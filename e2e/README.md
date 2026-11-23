@@ -57,10 +57,11 @@ under `store/`):
 
 - **Locally:** `npm run screenshots` (from `e2e/`). Options after `--`: `--skip-build` reuses the built jar,
   `--only=journeys` or `--only=store` limits what is regenerated. Commit the result yourself.
-- **On GitHub:** Actions → *Update screenshots* → Run workflow. It runs the same script, uploads the screenshots as an
-  artifact and opens a PR from a `screenshots/<date>-<run>` branch (and starts the e2e check on it). Opening the PR
-  needs Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests"; without it the
-  run summary links to the compare page instead.
+- **On GitHub:** Actions → *Update screenshots* → pick your branch → Run workflow. It runs the same script, uploads
+  the screenshots as an artifact and commits them to that branch (then starts the e2e check on the new commit).
+  Started on `main`, which only takes PRs, it commits to a new `screenshots/<date>-<run>` branch and opens a PR;
+  that needs Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests", otherwise
+  the run summary links to the compare page.
 
 ## Good to know
 
