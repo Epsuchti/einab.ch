@@ -41,10 +41,26 @@ Other options:
 - `E2E_SERVER_PORT` changes the port (default 8181).
 - `E2E_BASE_URL=http://localhost:8181` runs against a server that is already running (it must have the demo login on).
 
+## CI
+
+`.github/workflows/e2e.yml` runs the journeys on every pull request and every push to `main` (check name
+**Playwright e2e**). It builds the jar once, then runs the tests with `E2E_SKIP_SERVER_BUILD=true`. The HTML report,
+screenshots and traces are attached to the run as the `e2e-report` artifact.
+
 ## Screenshots
 
 `screenshots/<desktop|mobile>/<journey>/NN-<step>.png`, numbered in journey order (gitignored). Pages are captured
 whole; with a dialog open, the visible screen is captured instead.
+
+To refresh the committed copies in `docs/screenshots/` (journeys under `desktop/` and `mobile/`, store screenshots
+under `store/`):
+
+- **Locally:** `npm run screenshots` (from `e2e/`). Options after `--`: `--skip-build` reuses the built jar,
+  `--only=journeys` or `--only=store` limits what is regenerated. Commit the result yourself.
+- **On GitHub:** Actions → *Update screenshots* → Run workflow. It runs the same script, uploads the screenshots as an
+  artifact and opens a PR from a `screenshots/<date>-<run>` branch (and starts the e2e check on it). Opening the PR
+  needs Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests"; without it the
+  run summary links to the compare page instead.
 
 ## Good to know
 
