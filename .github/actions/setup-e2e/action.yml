@@ -5,14 +5,14 @@ description: >
 runs:
   using: composite
   steps:
-    - uses: actions/setup-java@v4
+    - uses: actions/setup-java@v6
       with:
         distribution: temurin
         java-version: '21'
         cache: maven
         cache-dependency-path: server/pom.xml
 
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v7
       with:
         node-version: '24'
         cache: npm
@@ -21,7 +21,7 @@ runs:
           client/package-lock.json
 
     # frontend-maven-plugin downloads its own Node into client/node; keep it between runs.
-    - uses: actions/cache@v4
+    - uses: actions/cache@v6
       with:
         path: client/node
         key: frontend-node-${{ runner.os }}-${{ hashFiles('server/pom.xml') }}
