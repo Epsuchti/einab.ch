@@ -1,0 +1,36 @@
+<section class="page-shell page-shell--narrow bezirk-picker">
+  <header class="bezirk-picker__intro">
+    <span class="bezirk-picker__mark" aria-hidden="true"><i class="pi pi-map-marker"></i></span>
+    <h1>{{ i18n.t('bezirk.chooseTitle') }}</h1>
+    <p class="bezirk-picker__hint">{{ i18n.t('bezirk.chooseHint') }}</p>
+    <p class="bezirk-picker__what">{{ i18n.t('bezirk.whatIsEinAb') }}</p>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-box"><p-progressSpinner strokeWidth="4"></p-progressSpinner></div>
+  } @else if (error()) {
+    <div class="bezirk-error">
+      <strong>{{ i18n.t('bezirk.loadErrorTitle') }}</strong>
+      <p>{{ error() }}</p>
+      <p>{{ i18n.t('bezirk.loadErrorHint') }}</p>
+      <button pButton type="button" [label]="i18n.t('bezirk.retry')" (click)="retry()"></button>
+    </div>
+  } @else {
+    @if (lastBezirk(); as last) {
+      <a class="bezirk-continue" [routerLink]="['/bezirke', last.slug]">
+        <span>{{ i18n.t('bezirk.continueTo').replace('{0}', last.name) }}</span>
+        <i class="pi pi-arrow-right" aria-hidden="true"></i>
+      </a>
+      <p class="bezirk-picker__other">{{ i18n.t('bezirk.orOther') }}</p>
+    }
+    <nav class="bezirk-grid" [attr.aria-label]="i18n.t('bezirk.chooseTitle')">
+      @for (bezirk of bezirke(); track bezirk.id) {
+        <a class="bezirk-tile" [routerLink]="['/bezirke', bezirk.slug]">
+          <i class="pi pi-map-marker" aria-hidden="true"></i>
+          <span class="bezirk-tile__name">{{ bezirk.name }}</span>
+          <i class="pi pi-arrow-right bezirk-tile__arrow" aria-hidden="true"></i>
+        </a>
+      }
+    </nav>
+  }
+</section>

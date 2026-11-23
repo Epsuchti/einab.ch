@@ -1,0 +1,79 @@
+<section class="page-shell page-shell--narrow page-stack">
+  <p-card class="page-card--flat">
+    @if (loading()) {
+      <div class="loading-box">
+        <p-progressSpinner strokeWidth="4"></p-progressSpinner>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="empty-state">
+        <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+        <p>{{ errorMessage() }}</p>
+      </div>
+    } @else if (survey(); as survey) {
+      <h1 class="survey-title"><i class="pi pi-comments title-icon" aria-hidden="true"></i>{{ survey.title }}</h1>
+      @if (submitted()) {
+        <p>{{ i18n.t(survey.alreadySubmitted ? 'survey.alreadySubmitted' : 'survey.thanks') }}</p>
+      } @else {
+        @if (survey.description) {
+          <p class="survey-description">{{ survey.description }}</p>
+        }
+        @if (storeMissing()) {
+          <p class="survey-warning" role="alert">{{ i18n.t('survey.storeMissing') }}</p>
+        }
+        <form class="stack-form" (ngSubmit)="submit()">
+          @for (question of survey.questions; track question.id) {
+            <fieldset class="survey-question" [id]="'question-' + question.id" [class.survey-question--missing]="missingQuestions().has(question.id!)">
+              <legend>{{ question.label }}@if (question.required) { <span aria-hidden="true"> *</span> }</legend>
+              @if (missingQuestions().has(question.id!)) { <small class="field-error" role="alert">{{ i18n.t('survey.requiredHere') }}</small> }
+              @switch (question.type) {
+                @case (SurveyQuestionType.Text) {
+                  <textarea pTextarea rows="3" maxlength="5000" [name]="'q' + question.id" [(ngModel)]="values[question.id!]"></textarea>
+                }
+                @case (SurveyQuestionType.SingleChoice) {
+                  @for (option of question.options; track option) {
+                    <div class="checkbox-row">
+                      <p-radiobutton [inputId]="'q' + question.id + '-' + $index" [name]="'q' + question.id" [value]="option" [(ngModel)]="values[question.id!]"></p-radiobutton>
+                      <label [for]="'q' + question.id + '-' + $index">{{ option }}</label>
+                    </div>
+                  }
+                }
+                @case (SurveyQuestionType.MultipleChoice) {
+                  @for (option of question.options; track option) {
+                    <div class="checkbox-row">
+                      <p-checkbox [inputId]="'q' + question.id + '-' + $index" [name]="'q' + question.id" [value]="option" [(ngModel)]="selected[question.id!]"></p-checkbox>
+                      <label [for]="'q' + question.id + '-' + $index">{{ option }}</label>
+                    </div>
+                  }
+                }
+                @case (SurveyQuestionType.Boolean) {
+                  <div class="checkbox-row">
+                    <p-radiobutton [inputId]="'q' + question.id + '-true'" [name]="'q' + question.id" value="true" [(ngModel)]="values[question.id!]"></p-radiobutton>
+                    <label [for]="'q' + question.id + '-true'">{{ i18n.t('common.yes') }}</label>
+                  </div>
+                  <div class="checkbox-row">
+                    <p-radiobutton [inputId]="'q' + question.id + '-false'" [name]="'q' + question.id" value="false" [(ngModel)]="values[question.id!]"></p-radiobutton>
+                    <label [for]="'q' + question.id + '-false'">{{ i18n.t('common.no') }}</label>
+                  </div>
+                }
+                @case (SurveyQuestionType.Store) {
+                  @if (store()) {
+                    <p class="survey-store"><i class="pi pi-shop" aria-hidden="true"></i> {{ store() }}</p>
+                  } @else {
+                    <p class="survey-store survey-store--missing">{{ i18n.t('survey.storeMissingShort') }}</p>
+                  }
+                }
+              }
+            </fieldset>
+          }
+          <p class="survey-hint">{{ i18n.t('survey.visibleToCreator') }} <a href="/privacy" target="_blank" rel="noopener">{{ i18n.t('survey.privacyLink') }}</a></p>
+          <div>
+            <button pButton type="submit" icon="pi pi-send" [label]="i18n.t('survey.submit')" [loading]="submitting()" [disabled]="storeMissing()" [attr.aria-describedby]="storeMissing() ? 'survey-submit-reason' : null"></button>
+            @if (storeMissing()) {
+              <small id="survey-submit-reason" class="survey-submit-reason">{{ i18n.t('survey.submitDisabledReason') }}</small>
+            }
+          </div>
+        </form>
+      }
+    }
+  </p-card>
+</section>

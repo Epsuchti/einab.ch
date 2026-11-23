@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: 022-limit-online-einab-slots
+      author: codex
+      changes:
+        # Earlier versions allowed a multi-slot EinAb to be changed to ONLINE.
+        # Retain its first available slot and retire the rest without deleting
+        # booking or audit history.
+        - sql:
+            sql: |
+              UPDATE slots
+              SET status = 'CANCELLED'
+              WHERE id IN (
+                SELECT id
+                FROM (
+                  SELECT s.id,
+                         ROW_NUMBER() OVER (PARTITION BY s.einab_id ORDER BY s.created_at, s.id) AS slot_rank
+                  FROM slots s
+                  JOIN einabs e ON e.id = s.einab_id
+                  WHERE e.category = 'ONLINE'
+                    AND s.status = 'AVAILABLE'
+                ) duplicate_available_slots
+                WHERE slot_rank > 1
+              )

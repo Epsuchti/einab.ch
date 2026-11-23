@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 040-notification-channel
+      author: claude
+      changes:
+        - addColumn:
+            tableName: notification_subscriptions
+            columns:
+              - column: {name: channel, type: VARCHAR(20), defaultValue: FOODSHARING, constraints: {nullable: false}}
+              - column: {name: delivery_email, type: VARCHAR(255)}

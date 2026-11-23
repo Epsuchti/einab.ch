@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "936975125900",
+    "project_id": "foodsharing-einab-ch",
+    "storage_bucket": "foodsharing-einab-ch.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936975125900:android:8db7a2683003c3bcea5aa9",
+        "android_client_info": {
+          "package_name": "ch.einab.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCY1nKeKFGjl08692zLXKC0vggdUmWehHA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

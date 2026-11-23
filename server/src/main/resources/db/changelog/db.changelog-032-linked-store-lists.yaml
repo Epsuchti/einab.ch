@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: 032-linked-store-lists
+      author: claude
+      changes:
+        # A linked store rule now holds a list of stores: a pickup in any one of them satisfies the rule.
+        - createTable:
+            tableName: foodsharing_store_automation_linked_store_members
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: link_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: store_id, type: BIGINT, constraints: {nullable: false}}
+              - column: {name: store_name, type: VARCHAR(255), defaultValue: '', constraints: {nullable: false}}
+        - sql:
+            sql: >-
+              INSERT INTO foodsharing_store_automation_linked_store_members (id, version, created_at, updated_at, link_id, store_id, store_name)
+              SELECT id, 0, created_at, updated_at, id, linked_store_id, linked_store_name
+              FROM foodsharing_store_automation_linked_stores
+        - addForeignKeyConstraint:
+            baseTableName: foodsharing_store_automation_linked_store_members
+            baseColumnNames: link_id
+            referencedTableName: foodsharing_store_automation_linked_stores
+            referencedColumnNames: id
+            constraintName: fk_foodsharing_linked_store_members_link
+        - addUniqueConstraint:
+            tableName: foodsharing_store_automation_linked_store_members
+            columnNames: link_id, store_id
+            constraintName: uk_foodsharing_linked_store_members
+        - dropUniqueConstraint:
+            tableName: foodsharing_store_automation_linked_stores
+            constraintName: uk_foodsharing_store_automation_linked_stores
+        - dropColumn:
+            tableName: foodsharing_store_automation_linked_stores
+            columnName: linked_store_id
+        - dropColumn:
+            tableName: foodsharing_store_automation_linked_stores
+            columnName: linked_store_name

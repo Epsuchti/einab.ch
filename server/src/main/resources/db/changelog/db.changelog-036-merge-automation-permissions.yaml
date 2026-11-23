@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 036-merge-automation-permissions
+      author: claude
+      changes:
+        # The slot approval, request approval and open slot advertising flags are now covered by can_use_automations.
+        - sql:
+            sql: UPDATE users SET can_use_automations = TRUE WHERE can_use_automation_slot_approval = TRUE OR can_use_automation_request_approval = TRUE OR can_use_automation_open_slot_advertising = TRUE
+        - dropColumn:
+            tableName: users
+            columnName: can_use_automation_slot_approval
+        - dropColumn:
+            tableName: users
+            columnName: can_use_automation_request_approval
+        - dropColumn:
+            tableName: users
+            columnName: can_use_automation_open_slot_advertising

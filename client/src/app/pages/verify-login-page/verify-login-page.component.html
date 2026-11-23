@@ -1,0 +1,19 @@
+<section class="page-shell page-shell--narrow">
+<p-card class="page-card--flat">
+  <ng-template pTemplate="title"><i class="pi pi-sign-in title-icon" aria-hidden="true"></i>{{ i18n.t('login.title') }}</ng-template>
+  @if (loading()) {
+    <div class="loading-box">
+      <p-progressSpinner strokeWidth="4"></p-progressSpinner>
+      <p>{{ i18n.t('login.verifying') }}</p>
+    </div>
+  }
+  @if (error()) {
+    <div class="empty-state">
+      <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+      <p>{{ error() }}</p>
+      <p>{{ i18n.t('login.linkInvalidHint') }}</p>
+      <a pButton icon="pi pi-send" [label]="i18n.t('login.requestNewLink')" [routerLink]="bezirkContext.route('login')"></a>
+    </div>
+  }
+</p-card>
+</section>

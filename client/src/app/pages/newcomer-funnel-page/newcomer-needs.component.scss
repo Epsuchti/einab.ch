@@ -1,0 +1,235 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.needs {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.needs__label {
+  color: var(--app-text-muted);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.needs__label:not(:first-child) {
+  margin-top: 0.6rem;
+}
+
+.needs__headline {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.needs__who {
+  color: var(--app-danger);
+}
+
+.needs__sub {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.needs__bar {
+  height: 0.7rem;
+  margin-top: 0.25rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--app-danger) 16%, var(--app-surface));
+}
+
+.needs__bar i {
+  display: block;
+  height: 100%;
+  min-width: 0.7rem;
+  border-radius: 999px;
+  background: var(--app-primary);
+}
+
+.needs__legend {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--app-text-muted);
+  font-size: 0.82rem;
+}
+
+.needs__legend b {
+  color: var(--app-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.needs__ok {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--app-radius-sm);
+  background: var(--app-primary-soft);
+  line-height: 1.4;
+}
+
+.needs__ok .pi {
+  margin-top: 0.15rem;
+  color: var(--app-primary);
+}
+
+.needs__tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--app-radius-sm);
+  background: var(--app-primary-soft);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.needs__tip .pi {
+  margin-top: 0.15rem;
+  color: var(--app-primary);
+}
+
+.needs__actions {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.need {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
+}
+
+.need--top:not(.need--low) {
+  border-color: color-mix(in srgb, var(--app-danger) 35%, var(--app-border));
+  background: color-mix(in srgb, var(--app-danger) 4%, var(--app-surface));
+}
+
+.need__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.55rem;
+}
+
+.need__head strong {
+  font-size: 1rem;
+}
+
+.need__rank {
+  display: grid;
+  flex: none;
+  width: 1.45rem;
+  height: 1.45rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--app-text);
+  color: var(--app-surface);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.need__main,
+.need__facts {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.need__main {
+  font-size: 0.95rem;
+}
+
+.need__facts {
+  color: var(--app-text-muted);
+  font-size: 0.88rem;
+}
+
+.need__cta {
+  justify-self: stretch;
+  justify-content: center;
+  margin-top: 0.35rem;
+}
+
+.needs__foot {
+  margin: 0.2rem 0 0;
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+@media (min-width: 720px) {
+  .need__cta {
+    justify-self: start;
+    min-width: 16rem;
+  }
+}
+
+.need__head strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Phones: only the first (most needed) card keeps the full button; the others become one compact row
+   with a round "+" button, so the list is about half as tall. The label stays for screen readers. */
+@media (max-width: 640px) {
+  .need__head {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+  }
+
+  .need__rank {
+    margin-top: 0.1rem;
+  }
+
+  .need:not(.need--top) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+  }
+
+  .need:not(.need--top) > :not(.need__cta) {
+    grid-column: 1;
+  }
+
+  .need:not(.need--top) .need__main {
+    font-size: 0.88rem;
+  }
+
+  .need:not(.need--top) .need__cta {
+    grid-row: 1 / span 4;
+    grid-column: 2;
+    align-self: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+    border-radius: 50%;
+  }
+
+  .need:not(.need--top) .need__cta ::ng-deep .p-button-label,
+  .need:not(.need--top) .need__cta .p-button-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}

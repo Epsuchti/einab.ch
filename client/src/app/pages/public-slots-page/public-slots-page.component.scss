@@ -1,0 +1,724 @@
+/* Filters: search plus instant chips, no submit button. */
+.filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.filters__search {
+  position: relative;
+  display: block;
+}
+
+.filters__search .pi {
+  position: absolute;
+  top: 50%;
+  left: 0.8rem;
+  color: var(--app-text-muted);
+  transform: translateY(-50%);
+}
+
+.filters__search input {
+  width: 100%;
+  padding-left: 2.3rem;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.filter-chip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--app-text);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.filter-chip:hover {
+  border-color: var(--app-primary);
+}
+
+.filter-chip.is-active {
+  border-color: var(--app-primary);
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+}
+
+.slots-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0 0 1rem;
+  color: var(--app-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.slots-hint .pi {
+  margin-top: 0.15rem;
+}
+
+/* Slot list: grouped by day, one compact row per EinAb. */
+.slot-days {
+  display: grid;
+  gap: 1.25rem;
+  transition: opacity 150ms ease;
+}
+
+.slot-days.is-loading {
+  opacity: 0.55;
+}
+
+.slot-day__title {
+  margin: 0 0 0.4rem;
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.slot-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: #fff;
+  list-style: none;
+  overflow: hidden;
+}
+
+.slot-rows > li + li {
+  border-top: 1px solid var(--app-border);
+}
+
+.slot-row {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border: 0;
+  background: transparent;
+  color: var(--app-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.slot-row:hover,
+.slot-row:focus-visible {
+  background: var(--app-surface-muted);
+}
+
+.slot-row__time {
+  font-size: 1.05rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot-row__main {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.slot-row__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  font-weight: 700;
+}
+
+.slot-row__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.slot-row__meta {
+  overflow: hidden;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slot-row__side {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--app-text-muted);
+}
+
+.slot-row__free {
+  color: var(--app-primary-strong);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* The paginator sits below the day groups, not glued to the last row. */
+:host ::ng-deep .p-paginator {
+  margin-top: 1rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+@media (max-width: 480px) {
+  :host ::ng-deep .p-paginator :is(.p-paginator-first, .p-paginator-last) {
+    display: none;
+  }
+}
+
+/* Phones: place and EinAb-Geber:in wrap instead of cutting the name off ("Dem…"). */
+@media (max-width: 480px) {
+  .slot-row {
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    gap: 0.6rem;
+    padding: 0.7rem 0.75rem;
+  }
+
+  .slot-row__meta {
+    overflow: visible;
+    white-space: normal;
+    line-height: 1.35;
+  }
+
+  .slot-row__side {
+    gap: 0.25rem;
+  }
+
+  .slot-row__free {
+    font-size: 0.75rem;
+  }
+}
+
+/* Notification banner on top of the list. */
+.notify-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--app-radius);
+  background: linear-gradient(120deg, var(--app-primary-soft) 0%, #fff 70%);
+}
+
+.notify-banner--active {
+  background: #fff;
+}
+
+.notify-banner__icon {
+  margin-top: 0.15rem;
+  color: var(--app-primary);
+  font-size: 1.3rem;
+}
+
+.notify-banner__content {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 0.35rem;
+  line-height: 1.45;
+}
+
+.notify-banner__content > span {
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}
+
+.notify-banner__actions,
+.notify-banner__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.notify-banner__form input {
+  min-width: min(16rem, 100%);
+}
+
+@media (max-width: 560px) {
+  .notify-banner__form > * {
+    width: 100%;
+  }
+}
+
+/* Phones: a slimmer banner (tighter padding), so the list starts sooner. */
+@media (max-width: 640px) {
+  .notify-banner {
+    gap: 0.6rem;
+    padding: 0.65rem 0.75rem;
+  }
+
+  .notify-banner__icon {
+    font-size: 1.1rem;
+  }
+
+  .notify-banner__content {
+    gap: 0.2rem;
+    font-size: 0.92rem;
+  }
+
+  /* The whole hint stays readable; it is only set a little smaller. */
+  .notify-banner__content > span {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .notify-banner__actions .p-button,
+  .notify-banner__actions ::ng-deep .p-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Booking dialog: summary card plus fact tiles. */
+.booking-dialog {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.booking-dialog__summary {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.1rem;
+  border: 1px solid #b9dbbf;
+  border-radius: var(--app-radius);
+  background: linear-gradient(135deg, var(--app-primary-soft), #f9fcf9);
+}
+
+.booking-dialog__summary-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.booking-dialog__eyebrow {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--app-primary-strong);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.booking-dialog__summary h2 {
+  margin: 0;
+  color: var(--app-text);
+  font-size: 1.45rem;
+  line-height: 1.15;
+}
+
+.booking-dialog__summary-icon {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: var(--app-primary);
+  box-shadow: 0 3px 8px rgb(23 49 38 / 0.08);
+}
+
+.booking-dialog__date {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--app-text);
+}
+
+.booking-dialog__date i,
+.booking-dialog__label i {
+  color: var(--app-primary);
+}
+
+.booking-dialog__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.booking-dialog__fact {
+  display: grid;
+  min-width: 0;
+  gap: 0.35rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.booking-dialog__label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--app-text-muted);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.booking-dialog__value {
+  color: var(--app-text);
+  font-weight: 650;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.booking-dialog__public-info {
+  padding: 0.9rem 1rem;
+  border: 1px solid #c7e0eb;
+  border-radius: var(--app-radius-sm);
+  background: #f2f9fc;
+}
+
+.booking-dialog__public-info p {
+  margin: 0.45rem 0 0;
+  color: var(--app-text);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.booking-dialog__teacher-details {
+  display: grid;
+  gap: 0.9rem;
+  padding: 0.9rem 1rem;
+  border: 1px dashed var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.booking-dialog__teacher-details h3 {
+  margin: 0;
+}
+
+.booking-dialog__teacher-details a.booking-dialog__value {
+  overflow-wrap: anywhere;
+}
+
+.booking-dialog__multiline {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.booking-dialog__identity {
+  padding-top: 0.15rem;
+}
+
+.booking-dialog__identity label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+
+.booking-dialog__free {
+  margin-left: auto;
+  color: var(--app-primary-strong);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.booking-dialog__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.booking-dialog__note .pi {
+  margin-top: 0.15rem;
+}
+
+@media (max-width: 600px) {
+  .booking-dialog__facts {
+    gap: 0.5rem;
+  }
+
+  .booking-dialog__fact {
+    padding: 0.7rem 0.75rem;
+  }
+
+  .booking-dialog__summary {
+    padding: 0.875rem;
+  }
+
+  .booking-dialog__summary-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .booking-dialog__summary h2 {
+    font-size: 1.25rem;
+  }
+}
+
+.slots-empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1.5rem;
+  border: 1px dashed var(--app-border-strong);
+  border-radius: var(--app-radius);
+  background: linear-gradient(180deg, var(--app-surface-muted) 0%, #fff 100%);
+  text-align: center;
+}
+
+.slots-empty__icon {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 0.5rem;
+  border-radius: 50%;
+  background: var(--app-primary-soft);
+  color: var(--app-primary);
+  font-size: 1.75rem;
+}
+
+.slots-empty__title {
+  margin: 0;
+  font-size: 1.125rem;
+  color: var(--app-text);
+}
+
+.slots-empty__hint {
+  max-width: 34rem;
+  margin: 0 0 0.75rem;
+  color: var(--app-text-muted);
+  line-height: 1.5;
+}
+
+/* Phones: one swipeable row of chips instead of five wrapped rows. */
+@media (max-width: 640px) {
+  .filter-chips {
+    flex-wrap: nowrap;
+    padding-bottom: 0.15rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Fade at the right edge shows that the row scrolls on. */
+  .filter-chips {
+    padding-right: 1.5rem;
+    mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+  }
+
+  .filter-chip {
+    min-height: 2.5rem;
+    scroll-snap-align: start;
+  }
+}
+
+.filter-chips__divider {
+  flex: 0 0 1px;
+  align-self: stretch;
+  margin: 0.3rem 0.2rem;
+  background: var(--app-border);
+}
+
+/* Booking confirmation */
+.booking-success__hero {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0 0.25rem;
+  text-align: center;
+}
+
+.booking-success__tick {
+  display: grid;
+  place-items: center;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 0.4rem;
+  border-radius: 50%;
+  background: var(--app-primary);
+  color: #fff;
+  box-shadow: 0 0 0 0.6rem var(--app-primary-soft);
+  animation: booking-success-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.booking-success__tick .pi {
+  font-size: 2.4rem;
+  font-weight: 700;
+}
+
+.booking-success__hero h2 {
+  margin: 0.4rem 0 0;
+  font-size: 1.5rem;
+}
+
+.booking-success__hero p {
+  max-width: 26rem;
+  margin: 0;
+  color: var(--app-text-muted);
+  line-height: 1.45;
+}
+
+.booking-dialog__fact--wide {
+  grid-column: 1 / -1;
+}
+
+.booking-dialog__private-info {
+  padding: 0.9rem 1rem;
+  border: 1px solid #b9dbbf;
+  border-radius: var(--app-radius-sm);
+  background: var(--app-primary-soft);
+}
+
+.booking-dialog__private-info p {
+  margin: 0.45rem 0 0;
+  color: var(--app-text);
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+@keyframes booking-success-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booking-success__tick {
+    animation: none;
+  }
+}
+
+/* Spells out what "EinAb" means under the page title. */
+.einab-meaning {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--app-text-muted);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.einab-meaning .pi {
+  color: var(--app-primary);
+  font-size: 0.9rem;
+}
+
+/* Desktop has room for the full word in the title; phone keeps the short title plus the hint line. */
+.title-short,
+.einab-meaning--phone {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .title-long {
+    display: none;
+  }
+
+  .title-short {
+    display: inline;
+  }
+
+  .einab-meaning--phone {
+    display: inline-flex;
+  }
+}
+
+/* Small red "only for emergencies" note under the giver's phone number. */
+.emergency-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--app-danger);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.emergency-hint .pi {
+  font-size: 0.8rem;
+}
+
+/* Phones: one fact per row, label left and value right, so labels never wrap or touch the tile edge. */
+@media (max-width: 480px) {
+  .booking-dialog__facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    overflow: hidden;
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-sm);
+    background: var(--app-surface-muted);
+  }
+
+  .booking-dialog__fact {
+    padding: 0.6rem 0.75rem;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .booking-dialog__fact + .booking-dialog__fact {
+    border-top: 1px solid var(--app-border);
+  }
+
+  .booking-dialog__fact:not(.booking-dialog__fact--wide) {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    column-gap: 0.75rem;
+  }
+
+  .booking-dialog__fact:not(.booking-dialog__fact--wide) > .booking-dialog__value {
+    justify-self: end;
+    text-align: right;
+  }
+
+  .booking-dialog__fact:not(.booking-dialog__fact--wide) > .emergency-hint {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+}

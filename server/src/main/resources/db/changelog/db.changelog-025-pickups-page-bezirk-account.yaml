@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: 025-pickups-page-bezirk-account
+      author: claude
+      changes:
+        # The pickups page uses the Bezirk admin account (or the fallback account), never an automation connection.
+        - dropForeignKeyConstraint:
+            baseTableName: foodsharing_pickup_extra_slots
+            constraintName: fk_foodsharing_pickup_extra_slots_connection
+        - dropColumn:
+            tableName: foodsharing_pickup_extra_slots
+            columnName: admin_connection_id
+        - addColumn:
+            tableName: foodsharing_pickup_extra_slots
+            columns:
+              - column: {name: account_key, type: VARCHAR(150)}
+        - createTable:
+            tableName: foodsharing_my_pickups_store_cache
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: account_key, type: VARCHAR(150), constraints: {nullable: false}}
+              - column: {name: store_id, type: BIGINT, constraints: {nullable: false}}
+              - column: {name: store_name, type: VARCHAR(255), defaultValue: '', constraints: {nullable: false}}
+              - column: {name: refreshed_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: payload_json, type: VARCHAR(32600), constraints: {nullable: false}}
+        - addUniqueConstraint:
+            tableName: foodsharing_my_pickups_store_cache
+            columnNames: account_key, store_id
+            constraintName: uk_foodsharing_my_pickups_store_cache_account_store

@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 030-user-verification
+      author: claude
+      changes:
+        # Foodsharing verification state of a user, synced from the Bezirk admin account (or the fallback user-info
+        # API) and settable manually by admins.
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: verified
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_verified_at
+                  type: TIMESTAMP WITH TIME ZONE

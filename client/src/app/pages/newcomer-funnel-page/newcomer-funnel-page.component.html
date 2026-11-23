@@ -1,0 +1,156 @@
+<section class="page-shell funnel-page">
+  <p-card class="page-card--flat">
+    <ng-template pTemplate="title">
+      <div class="funnel-header">
+        <div class="funnel-header__title">
+          @if (canGiveEinAbs()) {
+            <a
+              pButton
+              text
+              rounded
+              icon="pi pi-arrow-left"
+              [routerLink]="bezirkContext.route('teacher')"
+              [attr.aria-label]="i18n.t('funnel.back')"
+            ></a>
+          } @else {
+            <i class="pi pi-users title-icon" aria-hidden="true"></i>
+          }
+          <span>{{ i18n.t('funnel.title') }}</span>
+        </div>
+        <label class="funnel-header__period">
+          <span>{{ i18n.t('funnel.period') }}</span>
+          <p-select
+            [options]="periodOptions()"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="days()"
+            (ngModelChange)="setDays($event)"
+            appendTo="body"
+          ></p-select>
+        </label>
+      </div>
+    </ng-template>
+    <p class="funnel-hint">
+      {{ showNames() ? i18n.t('funnel.hintAdmin') : i18n.t('funnel.hintTeacher') }}
+    </p>
+
+    @if (funnel(); as f) {
+      <div class="funnel-tiles">
+        <div class="funnel-tile">
+          <span>{{ i18n.t('funnel.tile.inTraining') }}</span>
+          <strong>{{ f.inTrainingUsers }}</strong>
+          <small>{{ i18n.t('funnel.tile.ofTotal').replace('{count}', '' + f.totalUsers) }}</small>
+        </div>
+        <div class="funnel-tile" [class.funnel-tile--warn]="f.stalledUsers > 0">
+          <span>{{ i18n.t('funnel.tile.stalled') }}</span>
+          <strong>{{ f.stalledUsers }}</strong>
+          <small>{{ i18n.t('funnel.tile.stalledHint') }}</small>
+        </div>
+        <div class="funnel-tile" [class.funnel-tile--warn]="f.openSlots < f.einAbsStillNeeded">
+          <span>{{ i18n.t('funnel.tile.einAbs') }}</span>
+          <strong>{{ f.openSlots }} / {{ f.einAbsStillNeeded }}</strong>
+          <small>{{ i18n.t('funnel.tile.einAbsHint').replace('{days}', '' + f.gapHorizonDays) }}</small>
+        </div>
+        @if (f.fairteilerRequired) {
+          <div class="funnel-tile" [class.funnel-tile--warn]="f.openFairteilerSlots < f.fairteilerVisitsStillNeeded">
+            <span>{{ i18n.t('funnel.tile.fairteiler') }}</span>
+            <strong>{{ f.openFairteilerSlots }} / {{ f.fairteilerVisitsStillNeeded }}</strong>
+            <small>{{ i18n.t('funnel.tile.einAbsHint').replace('{days}', '' + f.gapHorizonDays) }}</small>
+          </div>
+        }
+      </div>
+
+      <h2 class="funnel-section-title">{{ i18n.t('funnel.stepsTitle') }}</h2>
+      <app-newcomer-funnel-stepper
+        [steps]="f.steps"
+        [selectable]="true"
+        [selectedIndex]="selectedIndex()"
+        (stepSelected)="selectStep($event)"
+      ></app-newcomer-funnel-stepper>
+
+      @if (selectedStep(); as step) {
+        <section class="funnel-detail" [attr.aria-label]="stepLabel(step)">
+          <header class="funnel-detail__head">
+            <h3>{{ stepLabel(step) }}</h3>
+            <span class="funnel-detail__count">
+              <strong>{{ step.userCount }}</strong>
+              <small>{{ i18n.t('funnel.step.reached').replace('{count}', '' + step.reachedCount) }}</small>
+            </span>
+          </header>
+          <div class="funnel-step__meta">
+            @if (step.medianDaysInStep !== null && step.medianDaysInStep !== undefined) {
+              <span><i class="pi pi-clock" aria-hidden="true"></i>{{ i18n.t('funnel.step.medianDays').replace('{days}', '' + step.medianDaysInStep) }}</span>
+            }
+            @if (step.stalledCount > 0) {
+              <span class="funnel-step__stalled"><i class="pi pi-clock" aria-hidden="true"></i>{{ i18n.t(step.stalledCount === 1 ? 'funnel.step.stalledOne' : 'funnel.step.stalledMany').replace('{count}', '' + step.stalledCount) }}</span>
+            }
+          </div>
+          @if (showNames()) {
+            @if (step.users.length) {
+              <ul class="funnel-people">
+                @for (user of step.users; track user.id) {
+                  <li class="funnel-person" [class.funnel-person--stalled]="user.stalled">
+                    <div class="funnel-person__name">
+                      <a [routerLink]="bezirkContext.route('admin')" [queryParams]="{ userSearch: user.foodsharingId }">{{ user.name }}</a>
+                      <small>FS-ID {{ user.foodsharingId }}</small>
+                    </div>
+                    <div class="funnel-person__facts">
+                      <span>{{ i18n.t('funnel.person.einAbs').replace('{counted}', '' + user.countedEinAbs).replace('{upcoming}', '' + user.upcomingEinAbs) }}</span>
+                      @if (f.fairteilerRequired) {
+                        <span>{{ user.fairteilerDone ? i18n.t('funnel.person.fairteilerDone') : i18n.t('funnel.person.fairteilerMissing') }}</span>
+                      }
+                      <span>{{ i18n.t('funnel.person.lastActivity') }}: {{ user.lastActivityAt | zurichDateTime: 'date' }}</span>
+                    </div>
+                    <div class="funnel-person__actions">
+                      @if (user.stalled) {
+                        <p-tag severity="warn" [value]="i18n.t('funnel.person.stalled')"></p-tag>
+                      }
+                      <a pButton size="small" severity="secondary" [text]="true" icon="pi pi-envelope" class="funnel-person__message" [label]="i18n.t('funnel.person.message')" [attr.aria-label]="i18n.t('funnel.person.message') + ': ' + user.name" [href]="'https://foodsharing.network/profile/' + user.foodsharingId" target="_blank" rel="noopener"></a>
+                    </div>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="empty-state">{{ i18n.t('funnel.step.nobody') }}</p>
+            }
+          }
+        </section>
+      }
+    } @else if (loading()) {
+      <app-loading-indicator />
+    }
+  </p-card>
+
+  @if (funnel(); as f) {
+    <p-card class="page-card--flat">
+      <app-newcomer-needs [funnel]="f" [maxActions]="null" [canCreate]="canGiveEinAbs()"></app-newcomer-needs>
+      @if (f.gaps.length) {
+        <details class="app-collapsible funnel-all-gaps">
+          <summary>{{ i18n.t('needs.allCategories') }}</summary>
+          <p class="funnel-hint">{{ i18n.t('funnel.gapsHint').replace('{days}', '' + f.gapHorizonDays) }}</p>
+          <table class="gap-table">
+            <thead>
+              <tr>
+                <th>{{ i18n.t('slots.category') }}</th>
+                <th class="gap-table__num">{{ i18n.t('funnel.gap.freeColumn') }}</th>
+                <th class="gap-table__num">{{ i18n.t('funnel.gap.neededColumn') }}</th>
+                <th><span class="sr-only">{{ i18n.t('common.status') }}</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (gap of problemGaps().concat(okGaps()); track gap.category + gap.withFairteiler) {
+                <tr [class]="'gap-row--' + gap.severity.toLowerCase()">
+                  <td>@if (gap.withFairteiler) { <i class="pi pi-heart" aria-hidden="true"></i> }{{ gapLabel(gap) }}</td>
+                  <td class="gap-table__num">{{ gap.openSlots }}</td>
+                  <td class="gap-table__num">{{ gap.students }}</td>
+                  <td><p-tag [severity]="gapSeverityTag(gap.severity)" [value]="gapSeverityLabel(gap.severity)"></p-tag></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </details>
+      }
+    </p-card>
+  }
+</section>
+

@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 051-private-info-templates-per-store
+      author: claude
+      changes:
+        # Templates are now saved per store. Rows with store_name NULL are the old category templates
+        # (key "category:CATEGORY"); they stay for online EinAbs and as fallback for stores without a template.
+        - addColumn:
+            tableName: private_info_templates
+            columns:
+              - column: {name: store_name, type: VARCHAR(500)}
+              - column: {name: store_key, type: VARCHAR(500)}
+        - sql:
+            sql: UPDATE private_info_templates SET store_key = CONCAT('category:', category)
+        - addNotNullConstraint:
+            tableName: private_info_templates
+            columnName: store_key
+            columnDataType: VARCHAR(500)
+        - dropUniqueConstraint:
+            tableName: private_info_templates
+            constraintName: uk_private_info_template_teacher_category
+        - addUniqueConstraint:
+            tableName: private_info_templates
+            columnNames: teacher_id, store_key
+            constraintName: uk_private_info_template_teacher_store_key
+        - customChange:
+            class: ch.it4user.foodsharing.config.liquibase.CopyCategoryPrivateInfoTemplatesToStores

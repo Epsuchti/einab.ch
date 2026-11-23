@@ -1,0 +1,347 @@
+<section class="page-shell page-stack">
+  @if (showNotificationBanner()) {
+    <aside class="notify-banner" [class.notify-banner--active]="notificationStatus()?.active">
+      <i class="pi notify-banner__icon" [ngClass]="notificationStatus()?.active ? 'pi-check-circle' : 'pi-bell'" aria-hidden="true"></i>
+      <div class="notify-banner__content">
+        <strong>{{ i18n.t('slots.subscribeTitle') }}</strong>
+        @if (!isAuthenticated()) {
+          <span>{{ i18n.t('slots.subscribeHint') }}</span>
+          <div class="notify-banner__actions">
+            <a pButton size="small" icon="pi pi-sign-in" [label]="i18n.t('slots.subscribeSignInButton')"
+               [routerLink]="bezirkContext.route('login')" [queryParams]="{ returnUrl: loginReturnUrl() }"></a>
+          </div>
+        } @else if (notificationStatus(); as status) {
+          @if (status.active) {
+            <span>{{ status.channel === 'EMAIL' ? i18n.t('slots.subscribeViaEmail').replace('{0}', status.email ?? '') : i18n.t('slots.subscribeViaFoodsharing') }}</span>
+            <div class="notify-banner__actions">
+              <button pButton type="button" size="small" severity="secondary" [text]="true" icon="pi pi-bell-slash" [label]="i18n.t('slots.unsubscribeButton')" [loading]="subscribeLoading()" (click)="unsubscribe()"></button>
+            </div>
+          } @else {
+            <span>{{ i18n.t('slots.subscribeHint') }}</span>
+            <form class="notify-banner__form" [formGroup]="subscriptionForm" (ngSubmit)="subscribe()">
+              <p-select inputId="notificationChannel" formControlName="channel" [options]="channelOptions()" optionLabel="label" optionValue="value" appendTo="body" [ariaLabel]="i18n.t('slots.subscribeChannel')"></p-select>
+              @if (subscriptionForm.controls.channel.value === 'EMAIL') {
+                <input id="subscriptionEmail" pInputText type="email" inputmode="email" autocomplete="email" formControlName="email" [placeholder]="i18n.t('slots.subscribeEmail')" />
+              }
+              <button pButton type="submit" size="small" icon="pi pi-bell" [label]="i18n.t('slots.subscribeButton')" [loading]="subscribeLoading()" [disabled]="subscriptionForm.invalid"></button>
+            </form>
+          }
+        }
+      </div>
+    </aside>
+  }
+
+  <p-card class="page-card--flat">
+    <ng-template pTemplate="title"><i class="pi pi-search title-icon" aria-hidden="true"></i><span class="title-long">{{ i18n.t('slots.titleLong') }}</span><span class="title-short">{{ i18n.t('slots.title') }}</span></ng-template>
+    <ng-template pTemplate="subtitle"><span class="einab-meaning einab-meaning--phone"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ i18n.t('slots.einAbMeaning') }}</span></ng-template>
+    <div class="filters">
+      <span class="filters__search">
+        <i class="pi pi-search" aria-hidden="true"></i>
+        <input pInputText type="search" [ngModel]="search" (ngModelChange)="onSearchChange($event)" name="search" [placeholder]="i18n.t('slots.searchPlaceholder')" [attr.aria-label]="i18n.t('slots.search')" />
+      </span>
+      <div class="filter-chips" role="group" [attr.aria-label]="i18n.t('slots.category')">
+        <button type="button" class="filter-chip filter-chip--toggle" [class.is-active]="fairteilerOnly" [attr.aria-pressed]="fairteilerOnly" (click)="toggleFairteiler()">
+          <i class="pi" [ngClass]="fairteilerOnly ? 'pi-check' : 'pi-box'" aria-hidden="true"></i>
+          {{ i18n.t('slots.fairteilerOnly') }}
+        </button>
+        <span class="filter-chips__divider" aria-hidden="true"></span>
+        <button type="button" class="filter-chip" [class.is-active]="!selectedCategory" [attr.aria-pressed]="!selectedCategory" (click)="selectCategory(undefined)">{{ i18n.t('slots.allCategories') }}</button>
+        @for (option of categoryOptions(); track option.value) {
+          <button type="button" class="filter-chip" [class.is-active]="selectedCategory === option.value" [attr.aria-pressed]="selectedCategory === option.value" (click)="selectCategory(option.value)">{{ option.label }}</button>
+        }
+      </div>
+    </div>
+
+    @if (isAuthenticated() && canBookEinAbs()) {
+      <p class="slots-hint"><i class="pi pi-info-circle" aria-hidden="true"></i> {{ i18n.t('slots.onlyBookableHint') }}</p>
+    }
+
+    @if (loading() && !slots().length) {
+      <div class="loading-box">
+        <p-progressSpinner strokeWidth="4"></p-progressSpinner>
+      </div>
+    } @else if (!slots().length) {
+      <div class="slots-empty">
+        <div class="slots-empty__icon" aria-hidden="true"><i class="pi pi-calendar"></i></div>
+        <h3 class="slots-empty__title">{{ i18n.t(hasFilters() ? 'slots.emptyFiltered' : 'slots.empty') }}</h3>
+        @if (hasFilters()) {
+          <button pButton type="button" severity="secondary" [outlined]="true" icon="pi pi-filter-slash" [label]="i18n.t('slots.resetFilters')" (click)="resetFilters()"></button>
+        } @else {
+          <p class="slots-empty__hint">{{ i18n.t('slots.emptyHint') }}</p>
+        }
+      </div>
+    } @else {
+      <div class="slot-days" [class.is-loading]="loading()">
+        @for (day of slotDays(); track day.key) {
+          <section class="slot-day">
+            <h3 class="slot-day__title">{{ day.date | zurichDateTime: 'day' }}</h3>
+            <ul class="slot-rows">
+              @for (group of day.groups; track group.key) {
+                <li>
+                  <button type="button" class="slot-row" (click)="openSlotDetails(group.slots[0], group.slots.length)">
+                    <span class="slot-row__time">{{ group.slots[0].startDateTime | zurichDateTime: 'time' }}</span>
+                    <span class="slot-row__main">
+                      <span class="slot-row__title">
+                        {{ i18n.categoryLabel(group.slots[0].category) }}
+                        @if (group.slots[0].visitFairteiler) {
+                          <span class="slot-row__badge"><i class="pi pi-box" aria-hidden="true"></i> {{ i18n.t('slots.withFairteiler') }}</span>
+                        }
+                      </span>
+                      <span class="slot-row__meta">{{ displayPublicLocation(group.slots[0]) }} · {{ group.slots[0].teacherName }}</span>
+                    </span>
+                    <span class="slot-row__side">
+                      <span class="slot-row__free">{{ freeLabel(group.slots.length, group.slots[0].category) }}</span>
+                      <i class="pi pi-chevron-right" aria-hidden="true"></i>
+                    </span>
+                  </button>
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      </div>
+
+      <p-paginator [alwaysShow]="false"
+        [rows]="pageSize"
+        [totalRecords]="slotsPage()?.totalElements ?? 0"
+        [first]="(slotsPage()?.page ?? 0) * pageSize"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first} - {last} / {totalRecords}"
+        (onPageChange)="onSlotsPageChange($event)">
+      </p-paginator>
+    }
+  </p-card>
+</section>
+
+<p-dialog [(visible)]="slotDetailsVisible" [modal]="true" [dismissableMask]="true" [draggable]="false" [header]="i18n.t(bookedDetail() ? 'book.successTitle' : canBookEinAbs() ? 'book.dialogTitle' : 'slots.details')" (onHide)="bookedDetail.set(null)" [style]="{ width: 'min(42rem, 96vw)' }" styleClass="slot-details-dialog">
+  @if (bookedDetail(); as booked) {
+    <div class="booking-dialog booking-success" role="status">
+      <div class="booking-success__hero">
+        <span class="booking-success__tick" aria-hidden="true"><i class="pi pi-check"></i></span>
+        <h2>{{ i18n.t('book.successHeading') }}</h2>
+        <p>{{ i18n.t('book.successLead') }}</p>
+      </div>
+
+      <section class="booking-dialog__summary">
+        <div class="booking-dialog__summary-heading">
+          <div>
+            <span class="booking-dialog__eyebrow">{{ i18n.t('book.successEyebrow') }}</span>
+            <h2>{{ i18n.categoryLabel(booked.category) }}@if (booked.businessName) { · {{ booked.businessName }} }</h2>
+          </div>
+          <i class="pi pi-calendar-plus booking-dialog__summary-icon" aria-hidden="true"></i>
+        </div>
+        <div class="booking-dialog__date">
+          <i class="pi pi-clock" aria-hidden="true"></i>
+          <strong>{{ booked.startDateTime | zurichDateTime: 'day' }}, {{ booked.startDateTime | zurichDateTime: 'time' }}</strong>
+        </div>
+      </section>
+
+      <div class="booking-dialog__facts">
+        @if (booked.onlineCallLink) {
+          <div class="booking-dialog__fact booking-dialog__fact--wide">
+            <span class="booking-dialog__label"><i class="pi pi-video" aria-hidden="true"></i>{{ i18n.t('common.onlineCallLink') }}</span>
+            <a class="booking-dialog__value" [href]="booked.onlineCallLink" target="_blank" rel="noopener noreferrer">{{ booked.onlineCallLink }}</a>
+          </div>
+        }
+        @if (booked.location) {
+          <div class="booking-dialog__fact booking-dialog__fact--wide">
+            <span class="booking-dialog__label"><i class="pi pi-map-marker" aria-hidden="true"></i>{{ i18n.t('common.address') }}</span>
+            <a class="booking-dialog__value" [href]="mapsLink(booked.location)" target="_blank" rel="noopener">{{ booked.location }}</a>
+          </div>
+        }
+        <div class="booking-dialog__fact">
+          <span class="booking-dialog__label"><i class="pi pi-user" aria-hidden="true"></i>{{ i18n.t('slots.teacher') }}</span>
+          <span class="booking-dialog__value">{{ booked.teacherName }}</span>
+        </div>
+        <div class="booking-dialog__fact">
+          <span class="booking-dialog__label"><i class="pi pi-phone" aria-hidden="true"></i>{{ i18n.t('slots.teacherEmergencyPhone') }}</span>
+          @if (booked.teacherPhoneNumber) {
+            <a class="booking-dialog__value" [href]="'tel:' + booked.teacherPhoneNumber">{{ booked.teacherPhoneNumber }}</a>
+            <span class="emergency-hint"><i class="pi pi-exclamation-circle" aria-hidden="true"></i>{{ i18n.t('slots.emergencyOnly') }}</span>
+          } @else {
+            <span class="booking-dialog__value">-</span>
+          }
+        </div>
+        @if (booked.publicLocation) {
+          <div class="booking-dialog__fact">
+            <span class="booking-dialog__label"><i class="pi pi-compass" aria-hidden="true"></i>{{ i18n.t('common.publicLocation') }}</span>
+            <span class="booking-dialog__value">{{ booked.publicLocation }}</span>
+          </div>
+        }
+        <div class="booking-dialog__fact">
+          <span class="booking-dialog__label"><i class="pi pi-box" aria-hidden="true"></i>{{ i18n.t('common.visitFairteiler') }}</span>
+          <span class="booking-dialog__value">{{ booked.visitFairteiler ? i18n.t('common.yes') : i18n.t('common.no') }}</span>
+        </div>
+      </div>
+
+      @if (booked.privateInfo) {
+        <section class="booking-dialog__private-info">
+          <span class="booking-dialog__label"><i class="pi pi-lock" aria-hidden="true"></i>{{ i18n.t('book.privateInfoTitle') }}</span>
+          <p>{{ booked.privateInfo }}</p>
+        </section>
+      }
+      @if (booked.publicInfo) {
+        <section class="booking-dialog__public-info">
+          <span class="booking-dialog__label"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ i18n.t('common.publicInfo') }}</span>
+          <p>{{ booked.publicInfo }}</p>
+        </section>
+      }
+
+      <p class="booking-dialog__note"><i class="pi pi-envelope" aria-hidden="true"></i> {{ i18n.t('book.successNote') }}</p>
+    </div>
+  } @else if (selectedSlot; as slot) {
+    <div class="booking-dialog">
+      <section class="booking-dialog__summary" aria-labelledby="booking-dialog-summary-title">
+        <div class="booking-dialog__summary-heading">
+          <div>
+            <span class="booking-dialog__eyebrow">{{ i18n.t('slots.title') }}</span>
+            <h2 id="booking-dialog-summary-title">{{ i18n.categoryLabel(slot.category) }}</h2>
+          </div>
+          <i class="pi pi-calendar booking-dialog__summary-icon" aria-hidden="true"></i>
+        </div>
+        <div class="booking-dialog__date">
+          <i class="pi pi-clock" aria-hidden="true"></i>
+          <strong>{{ slot.startDateTime | zurichDateTime: 'day' }}, {{ slot.startDateTime | zurichDateTime: 'time' }}</strong>
+          @if (isOnline(slot.category)) {
+            <span class="booking-dialog__free">{{ freeLabel(selectedFreeCount, slot.category) }}</span>
+          } @else if (selectedFreeCount > 1) {
+            <span class="booking-dialog__free">{{ freeLabel(selectedFreeCount) }}</span>
+          }
+        </div>
+      </section>
+
+      <div class="booking-dialog__facts">
+        <div class="booking-dialog__fact">
+          <span class="booking-dialog__label">
+            <i class="pi pi-map-marker" aria-hidden="true"></i>
+            {{ i18n.t(isOnline(slot.category) ? 'common.location' : 'common.publicLocation') }}
+          </span>
+          <span class="booking-dialog__value">{{ displayPublicLocation(slot) }}</span>
+        </div>
+        <div class="booking-dialog__fact">
+          <span class="booking-dialog__label">
+            <i class="pi pi-compass" aria-hidden="true"></i>
+            {{ i18n.t('bezirk.label') }}
+          </span>
+          <span class="booking-dialog__value">{{ slot.bezirk.name }}</span>
+        </div>
+        <div class="booking-dialog__fact">
+          <span class="booking-dialog__label">
+            <i class="pi pi-user" aria-hidden="true"></i>
+            {{ i18n.t('slots.teacher') }}
+          </span>
+          <span class="booking-dialog__value">{{ slot.teacherName }}</span>
+        </div>
+        <div class="booking-dialog__fact">
+          <span class="booking-dialog__label">
+            <i class="pi pi-box" aria-hidden="true"></i>
+            {{ i18n.t('common.visitFairteiler') }}
+          </span>
+          <span class="booking-dialog__value">{{ slot.visitFairteiler ? i18n.t('common.yes') : i18n.t('common.no') }}</span>
+        </div>
+        @if (slot.minimumPickupCount) {
+          <div class="booking-dialog__fact">
+            <span class="booking-dialog__label">
+              <i class="pi pi-history" aria-hidden="true"></i>
+              {{ i18n.t('common.minimumPickupCount') }}
+            </span>
+            <span class="booking-dialog__value">{{ i18n.requiredExperienceLabel(slot.minimumPickupCount) }}</span>
+          </div>
+        }
+      </div>
+
+      @if (slot.publicInfo) {
+        <section class="booking-dialog__public-info">
+          <span class="booking-dialog__label">
+            <i class="pi pi-info-circle" aria-hidden="true"></i>
+            {{ i18n.t('common.publicInfo') }}
+          </span>
+          <p>{{ slot.publicInfo }}</p>
+        </section>
+      }
+
+      @if (slot.teacherDetails; as details) {
+        <section class="booking-dialog__teacher-details" aria-labelledby="booking-dialog-teacher-details-title">
+          <h3 id="booking-dialog-teacher-details-title" class="booking-dialog__label">
+            <i class="pi pi-lock" aria-hidden="true"></i>
+            {{ i18n.t('slots.teacherOnlyDetails') }}
+          </h3>
+          <div class="booking-dialog__facts">
+            @if (details.businessName) {
+              <div class="booking-dialog__fact">
+                <span class="booking-dialog__label">{{ i18n.t('common.businessName') }}</span>
+                <span class="booking-dialog__value">{{ details.businessName }}</span>
+              </div>
+            }
+            @if (details.location) {
+              <div class="booking-dialog__fact">
+                <span class="booking-dialog__label">{{ i18n.t('common.location') }}</span>
+                <span class="booking-dialog__value">{{ details.location }}</span>
+              </div>
+            }
+            @if (details.privateAddress) {
+              <div class="booking-dialog__fact">
+                <span class="booking-dialog__label">{{ i18n.t('common.address') }}</span>
+                <a class="booking-dialog__value" [href]="mapsLink(details.privateAddress)" target="_blank" rel="noopener">{{ details.privateAddress }}</a>
+              </div>
+            }
+            @if (details.publicGeneralLocation) {
+              <div class="booking-dialog__fact">
+                <span class="booking-dialog__label">{{ i18n.t('common.publicGeneralLocation') }}</span>
+                <span class="booking-dialog__value">{{ details.publicGeneralLocation }}</span>
+              </div>
+            }
+            @if (details.teacherPhoneNumber) {
+              <div class="booking-dialog__fact">
+                <span class="booking-dialog__label">{{ i18n.t('slots.teacherEmergencyPhone') }}</span>
+                <a class="booking-dialog__value" [href]="'tel:' + details.teacherPhoneNumber">{{ details.teacherPhoneNumber }}</a>
+                <span class="emergency-hint"><i class="pi pi-exclamation-circle" aria-hidden="true"></i>{{ i18n.t('slots.emergencyOnly') }}</span>
+              </div>
+            }
+            <div class="booking-dialog__fact">
+              <span class="booking-dialog__label">{{ i18n.t('common.slotCount') }}</span>
+              <span class="booking-dialog__value">{{ isOnline(slot.category) ? i18n.t('common.unlimited') : details.slotCount }}</span>
+            </div>
+          </div>
+          @if (details.onlineCallLink) {
+            <div class="booking-dialog__fact">
+              <span class="booking-dialog__label">{{ i18n.t('common.onlineCallLink') }}</span>
+              <a class="booking-dialog__value" [href]="details.onlineCallLink" target="_blank" rel="noopener noreferrer">{{ details.onlineCallLink }}</a>
+            </div>
+          }
+          @if (details.privateInfo) {
+            <div class="booking-dialog__fact">
+              <span class="booking-dialog__label">{{ i18n.t('common.privateInfo') }}</span>
+              <p class="booking-dialog__value booking-dialog__multiline">{{ details.privateInfo }}</p>
+            </div>
+          }
+        </section>
+      }
+
+      @if (canBookEinAbs() && isAuthenticated()) {
+        <p class="booking-dialog__note"><i class="pi pi-info-circle" aria-hidden="true"></i> {{ i18n.t('book.bindingNote') }}</p>
+      }
+    </div>
+  }
+  <ng-template #footer>
+    @if (bookedDetail(); as booked) {
+      <div class="dialog-actions">
+        <button pButton type="button" severity="secondary" [text]="true" [label]="i18n.t('common.close')" (click)="slotDetailsVisible = false"></button>
+        <button pButton type="button" severity="secondary" [outlined]="true" icon="pi pi-calendar" [label]="i18n.t('common.addToCalendar')" (click)="downloadIcs(booked)"></button>
+        <a pButton icon="pi pi-bookmark" [label]="i18n.t('book.toMyBookings')" [routerLink]="bezirkContext.route('my-bookings')" (click)="slotDetailsVisible = false"></a>
+      </div>
+    } @else {
+    <div class="dialog-actions">
+      <button pButton type="button" severity="secondary" [text]="true" [label]="i18n.t('common.close')" (click)="slotDetailsVisible = false"></button>
+      @if (canBookEinAbs()) {
+        @if (isAuthenticated()) {
+          <button pButton type="button" icon="pi pi-calendar-plus" [label]="i18n.t('book.submit')" [loading]="bookingLoading()" (click)="performBooking()"></button>
+        } @else {
+          <a pButton icon="pi pi-sign-in" [label]="i18n.t('book.loginToBook')"
+             [routerLink]="bezirkContext.route('login')" [queryParams]="{ returnUrl: loginReturnUrl(selectedSlot?.slotId) }"></a>
+        }
+      }
+    </div>
+    }
+  </ng-template>
+</p-dialog>

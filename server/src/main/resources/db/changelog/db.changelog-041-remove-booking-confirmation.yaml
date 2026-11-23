@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: 041-remove-booking-confirmation
+      author: claude
+      changes:
+        # Bookings that were still waiting for the confirmation link: expired ones go back to the pool,
+        # the others are kept as regular bookings now that no confirmation step exists anymore.
+        - sql:
+            sql: >-
+              UPDATE slots SET status = 'AVAILABLE', booking_user_id = NULL, booked_at = NULL
+              WHERE status = 'PENDING_CONFIRMATION'
+              AND (pending_confirmation_expires_at IS NULL OR pending_confirmation_expires_at < CURRENT_TIMESTAMP)
+        - sql:
+            sql: UPDATE slots SET status = 'BOOKED' WHERE status = 'PENDING_CONFIRMATION'
+        - dropColumn:
+            tableName: slots
+            columnName: pending_confirmation_token_hash
+        - dropColumn:
+            tableName: slots
+            columnName: pending_confirmation_expires_at

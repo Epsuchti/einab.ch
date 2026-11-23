@@ -1,0 +1,160 @@
+<section class="page-shell page-stack">
+  <app-newcomer-progress-card></app-newcomer-progress-card>
+  <p-card class="page-card--flat">
+    <ng-template pTemplate="title"><i class="pi pi-bookmark title-icon" aria-hidden="true"></i>{{ i18n.t('bookings.title') }}</ng-template>
+    @if (loading()) {
+      <app-loading-indicator />
+    } @else {
+      @if (!upcoming().length) {
+        <div class="empty-state">
+          <i class="pi pi-calendar" aria-hidden="true"></i>
+          <p>{{ i18n.t('bookings.emptyUpcoming') }}</p>
+          <a pButton icon="pi pi-calendar-plus" [label]="i18n.t('bookings.findEinAb')" [routerLink]="bezirkContext.route()"></a>
+        </div>
+      }
+      <div class="booking-cards">
+        @for (booking of upcoming(); track booking.slotId; let first = $first) {
+          @let when = dateParts(booking.startDateTime);
+          <article class="booking-card" [class.booking-card--next]="first">
+            <div class="booking-card__main">
+              <div class="booking-date" aria-hidden="true">
+                <span class="booking-date__weekday">{{ when.weekday }}</span>
+                <strong class="booking-date__day">{{ when.day }}</strong>
+                <span class="booking-date__month">{{ when.month }}</span>
+              </div>
+
+              <div class="booking-card__body">
+                <div class="booking-card__top">
+                  <h2>{{ i18n.categoryLabel(booking.category) }}@if (booking.businessName) {<span class="booking-card__business"> · {{ booking.businessName }}</span>}</h2>
+                  @if (booking.status !== SlotStatus.Booked) {
+                    <p-tag [value]="i18n.statusLabel(booking.status)" severity="secondary"></p-tag>
+                  }
+                </div>
+                <p class="booking-card__when"><i class="pi pi-clock" aria-hidden="true"></i><span class="sr-only">{{ i18n.t('slots.date') }}: </span>{{ booking.startDateTime | zurichDateTime: 'day' }}, {{ booking.startDateTime | zurichDateTime: 'time' }}</p>
+                @if (!first && !isExpanded(booking.slotId)) {
+                  <p class="booking-card__where">
+                    @if (booking.onlineCallLink) {
+                      <i class="pi pi-video" aria-hidden="true"></i>{{ i18n.t('bookings.joinOnline') }}
+                    } @else {
+                      <i class="pi pi-map-marker" aria-hidden="true"></i>{{ booking.location || booking.publicLocation || '-' }}
+                    }
+                  </p>
+                }
+              </div>
+            </div>
+
+            @if (first || isExpanded(booking.slotId)) {
+              <div class="booking-card__details" [id]="'booking-details-' + booking.slotId">
+                <div class="booking-facts">
+                  @if (booking.onlineCallLink) {
+                    <div class="booking-fact booking-fact--wide">
+                      <span class="booking-fact__label"><i class="pi pi-video" aria-hidden="true"></i>{{ i18n.t('common.onlineCallLink') }}</span>
+                      <a class="booking-fact__value" [href]="booking.onlineCallLink" target="_blank" rel="noopener noreferrer">{{ i18n.t('bookings.joinOnline') }}</a>
+                    </div>
+                  }
+                  @if (booking.location) {
+                    <div class="booking-fact booking-fact--wide">
+                      <span class="booking-fact__label"><i class="pi pi-map-marker" aria-hidden="true"></i>{{ i18n.t('common.address') }}</span>
+                      <a class="booking-fact__value" [href]="mapsLink(booking.location)" target="_blank" rel="noopener">{{ booking.location }} <i class="pi pi-external-link" aria-hidden="true"></i></a>
+                    </div>
+                  }
+                  <div class="booking-fact">
+                    <span class="booking-fact__label"><i class="pi pi-user" aria-hidden="true"></i>{{ i18n.t('slots.teacher') }}</span>
+                    <span class="booking-fact__value">{{ booking.teacherName || '-' }}</span>
+                  </div>
+                  <div class="booking-fact">
+                    <span class="booking-fact__label"><i class="pi pi-phone" aria-hidden="true"></i>{{ i18n.t('slots.teacherEmergencyPhone') }}</span>
+                    @if (booking.teacherPhoneNumber) {
+                      <a class="booking-fact__value" [href]="'tel:' + booking.teacherPhoneNumber">{{ booking.teacherPhoneNumber }}</a>
+                      <span class="emergency-hint"><i class="pi pi-exclamation-circle" aria-hidden="true"></i>{{ i18n.t('slots.emergencyOnly') }}</span>
+                    } @else {
+                      <span class="booking-fact__value">-</span>
+                    }
+                  </div>
+                  @if (booking.publicLocation && booking.publicLocation !== booking.location) {
+                    <div class="booking-fact">
+                      <span class="booking-fact__label"><i class="pi pi-compass" aria-hidden="true"></i>{{ i18n.t('common.publicLocation') }}</span>
+                      <span class="booking-fact__value">{{ booking.publicLocation }}</span>
+                    </div>
+                  }
+                  <div class="booking-fact">
+                    <span class="booking-fact__label"><i class="pi pi-box" aria-hidden="true"></i>{{ i18n.t('common.visitFairteiler') }}</span>
+                    <span class="booking-fact__value">{{ booking.visitFairteiler ? i18n.t('common.yes') : i18n.t('common.no') }}</span>
+                  </div>
+                </div>
+
+                @if (booking.privateInfo) {
+                  <section class="booking-note booking-note--private">
+                    <span class="booking-fact__label"><i class="pi pi-lock" aria-hidden="true"></i>{{ i18n.t('book.privateInfoTitle') }}</span>
+                    <p>{{ booking.privateInfo }}</p>
+                  </section>
+                }
+                @if (booking.publicInfo && booking.publicInfo !== booking.privateInfo) {
+                  <section class="booking-note booking-note--public">
+                    <span class="booking-fact__label"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ i18n.t('common.publicInfo') }}</span>
+                    <p>{{ booking.publicInfo }}</p>
+                  </section>
+                }
+              </div>
+            }
+
+            <footer class="booking-card__actions">
+              @if (!first) {
+                <button
+                  pButton
+                  type="button"
+                  size="small"
+                  severity="secondary"
+                  [text]="true"
+                  [icon]="isExpanded(booking.slotId) ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+                  [label]="isExpanded(booking.slotId) ? i18n.t('bookings.hideDetails') : i18n.t('bookings.showDetails')"
+                  [attr.aria-expanded]="isExpanded(booking.slotId)"
+                  [attr.aria-controls]="'booking-details-' + booking.slotId"
+                  (click)="toggleDetails(booking.slotId)"
+                ></button>
+              }
+              <button pButton type="button" size="small" severity="secondary" [text]="true" icon="pi pi-calendar-plus" [label]="i18n.t('bookings.calendarShort')" [attr.aria-label]="i18n.t('common.addToCalendar')" (click)="downloadIcs(booking)"></button>
+              @if (booking.status === SlotStatus.Booked) {
+                <button
+                  pButton
+                  type="button"
+                  size="small"
+                  severity="danger"
+                  [text]="true"
+                  icon="pi pi-times"
+                  class="booking-card__cancel"
+                  [label]="i18n.t('bookings.cancelShort')" [attr.aria-label]="i18n.t('bookings.cancel')"
+                  (click)="confirmCancel(booking)"
+                ></button>
+              }
+            </footer>
+          </article>
+        }
+      </div>
+
+      @if (past().length) {
+        <details class="past-bookings">
+          <summary>{{ i18n.t('bookings.past').replace('{0}', '' + past().length) }}</summary>
+          <ul class="past-bookings__list">
+            @for (booking of past(); track booking.slotId) {
+              <li>
+                <span class="past-bookings__date">{{ booking.startDateTime | zurichDateTime: 'date' }}</span>
+                <span class="past-bookings__title">{{ i18n.categoryLabel(booking.category) }}@if (booking.businessName) { · {{ booking.businessName }}}</span>
+                <p-tag [value]="i18n.statusLabel(booking.status)" [severity]="booking.status === SlotStatus.Done ? 'success' : 'secondary'"></p-tag>
+              </li>
+            }
+          </ul>
+        </details>
+      }
+    }
+    <p-paginator [alwaysShow]="false"
+      [rows]="pageSize"
+      [totalRecords]="bookingsPage()?.totalElements ?? 0"
+      [first]="(bookingsPage()?.page ?? 0) * pageSize"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} - {last} / {totalRecords}"
+      (onPageChange)="onPageChange($event)"
+    >
+    </p-paginator>
+  </p-card>
+</section>

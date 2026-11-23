@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 057-bezirk-info-step-only-unverified
+      author: claude
+      changes:
+        # The Bezirk info step can be limited to users who are not verified on Foodsharing yet (newcomers).
+        - addColumn:
+            tableName: bezirke
+            columns:
+              - column:
+                  name: info_step_only_unverified
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false

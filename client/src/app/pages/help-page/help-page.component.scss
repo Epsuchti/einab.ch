@@ -1,0 +1,288 @@
+.help-page {
+  gap: 1rem;
+}
+
+.help-page__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+}
+
+.help-page__header-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 2.8rem;
+  height: 2.8rem;
+  place-items: center;
+  border-radius: 0.85rem;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  font-size: 1.2rem;
+}
+
+.help-page__header h1 {
+  margin: 0;
+  color: var(--app-text);
+  font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+  line-height: 1.15;
+}
+
+.help-page__header p {
+  margin: 0.35rem 0 0;
+  color: var(--app-text-muted);
+  font-size: 0.95rem;
+}
+
+.help-card {
+  display: grid;
+  min-width: 0;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  background: var(--app-surface, #fff);
+  box-shadow: var(--app-shadow);
+}
+
+.help-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+}
+
+.help-card__head h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--app-text);
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+
+.help-card__head h3 .pi {
+  color: var(--app-primary-strong);
+}
+
+.help-card__meta {
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.help-card__text {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}
+
+.help-card__video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--app-radius);
+  border: 1px solid var(--app-border);
+  background: #eef5ec;
+}
+
+.help-sheet {
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  align-items: start;
+  gap: 1rem;
+}
+
+.help-sheet__preview {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: #fff;
+  cursor: zoom-in;
+  box-shadow: var(--app-shadow);
+}
+
+.help-sheet__preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.help-sheet__zoom {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(20, 40, 25, 0.78);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.help-sheet__actions {
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+}
+
+@media (max-width: 640px) {
+  .help-card {
+    padding: 1rem;
+  }
+
+  .help-sheet {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .help-sheet__preview {
+    max-height: 22rem;
+  }
+
+  .help-sheet__preview::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 4rem;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff);
+  }
+
+  .help-sheet__zoom {
+    z-index: 1;
+  }
+}
+
+:host ::ng-deep .help-zoom .p-dialog-content {
+  padding: 0;
+}
+
+.help-zoom__scroll {
+  overflow: auto;
+  max-height: calc(100dvh - 8rem);
+  -webkit-overflow-scrolling: touch;
+}
+
+.help-zoom__scroll img {
+  display: block;
+  width: max(100%, 56rem);
+  max-width: 1406px;
+  height: auto;
+}
+
+.help-page__section-title {
+  margin: 0.75rem 0 -0.25rem;
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  scroll-margin-top: 5rem;
+}
+
+.help-form__categories {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.help-form__categories .segmented__item {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.help-form__contact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  align-items: start;
+  gap: 1rem;
+}
+
+/* Keep label + input at the top so both inputs share one line,
+   even when only one field has a hint below it. */
+.help-form__contact > label {
+  align-content: start;
+}
+
+.help-form__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.help-form__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+}
+
+.help-sent {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.5rem 0.875rem;
+}
+
+.help-sent__icon {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+}
+
+.help-sent p {
+  margin: 0.2rem 0 0;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}
+
+.help-sent button {
+  grid-column: 2;
+  justify-self: start;
+}
+
+@media (max-width: 640px) {
+  .help-sheet__zoom-button {
+    display: none;
+  }
+
+  .help-form__footer button {
+    width: 100%;
+  }
+}
+
+/* Phones: the icon chip next to the title takes width from the text and sits off the title's baseline. */
+@media (max-width: 480px) {
+  .help-page__header-icon {
+    display: none;
+  }
+}
+
+.help-card__actions {
+  display: flex;
+  margin-top: 0.9rem;
+}
+
+@media (max-width: 599px) {
+  .help-card__actions a {
+    width: 100%;
+  }
+}

@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: 015-add-privacy-consent
+      author: codex
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: privacy_consent_at
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: privacy_consent_version
+                  type: VARCHAR(32)
+        - addColumn:
+            tableName: einabs
+            columns:
+              - column: {name: business_name, type: VARCHAR(500)}
+              - column: {name: private_address, type: VARCHAR(500)}
+              - column: {name: public_general_location, type: VARCHAR(500)}
+        - sql:
+            sql: UPDATE einabs SET private_address = location, public_general_location = public_location WHERE private_address IS NULL OR public_general_location IS NULL
+        - createTable:
+            tableName: bezirk_ignored_categories
+            columns:
+              - column: {name: bezirk_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: category, type: VARCHAR(64), constraints: {nullable: false}}
+        - addPrimaryKey:
+            tableName: bezirk_ignored_categories
+            columnNames: bezirk_id, category
+            constraintName: pk_bezirk_ignored_categories
+        - addForeignKeyConstraint:
+            baseTableName: bezirk_ignored_categories
+            baseColumnNames: bezirk_id
+            referencedTableName: bezirke
+            referencedColumnNames: id
+            constraintName: fk_bezirk_ignored_categories_bezirk
+            onDelete: CASCADE

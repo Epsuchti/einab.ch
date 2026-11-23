@@ -1,0 +1,826 @@
+:host {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid rgb(199 216 201 / 0.82);
+  background: rgb(255 255 255 / 0.9);
+  box-shadow: 0 1px 0 rgb(23 49 38 / 0.03);
+  backdrop-filter: blur(16px);
+}
+
+.app-header__content {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  width: min(100%, 82rem);
+  min-width: 0;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  gap: 1.25rem;
+}
+
+.app-header__topline {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.625rem;
+  color: var(--app-text);
+  font-size: 1rem;
+  font-weight: 760;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.brand__short {
+  display: none;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brand__bezirk {
+  color: var(--app-text-muted);
+  font-weight: 650;
+}
+
+.brand:hover {
+  color: var(--app-primary-strong);
+}
+
+.brand__mark {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.7rem;
+  background: linear-gradient(135deg, #2d9154, #195d35);
+  box-shadow: 0 5px 12px rgb(25 93 53 / 0.2);
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.nav-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.3rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.55rem;
+  color: var(--app-text-muted);
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.2;
+  text-decoration: none;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.nav-links a:hover {
+  background: var(--app-surface-strong);
+  color: var(--app-primary-strong);
+}
+
+.nav-links a.active {
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+}
+
+.nav-links--mobile a {
+  gap: 0.6rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  gap: 0.625rem;
+}
+
+.language-switch {
+  display: flex;
+  gap: 0.2rem;
+  padding: 0.2rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.65rem;
+  background: var(--app-surface-muted);
+}
+
+.language-switch .p-button {
+  min-width: 2.25rem;
+  padding-inline: 0.45rem;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: var(--app-text-muted);
+}
+
+.language-switch .p-button:hover {
+  background: #fff;
+  color: var(--app-primary-strong);
+}
+
+.language-switch .p-button.is-active {
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(23 49 38 / 0.12);
+  color: var(--app-primary-strong);
+  font-weight: 750;
+}
+
+.mobile-menu__who {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.2rem 0.3rem 0.7rem;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.mobile-menu__who small {
+  display: block;
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+}
+
+.mobile-menu__who strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.mobile-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  border: 0;
+  background: transparent;
+  color: #b42318;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.mobile-logout:hover {
+  color: #8f1c13;
+}
+
+.user-menu__item.user-menu__item--danger,
+.user-menu__item.user-menu__item--danger:hover {
+  color: #b42318;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.login-button {
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.user-menu {
+  position: relative;
+}
+
+.user-menu__toggle.p-button {
+  gap: 0.5rem;
+  max-width: 16rem;
+  padding: 0.3rem 0.6rem 0.3rem 0.35rem;
+}
+
+.user-menu__avatar {
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  font-size: 0.85rem;
+}
+
+.user-menu__name {
+  overflow: hidden;
+  font-size: 0.88rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-menu__chevron {
+  font-size: 0.7rem;
+}
+
+.user-menu__panel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 30;
+  display: grid;
+  min-width: 14rem;
+  gap: 0.25rem;
+  padding: 0.4rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: #fff;
+  box-shadow: var(--app-shadow);
+}
+
+.user-menu__item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0.6rem;
+  min-height: 2.3rem;
+  padding: 0.45rem 0.7rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--app-text);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 650;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.user-menu__item:hover {
+  background: var(--app-surface-strong);
+  color: var(--app-primary-strong);
+}
+
+.user-menu__item.active {
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+}
+
+.user-menu__languages {
+  justify-content: center;
+  margin: 0.15rem 0;
+}
+
+.user-menu__bezirke,
+.mobile-bezirke {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.user-menu__bezirke {
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.user-menu__heading {
+  padding: 0.1rem 0.7rem;
+  color: var(--app-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.user-menu__check {
+  margin-left: auto;
+}
+
+.mobile-menu-toggle,
+.mobile-menu,
+.mobile-menu-backdrop {
+  display: none;
+}
+
+.app-main {
+  flex: 1 0 auto;
+  width: 100%;
+  min-width: 0;
+  padding: clamp(1rem, 2.5vw, 2rem) 1.25rem 2.5rem;
+}
+
+/* Keeps the pages laid out as direct children of .app-main; hidden while the full-page error is shown. */
+.app-main__outlet {
+  display: contents;
+}
+
+.app-main__outlet--hidden {
+  display: none;
+}
+
+.app-footer {
+  width: 100%;
+  border-top: 1px solid var(--app-border);
+  background: rgb(255 255 255 / 0.68);
+}
+
+.app-footer__content {
+  display: flex;
+  width: min(100%, 82rem);
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+}
+
+.app-footer__heart {
+  color: #d94d5c;
+  font-size: 0.8em;
+}
+
+.app-footer a {
+  font-weight: 650;
+}
+
+.app-footer__version {
+  font-variant-numeric: tabular-nums;
+}
+
+.app-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.6rem;
+}
+
+@media (max-width: 1120px) {
+  .app-header__content {
+    gap: 0.75rem;
+    padding-inline: 1rem;
+  }
+
+  .nav-links a {
+    padding-inline: 0.55rem;
+  }
+
+  .header-actions > .p-button:not(.language-switch .p-button) {
+    padding-inline: 0.65rem;
+  }
+}
+
+@media (max-width: 1050px) {
+  .app-header__content {
+    display: flex;
+    padding: 0.7rem 0.875rem;
+  }
+
+  .app-header__topline {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .nav-links--desktop,
+  .header-actions--desktop {
+    display: none;
+  }
+
+  .mobile-menu-toggle {
+    display: inline-flex;
+    flex: 0 0 auto;
+  }
+
+  .mobile-menu {
+    display: grid;
+    width: min(100% - 1.75rem, 82rem);
+    margin: 0 auto 0.875rem;
+    gap: 0.875rem;
+    padding: 0.75rem;
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius);
+    background: #fff;
+    box-shadow: 0 14px 34px rgb(0 0 0 / 0.28), 0 2px 6px rgb(0 0 0 / 0.1);
+  }
+
+  /* Dims the page behind the open menu; tapping it closes the menu. */
+  .mobile-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    display: block;
+    background: rgb(17 20 18 / 0.55);
+    animation: mobile-menu-backdrop-in 160ms ease-out;
+  }
+
+  .nav-links--mobile,
+  .header-actions--mobile {
+    display: flex;
+  }
+
+  .nav-links--mobile {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+
+  .nav-links--mobile a {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid transparent;
+  }
+
+  .nav-links--mobile a.active {
+    border-color: #b9dbbf;
+  }
+
+  .header-actions--mobile {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.625rem;
+  }
+
+  .header-actions--mobile .language-switch {
+    width: 100%;
+  }
+
+  /* Grow from the label width, so the long "Schwiizerdütsch" does not touch the edge of an equal third. */
+  .header-actions--mobile .language-switch .p-button {
+    flex: 1 1 auto;
+    padding-inline: 0.35rem;
+  }
+
+  .mobile-bezirke {
+    width: 100%;
+  }
+
+  .mobile-switch-bezirk,
+  .header-actions--mobile > .p-button {
+    width: 100%;
+  }
+
+  .app-main {
+    padding: 1rem 0.875rem 2rem;
+  }
+
+  .app-footer__content {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0.75rem 0.875rem;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header__content {
+    padding: 0.55rem 0.75rem;
+  }
+
+  .brand {
+    max-width: calc(100vw - 4.5rem);
+    font-size: 0.94rem;
+  }
+
+  .brand__long {
+    display: none;
+  }
+
+  .brand__short {
+    display: inline;
+  }
+
+  .mobile-menu {
+    width: calc(100% - 1rem);
+    max-height: calc(100dvh - 4.75rem);
+    margin-bottom: 0.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .app-main {
+    padding: 0.75rem 0.625rem 1.5rem;
+  }
+
+  .app-footer__content {
+    padding-inline: 0.75rem;
+  }
+}
+
+/* Admin info notes: one card per note, centered like the page content, dismissable. */
+.info-notes {
+  display: grid;
+  gap: 0.6rem;
+  /* Same width and side padding as .app-main, so the notes line up with the page cards below. */
+  box-sizing: border-box;
+  width: min(100%, calc(82rem + 2.5rem));
+  margin: 0 auto;
+  padding: clamp(1rem, 2.5vw, 2rem) 1.25rem 0;
+}
+
+.info-note {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.75rem;
+  padding: 0.8rem 0.6rem 0.8rem 1rem;
+  border: 1px solid #b9d3ee;
+  border-left: 4px solid #2f6fb3;
+  border-radius: 0.75rem;
+  background: #eef5fc;
+  color: #1d3b5c;
+}
+
+.info-note--warning {
+  border-color: #f0c36d;
+  border-left-color: #d99100;
+  background: #fff7e2;
+  color: #5c4000;
+}
+
+.info-note__icon {
+  margin-top: 0.15rem;
+  font-size: 1.1rem;
+}
+
+.info-note__body {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.info-note__title {
+  font-size: 1rem;
+}
+
+.info-note__message {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
+
+.info-note__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: -0.35rem 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: rgb(0 0 0 / 0.07);
+  }
+}
+
+@media (max-width: 1050px) {
+  .info-notes {
+    padding: 1rem 0.875rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .info-notes {
+    padding: 0.75rem 0.625rem 0;
+  }
+}
+
+.foodsharing-offline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.25rem;
+  background: #fff4d6;
+  border-bottom: 1px solid #f0c36d;
+  color: #6b4a00;
+  font-weight: 600;
+  text-align: center;
+}
+
+.connection-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+  text-align: center;
+  border-bottom: 1px solid transparent;
+}
+
+.connection-banner--offline {
+  background: #3d4451;
+  border-bottom-color: #2a2f38;
+  color: #fff;
+}
+
+.connection-banner--server {
+  background: #fde8e8;
+  border-bottom-color: #f2b8b5;
+  color: #8a1c1c;
+}
+
+.connection-banner--back {
+  background: #d8f3df;
+  border-bottom-color: #82d59b;
+  color: #174b2d;
+}
+
+.app-header--survey .app-header__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+/* Thin bar for any running request; fades in only after a short delay so quick calls do not flicker. */
+.request-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 3px;
+  overflow: hidden;
+  background: rgb(37 131 74 / 0.18);
+  opacity: 0;
+  animation: request-bar-in 0.15s linear 0.3s forwards;
+  pointer-events: none;
+}
+
+.request-bar::after {
+  content: '';
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--p-primary-color, #25834a);
+  animation: request-bar-slide 1.1s ease-in-out infinite;
+}
+
+@keyframes request-bar-in {
+  to { opacity: 1; }
+}
+
+@keyframes request-bar-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .request-bar::after {
+    width: 100%;
+    animation: none;
+  }
+}
+
+/* Bottom tab bar on phones for the main destinations of the role. */
+.tabbar {
+  display: none;
+}
+
+@keyframes mobile-menu-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  /* The bottom tab bar has its own "Menü" tab, so the header burger is redundant there. */
+  .mobile-menu-toggle--has-tabbar {
+    display: none !important;
+  }
+
+  .tabbar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 25;
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    padding: 0.25rem 0.25rem calc(0.25rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--app-border);
+    background: rgb(255 255 255 / 0.96);
+    backdrop-filter: blur(12px);
+  }
+
+  .tabbar__item {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 0.15rem;
+    min-height: 3.1rem;
+    padding: 0.35rem 0.25rem;
+    border: 0;
+    border-radius: 0.6rem;
+    background: transparent;
+    color: var(--app-text-muted);
+    font: inherit;
+    font-size: 0.7rem;
+    font-weight: 650;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .tabbar__item .pi {
+    font-size: 1.15rem;
+  }
+
+  .tabbar__item.is-active {
+    color: var(--app-primary-strong);
+    background: var(--app-primary-soft);
+  }
+
+  /* While the menu sheet is open only "Menü" is lit, not also the page underneath. */
+  .tabbar--menu-open a.tabbar__item.is-active {
+    color: var(--app-text-muted);
+    background: transparent;
+  }
+
+  .app-footer--with-tabbar {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* Phones: green header and tab bar around a white page. */
+@media (max-width: 640px) {
+  .app-header {
+    border-bottom: 0;
+    background: #1f7442;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
+    backdrop-filter: none;
+  }
+
+  .app-header .brand,
+  .app-header .brand:hover {
+    color: #fff;
+  }
+
+  .app-header .brand__bezirk {
+    color: rgb(255 255 255 / 0.85);
+  }
+
+  .app-header .brand__mark {
+    background: #fff;
+    box-shadow: none;
+    color: #1f7442;
+  }
+
+  .app-header .mobile-menu-toggle.p-button,
+  .app-header .mobile-menu-toggle.p-button:hover {
+    color: #fff;
+  }
+
+  .app-header .mobile-menu-toggle.p-button:hover {
+    background: rgb(255 255 255 / 0.12);
+  }
+
+  .tabbar {
+    border-top: 0;
+    background: #1f7442;
+    backdrop-filter: none;
+  }
+
+  .tabbar__item {
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  .tabbar__item.is-active {
+    background: #fff;
+    color: #1f7442;
+  }
+
+  .tabbar--menu-open a.tabbar__item.is-active {
+    background: transparent;
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  .app-footer {
+    background: var(--app-surface-muted);
+  }
+}

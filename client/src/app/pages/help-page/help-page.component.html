@@ -1,0 +1,135 @@
+<section class="page-shell page-shell--narrow help-page">
+  <header class="help-page__header">
+    <span class="help-page__header-icon" aria-hidden="true"><i class="pi pi-question-circle"></i></span>
+    <div>
+      <h1><i class="pi pi-question-circle title-icon--phone title-icon" aria-hidden="true"></i>{{ i18n.t('help.title') }}</h1>
+      <p>{{ i18n.t(isTeacher() ? 'help.introTeacher' : 'help.intro') }}</p>
+    </div>
+  </header>
+
+  @if (sessionService.isAuthenticated() && bezirkContext.selectedBezirk()?.infoAvailable) {
+    <h2 class="help-page__section-title" id="bezirk-info">{{ i18n.t('bezirkInfo.helpSection') }}</h2>
+    <article class="help-card">
+      <div class="help-card__head">
+        <h3><i class="pi pi-map-marker" aria-hidden="true"></i>{{ i18n.t('bezirkInfo.titleFor').replace('{0}', bezirkContext.selectedBezirk()?.name ?? '') }}</h3>
+      </div>
+      <p class="help-card__text">{{ i18n.t('bezirkInfo.helpHint') }}</p>
+      <div class="help-card__actions">
+        <a pButton icon="pi pi-book" [routerLink]="bezirkContext.route('bezirk-info')" [label]="i18n.t('bezirkInfo.open')"></a>
+      </div>
+    </article>
+  }
+
+  @if (isTeacher()) {
+    <h2 class="help-page__section-title" id="anleitung">{{ i18n.t('help.guideSection') }}</h2>
+
+    <article class="help-card">
+      <div class="help-card__head">
+        <h3><i class="pi pi-video" aria-hidden="true"></i>{{ i18n.t('teacherGuide.videoTitle') }}</h3>
+        <span class="help-card__meta">{{ i18n.t('teacherGuide.videoMeta') }}</span>
+      </div>
+      <p class="help-card__text">{{ i18n.t('teacherGuide.videoHint') }}</p>
+      <video
+        class="help-card__video"
+        controls
+        playsinline
+        preload="none"
+        width="1280"
+        height="720"
+        [poster]="posterUrl"
+        [attr.aria-label]="i18n.t('teacherGuide.videoTitle')">
+        <source [src]="videoUrl" type="video/mp4" />
+        <p>{{ i18n.t('teacherGuide.videoUnsupported') }} <a [href]="videoUrl">{{ i18n.t('teacherGuide.videoDownload') }}</a></p>
+      </video>
+    </article>
+
+    <article class="help-card">
+      <div class="help-card__head">
+        <h3><i class="pi pi-file" aria-hidden="true"></i>{{ i18n.t('teacherGuide.sheetTitle') }}</h3>
+        <span class="help-card__meta">{{ i18n.t('teacherGuide.sheetMeta') }}</span>
+      </div>
+      <p class="help-card__text">{{ i18n.t('teacherGuide.sheetHint') }}</p>
+      <div class="help-sheet">
+        <button type="button" class="help-sheet__preview" [attr.aria-label]="i18n.t('teacherGuide.sheetZoom')" (click)="sheetZoomVisible.set(true)">
+          <img [src]="sheetImageUrl" width="1406" height="1988" loading="lazy" decoding="async" [alt]="i18n.t('teacherGuide.sheetAlt')" />
+          <span class="help-sheet__zoom" aria-hidden="true"><i class="pi pi-search-plus"></i>{{ i18n.t('teacherGuide.sheetZoom') }}</span>
+        </button>
+        <div class="help-sheet__actions">
+          <button pButton type="button" class="help-sheet__zoom-button" icon="pi pi-search-plus" [label]="i18n.t('teacherGuide.sheetZoom')" [severity]="showPdfLinks ? 'secondary' : undefined" [outlined]="showPdfLinks" (click)="sheetZoomVisible.set(true)"></button>
+          @if (showPdfLinks) {
+            <a pButton icon="pi pi-external-link" [href]="pdfUrl" target="_blank" rel="noopener" [label]="i18n.t('teacherGuide.openPdf')"></a>
+            <a pButton severity="secondary" [outlined]="true" icon="pi pi-download" [href]="pdfUrl" download="EinAb-Spickzettel.pdf" [label]="i18n.t('teacherGuide.downloadPdf')"></a>
+          }
+        </div>
+      </div>
+    </article>
+  }
+
+  <h2 class="help-page__section-title" id="support">{{ i18n.t('help.supportSection') }}</h2>
+  <article class="help-card">
+    @if (sent()) {
+      <div class="help-sent" role="status">
+        <span class="help-sent__icon" aria-hidden="true"><i class="pi pi-check"></i></span>
+        <div>
+          <strong>{{ i18n.t('help.sentTitle') }}</strong>
+          <p>{{ i18n.t('help.sentText') }}</p>
+        </div>
+        <button pButton type="button" severity="secondary" [outlined]="true" icon="pi pi-pencil" [label]="i18n.t('help.writeAnother')" (click)="writeAnother()"></button>
+      </div>
+    } @else {
+      <p class="help-card__text">{{ i18n.t('help.supportHint') }}</p>
+      <form class="stack-form help-form" (ngSubmit)="send()">
+        <div class="segmented help-form__categories" role="radiogroup" [attr.aria-label]="i18n.t('help.categoryLabel')">
+          @for (option of categories; track option.value) {
+            <button type="button" role="radio" class="segmented__item" [class.is-active]="category() === option.value" [attr.aria-checked]="category() === option.value" (click)="category.set(option.value)">
+              <i [class]="option.icon" aria-hidden="true"></i>{{ i18n.t(option.label) }}
+            </button>
+          }
+        </div>
+        <label>
+          <span>{{ i18n.t('help.messageLabel') }}</span>
+          <textarea pTextarea name="message" rows="6" maxlength="4000" required [ngModel]="message()" (ngModelChange)="message.set($event)" [placeholder]="i18n.t(messagePlaceholder())"></textarea>
+        </label>
+        @if (!sessionService.isAuthenticated()) {
+          <div class="help-form__contact">
+            <label>
+              <span>{{ i18n.t('common.foodsharingId') }} *</span>
+              <input pInputText name="contactFoodsharingId" inputmode="numeric" autocomplete="off" maxlength="64" required [ngModel]="contactFoodsharingId()" (ngModelChange)="contactFoodsharingId.set($event)" />
+              <small>{{ i18n.t('help.contactIdHint') }}
+                @if (bezirkContext.selectedBezirk()) { <a [routerLink]="bezirkContext.route('foodsharing-id')">{{ i18n.t('help.findId') }}</a> }
+              </small>
+            </label>
+            <label>
+              <span>{{ i18n.t('help.contactName') }}</span>
+              <input pInputText name="contactName" autocomplete="name" maxlength="255" [ngModel]="contactName()" (ngModelChange)="contactName.set($event)" />
+            </label>
+          </div>
+        }
+        @if (error(); as message) {
+          <p class="field-error" role="alert">{{ message }}</p>
+        }
+        <div class="help-form__footer">
+          <small class="help-form__meta"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ i18n.t('help.sentAlong').replace('{version}', release) }}</small>
+          <button pButton type="submit" icon="pi pi-send" [label]="i18n.t('help.send')" [loading]="sending()" [disabled]="!canSend()"></button>
+        </div>
+      </form>
+    }
+  </article>
+</section>
+
+<p-dialog
+  [visible]="sheetZoomVisible()"
+  (visibleChange)="sheetZoomVisible.set($event)"
+  [modal]="true"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [header]="i18n.t('teacherGuide.sheetTitle')"
+  styleClass="help-zoom"
+  [style]="{ width: 'min(64rem, 98vw)' }">
+  @if (sheetZoomVisible()) {
+    <div class="help-zoom__scroll">
+      <img [src]="sheetImageUrl" width="1406" height="1988" [alt]="i18n.t('teacherGuide.sheetAlt')" />
+    </div>
+  }
+</p-dialog>

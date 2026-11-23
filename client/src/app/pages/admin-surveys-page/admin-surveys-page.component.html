@@ -1,0 +1,83 @@
+<section class="page-shell">
+  <p-card class="page-card--flat">
+    <ng-template pTemplate="title">
+      <div class="survey-page-header">
+        <span><i class="pi pi-list title-icon" aria-hidden="true"></i>{{ i18n.t('surveys.title') }}</span>
+        @if (surveys().length > 0) {
+          <a pButton icon="pi pi-plus" [label]="i18n.t('surveys.new')" [routerLink]="bezirkContext.route('admin', 'surveys', 'new')"></a>
+        }
+      </div>
+    </ng-template>
+    @if (loading()) {
+      <app-loading-indicator />
+    }
+    @if (!loading() && surveys().length === 0) {
+      <div class="survey-empty">
+        <i class="pi pi-list-check" aria-hidden="true"></i>
+        <p>{{ i18n.t('surveys.empty') }}</p>
+        <a pButton icon="pi pi-plus" [label]="i18n.t('surveys.new')" [routerLink]="bezirkContext.route('admin', 'surveys', 'new')"></a>
+      </div>
+    }
+    @if (!loading() && surveys().length > 0) {
+      <ul class="survey-list">
+        @for (survey of surveys(); track survey.id) {
+          <li class="survey-row">
+            <div class="survey-row__main">
+              <strong>{{ survey.title }}</strong>
+              <small>
+                {{ survey.createdAt | zurichDateTime: 'date' }} · {{ i18n.t(survey.responseCount === 1 ? 'surveys.responseOne' : 'surveys.responseMany').replace('{0}', '' + survey.responseCount) }}
+                @if (!survey.owner) {
+                  · <i class="pi pi-users" aria-hidden="true"></i> {{ i18n.t('surveys.sharedBy') }} {{ survey.ownerName }}
+                } @else if (survey.coauthorCount > 0) {
+                  · <i class="pi pi-users" aria-hidden="true"></i> {{ survey.coauthorCount }} {{ i18n.t('surveys.coauthorCount') }}
+                }
+              </small>
+            </div>
+            <div class="survey-row__actions">
+              <a pButton size="small" icon="pi pi-chart-bar" severity="secondary" [label]="i18n.t('surveys.results')" [routerLink]="bezirkContext.route('admin', 'surveys', survey.id, 'results')"></a>
+              <button pButton size="small" icon="pi pi-link" severity="secondary" [outlined]="true" [label]="i18n.t('surveys.links')" (click)="openLinks(survey)"></button>
+              <button pButton size="small" icon="pi pi-ellipsis-v" severity="secondary" [text]="true" [attr.aria-label]="i18n.t('common.more')" (click)="openSurveyActions($event, survey)"></button>
+            </div>
+          </li>
+        }
+      </ul>
+      <p-menu #surveyActionsMenu [model]="surveyActionItems()" [popup]="true" appendTo="body"></p-menu>
+    }
+  </p-card>
+</section>
+
+<p-dialog
+  [visible]="linkSurvey() !== null"
+  (visibleChange)="!$event && closeLinks()"
+  [modal]="true"
+  [draggable]="false"
+  [dismissableMask]="true"
+  [style]="{ width: 'min(44rem, 96vw)' }"
+  [header]="i18n.t('surveys.linksTitle')">
+  <div class="stack-form">
+    <p>{{ i18n.t('surveys.linksHint') }}</p>
+    <div class="survey-copy-link">
+      <span class="survey-copy-link__label">{{ i18n.t('surveys.baseLink') }}</span>
+      <button pButton type="button" icon="pi pi-copy" [label]="i18n.t('surveys.copyLink')" (click)="copy(baseLink())"></button>
+      <small class="survey-copy-link__url">{{ baseLink() }}</small>
+    </div>
+    <label>
+      <span>{{ i18n.t('surveys.storesLabel') }}</span>
+      <textarea pTextarea rows="5" [ngModel]="storesText()" (ngModelChange)="storesText.set($event)" name="stores"></textarea>
+    </label>
+    @if (storeLinks().length > 0) {
+      <div class="survey-link-list">
+        @for (entry of storeLinks(); track entry.store) {
+          <div class="survey-link-row">
+            <div class="survey-link-row__text">
+              <strong>{{ entry.store }}</strong>
+              <small>{{ entry.link }}</small>
+            </div>
+            <button pButton type="button" size="small" icon="pi pi-copy" severity="secondary" [label]="i18n.t('surveys.copy')" (click)="copy(entry.link)"></button>
+          </div>
+        }
+      </div>
+      <button pButton type="button" size="small" icon="pi pi-copy" [label]="i18n.t('surveys.copyAll')" (click)="copyAllStoreLinks()"></button>
+    }
+  </div>
+</p-dialog>

@@ -1,0 +1,36 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "appData": {
+    "purpose": "Caches the app shell so the site starts fast and offline, and tells the page when a new release is deployed."
+  },
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "resources": {
+        "files": ["/favicon.ico", "/favicon.svg", "/favicon.png", "/index.html", "/manifest.webmanifest", "/*.css", "/*.js"]
+      }
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": ["/i18n/**", "/images/**", "/icons/**", "/media/**", "!/media/**/*.mp4", "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"]
+      }
+    }
+  ],
+  "navigationUrls": [
+    "/**",
+    "!/**/*.*",
+    "!/**/*__*",
+    "!/**/*__*/**",
+    "!/api/**",
+    "!/actuator/**",
+    "!/swagger-ui/**",
+    "!/v3/**",
+    "!/h2-console/**",
+    "!/.well-known/**"
+  ]
+}

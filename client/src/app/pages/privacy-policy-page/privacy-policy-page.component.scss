@@ -1,0 +1,97 @@
+.privacy-policy h2 {
+  margin: 1.75rem 0 0.5rem;
+  font-size: 1.15rem;
+}
+
+.privacy-policy p,
+.privacy-policy ul {
+  margin: 0 0 0.75rem;
+  line-height: 1.55;
+}
+
+.privacy-policy ul {
+  padding-left: 1.25rem;
+}
+
+.privacy-policy__version {
+  color: var(--app-text-muted);
+  font-size: 0.95rem;
+}
+
+.privacy-policy__table-wrap {
+  overflow-x: auto;
+  margin: 0 0 0.75rem;
+}
+
+.privacy-policy table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.privacy-policy th,
+.privacy-policy td {
+  padding: 0.5rem 0.625rem;
+  border-bottom: 1px solid var(--app-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.privacy-policy th {
+  font-weight: 650;
+}
+
+.privacy-policy__summary {
+  margin: 0.5rem 0 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--app-radius);
+  background: var(--app-primary-soft);
+}
+
+.privacy-policy__summary h2 {
+  margin-top: 0;
+}
+
+.privacy-policy__summary ul {
+  margin: 0;
+}
+
+/* Phone: each table row becomes a small card (first cell as title, the others labelled) instead of a table that scrolls sideways. */
+@media (max-width: 600px) {
+  .privacy-policy__table-wrap {
+    overflow-x: visible;
+  }
+
+  .privacy-policy table,
+  .privacy-policy tbody,
+  .privacy-policy tr,
+  .privacy-policy td {
+    display: block;
+    width: 100%;
+  }
+
+  .privacy-policy thead {
+    display: none;
+  }
+
+  .privacy-policy tr {
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--app-border);
+  }
+
+  .privacy-policy td {
+    padding: 0.1rem 0;
+    border: 0;
+  }
+
+  .privacy-policy td:first-child {
+    font-weight: 650;
+  }
+
+  .privacy-policy td:not(:first-child)::before {
+    content: attr(data-label) ': ';
+    color: var(--app-text-muted);
+    font-weight: 600;
+  }
+}

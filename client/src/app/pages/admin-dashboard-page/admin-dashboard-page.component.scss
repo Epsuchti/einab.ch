@@ -1,0 +1,1535 @@
+@use '../../shared/einab-list';
+
+.admin-collapsible {
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-nest-bg);
+  box-shadow: 0 4px 12px rgb(23 49 38 / 0.04);
+}
+
+.admin-collapsible__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  color: var(--app-text);
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 750;
+  list-style: none;
+}
+
+.admin-collapsible__summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-collapsible__chevron {
+  color: var(--app-primary-strong);
+  transition: transform 160ms ease;
+}
+
+.admin-collapsible[open] .admin-collapsible__chevron {
+  transform: rotate(180deg);
+}
+
+.admin-collapsible > p-card {
+  display: block;
+  border-top: 1px solid var(--app-border);
+}
+
+/* Each setting gets room of its own; a hint stays close to the setting it explains. */
+.admin-booking-settings {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.admin-booking-settings > small {
+  margin-top: -0.85rem;
+}
+
+.admin-category-settings {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+
+  /* Same as the other field labels ("Reinigungs-Betriebs-ID"), not PrimeNG's grey legend. */
+  legend {
+    padding: 0 0.25rem;
+    color: var(--app-text);
+    font-size: 0.9rem;
+    font-weight: 650;
+  }
+}
+
+.admin-category-settings__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+/* Phones: two columns of categories instead of one long list. */
+@media (max-width: 480px) {
+  .admin-category-settings {
+    padding: 0.75rem;
+  }
+
+  .admin-category-settings__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem 0.75rem;
+  }
+}
+
+.admin-foodsharing-message-settings {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.admin-foodsharing-message-settings h3,
+.admin-foodsharing-message-settings p {
+  margin: 0;
+}
+
+.admin-foodsharing-message-settings h3 {
+  color: var(--app-text);
+  font-size: 1rem;
+}
+
+.admin-foodsharing-message-settings p,
+.admin-foodsharing-message-settings small {
+  color: var(--app-text-muted);
+}
+
+.admin-foodsharing-message-settings__connection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--app-radius-sm);
+  background: #fff;
+}
+
+.admin-foodsharing-message-settings__connection span {
+  color: var(--app-text-muted);
+}
+
+.admin-foodsharing-message-settings__connection strong {
+  overflow-wrap: anywhere;
+}
+
+.admin-foodsharing-message-settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-foodsharing-message-settings__connection .admin-foodsharing-message-settings__actions {
+  margin-left: auto;
+}
+
+.admin-foodsharing-message-settings__connection > .p-button {
+  margin-left: auto;
+}
+
+.admin-messaging-telegram {
+  margin-top: 1rem;
+}
+
+.admin-messaging-telegram__steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--app-text-muted);
+}
+
+.admin-messaging-telegram__chat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.admin-messaging-telegram__chat label {
+  display: grid;
+  flex: 1 1 16rem;
+  gap: 0.35rem;
+}
+
+.stack-form .admin-booking-settings__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+}
+
+.admin-user-cards {
+  display: none;
+  gap: 0.875rem;
+}
+
+.user-expand-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  gap: 0.45rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--app-primary-strong);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.user-expand-button:hover,
+.user-expand-button--expanded {
+  border-color: var(--app-primary);
+  background: var(--app-primary-soft);
+}
+
+.user-expand-button:focus-visible {
+  outline: 3px solid rgb(45 145 84 / 0.3);
+  outline-offset: 2px;
+}
+
+.admin-users-table__expand-cell,
+.admin-users-table__pickup-count {
+  white-space: nowrap;
+}
+
+.admin-users-table__expandable-row {
+  cursor: pointer;
+}
+
+.admin-user-details-row > td {
+  padding: 0;
+  background: var(--app-surface-muted);
+}
+
+.admin-user-details {
+  gap: 1.25rem;
+  margin-left: 1.25rem;
+  padding: 1.25rem 1.25rem 1.5rem 1.5rem;
+  border-left: 3px solid var(--app-primary-soft);
+}
+
+.admin-user-section {
+  display: grid;
+  min-width: 0;
+  gap: 1rem;
+  padding: 1.125rem 1.25rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: #fff;
+}
+
+.admin-user-section__header {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.admin-user-section__header h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.admin-user-section__header h4 .pi {
+  color: var(--app-primary);
+  font-size: 0.95rem;
+}
+
+.admin-user-section__header p {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.admin-user-section > .empty-state,
+.admin-user-section > p-table,
+.admin-user-section > .p-datatable {
+  margin: 0;
+}
+
+.user-permission-groups {
+  display: grid;
+  gap: 1rem;
+}
+
+.user-permission-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0.875rem 1rem 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.user-permission-group legend {
+  padding: 0 0.4rem;
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.user-permission-group .user-permissions-form {
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.5rem;
+}
+
+.user-permission-group .user-permission-toggle {
+  min-height: 2.5rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: #fff;
+}
+
+.user-permission-group .user-permission-toggle:hover {
+  border-color: var(--app-border-strong);
+}
+
+.user-permission-group .user-permission-toggle:has(.p-checkbox-checked) {
+  border-color: var(--app-primary);
+  background: var(--app-primary-soft);
+}
+
+.user-permissions-actions {
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.admin-users-table__pickup-count {
+  font-weight: 750;
+  text-align: center;
+}
+
+.admin-user-details__pickups {
+  order: -1;
+}
+
+.admin-user-account__manage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 1rem 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.admin-user-account__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-user-account__facts > div,
+.admin-user-account__bezirk {
+  display: grid;
+  min-width: 0;
+  gap: 0.35rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-user-account__facts > div {
+  padding: 0.8rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.admin-user-account__facts span,
+.admin-user-account__bezirk > span {
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-user-account__bezirk .p-select,
+.admin-user-account__actions .p-button {
+  width: 100%;
+}
+
+.admin-user-account__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  justify-content: flex-end;
+}
+
+.admin-user-account__actions .p-button {
+  width: auto;
+}
+
+.admin-user-card {
+  display: grid;
+  /* One column that never grows past the card: a wide header or detail row must wrap, not push everything off screen. */
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  gap: 1rem;
+  padding: 1.125rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: linear-gradient(135deg, #fff 55%, var(--app-surface-muted));
+  box-shadow: 0 6px 18px rgb(23 49 38 / 0.06);
+}
+
+.admin-user-card__header,
+.admin-user-slot-card__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.admin-user-card__identity {
+  display: flex;
+  align-items: center;
+  /* Basis keeps the name readable: the Verifizieren/Details buttons wrap below instead of squeezing it to one letter per line. */
+  flex: 1 1 12rem;
+  min-width: 0;
+  gap: 0.75rem;
+}
+
+.admin-user-card__avatar {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 2.75rem;
+  place-items: center;
+  border: 1px solid rgb(37 131 74 / 0.13);
+  border-radius: 50%;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  font-size: 1.05rem;
+}
+
+.admin-user-card__identity-copy {
+  min-width: 0;
+}
+
+.admin-user-card__header h3 {
+  margin: 0;
+  color: var(--app-text);
+  font-size: 1.075rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.admin-user-card__header span,
+.admin-user-card__label,
+.admin-user-comment small {
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-user-card__header .admin-user-card__foodsharing-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--app-surface-strong);
+  color: var(--app-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.admin-user-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.admin-user-card__header .admin-user-card__meta .admin-user-card__foodsharing-id {
+  margin-top: 0;
+}
+
+.admin-user-card__foodsharing-id .pi {
+  font-size: 0.7rem;
+}
+
+.admin-user-card__expand-button {
+  flex: 0 0 auto;
+  min-height: 2.75rem;
+  padding-inline: 0.9rem;
+}
+
+.admin-user-card__expand-button span {
+  color: inherit;
+  font-size: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.admin-user-card__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-user-card__fact,
+.admin-user-slot-card__facts > div,
+.admin-user-card__bezirk {
+  display: grid;
+  min-width: 0;
+  gap: 0.35rem;
+  color: var(--app-text);
+  overflow-wrap: anywhere;
+}
+
+.admin-user-card__fact {
+  padding: 0.8rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.admin-user-card__bezirk .p-select {
+  width: 100%;
+}
+
+.admin-user-card__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.admin-user-card__actions .p-button {
+  width: 100%;
+}
+
+.admin-user-card__pickups {
+  display: grid;
+  gap: 0.875rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.admin-user-card__pickups h4 {
+  margin: 0;
+}
+
+.admin-user-slot-list,
+.admin-user-comment-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-user-slot-card,
+.admin-user-comment {
+  display: grid;
+  min-width: 0;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.admin-user-slot-card__facts {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.admin-user-card__additional-details summary {
+  font-weight: 750;
+}
+
+.admin-user-card__additional-details > p {
+  color: var(--app-text-muted);
+  line-height: 1.5;
+}
+
+.admin-user-comment > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.admin-user-comment p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 768px) {
+  .admin-users-table--desktop {
+    display: none;
+  }
+
+  .admin-user-cards--mobile {
+    display: grid;
+  }
+
+  .admin-user-card {
+    gap: 0.75rem;
+  }
+
+  .admin-user-account__actions .p-button {
+    width: 100%;
+  }
+
+  .admin-user-account__manage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-user-account__actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .user-permissions-actions .p-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-user-section {
+    padding: 0.875rem;
+  }
+
+  .user-permission-group {
+    padding: 0.75rem;
+  }
+
+  .admin-user-card__facts,
+  .admin-user-card__actions,
+  .admin-user-account__facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-user-comment > div {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .admin-collapsible__summary,
+  .admin-user-card {
+    padding: 0.875rem;
+  }
+
+  .admin-user-card__header {
+    align-items: center;
+  }
+
+  .admin-user-card__expand-button {
+    min-width: 2.75rem;
+  }
+}
+
+/* Phones: the details toggle is a round chevron next to the name instead of its own row (the aria-label keeps its name). */
+@media (max-width: 640px) {
+  .admin-user-card__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: start;
+    gap: 0.5rem;
+  }
+
+  .admin-user-card__identity {
+    min-width: 0;
+  }
+
+  .admin-user-card__expand-button {
+    width: 2.75rem;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+  }
+
+  .admin-user-card__expand-button span {
+    display: none;
+  }
+}
+
+.admin-user-slot-comments p {
+  margin: 0 0 0.35rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-user-slot-comments p:last-child {
+  margin-bottom: 0;
+}
+
+.admin-user-slot-visit {
+  white-space: nowrap;
+}
+
+.admin-user-slot-visit__none {
+  color: var(--app-muted, #5c6b63);
+}
+
+.bulk-teachers {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.bulk-teachers h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.bulk-teachers__hint {
+  margin: 0;
+  color: var(--app-text-muted);
+}
+
+.bulk-teachers__results {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bulk-teachers__results li {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, auto) 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  background: var(--app-surface-muted);
+}
+
+.bulk-teachers__id {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.bulk-teachers__name {
+  display: grid;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.bulk-teachers__name small {
+  color: var(--app-danger, #b42318);
+}
+
+/* Same look as the Automation tabs: muted bar, text tabs, green underline. */
+.admin-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.35rem 0.5rem 0;
+  overflow-x: auto;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-surface-muted);
+  scrollbar-width: none;
+}
+
+.admin-tabs__tab {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 0.8rem 1rem;
+  border: 0;
+  border-radius: var(--app-radius-sm) var(--app-radius-sm) 0 0;
+  background: transparent;
+  color: var(--app-text-muted);
+  font: inherit;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-tabs__tab::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: transparent;
+  content: '';
+}
+
+.admin-tabs__tab:hover {
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+}
+
+.admin-tabs__tab.is-active {
+  color: var(--app-primary-strong);
+}
+
+.admin-tabs__tab.is-active::after {
+  background: var(--app-primary);
+}
+
+.admin-tabs__tab:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: -2px;
+}
+
+/* Phone and small tablet: the tabs wrap as pills instead of scrolling sideways, like every other tab bar (styles.scss). */
+@media (max-width: 768px) {
+  .admin-tabs {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: 0.4rem;
+    overflow-x: visible;
+  }
+
+  .admin-tabs__tab {
+    min-height: 2.5rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Phones: tighter pills, so the eight tabs need fewer rows before the content starts. */
+@media (max-width: 480px) {
+  .admin-tabs {
+    gap: 0.2rem;
+    padding: 0.3rem;
+  }
+
+  .admin-tabs__tab {
+    min-height: 2.35rem;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.85rem;
+  }
+
+  .admin-tabs__tab::after {
+    display: none;
+  }
+
+  .admin-tabs__tab.is-active {
+    background: var(--app-primary-soft);
+    box-shadow: inset 0 0 0 1px var(--app-primary);
+  }
+}
+
+.admin-section-title {
+  margin: 0.75rem 0 0;
+  font-size: 1.05rem;
+}
+
+
+.user-progress {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.user-progress__count {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.user-progress__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.user-progress__badge--ready {
+  background: #fde7c8;
+  color: #7a4a00;
+}
+
+.user-progress__badge--done {
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+}
+
+.admin-user-account__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-user-account__top h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.admin-user-account__primary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin-user-account__primary .p-button {
+  width: auto;
+}
+
+.admin-user-account .kv-list dd .p-select {
+  width: min(100%, 16rem);
+}
+
+.kv-list__note {
+  margin-left: 0.4rem;
+  color: var(--app-text-muted);
+}
+
+.admin-user-card__verify {
+  flex: 0 0 auto;
+}
+
+.user-permission-toggle__help {
+  display: block;
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.admin-sticky-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: 0 -0.25rem;
+  padding: 0.75rem 0.25rem calc(0.25rem + env(safe-area-inset-bottom));
+  background: linear-gradient(to bottom, rgb(255 255 255 / 0), #fff 30%);
+}
+
+.admin-messaging-telegram__setup,
+.admin-messaging-telegram__setup summary {
+  background: none;
+}
+
+.admin-messaging-telegram__setup summary {
+  min-height: 2.25rem;
+  padding-block: 0.4rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.admin-einab-delete-warning {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0;
+  color: var(--p-red-700, #b91c1c);
+}
+
+@media (max-width: 600px) {
+  .admin-user-account__primary > .p-button:not(.p-button-secondary) {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  /* "Nutzerdaten aktualisieren" shares its line with the ⋮ menu instead of pushing it onto a line of its own. */
+  .admin-user-account__primary {
+    flex-wrap: wrap;
+  }
+
+  .admin-user-account__primary > .p-button-secondary:not(:last-child) {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: flex-start;
+    text-align: left;
+  }
+}
+
+/* Account facts: one row per label/value, both centred on a shared line. */
+.kv-list--rows {
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0;
+  column-gap: 1.5rem;
+}
+
+.kv-list--rows .kv-list__row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.25rem 0;
+  border-top: 1px solid var(--app-border);
+}
+
+.kv-list--rows dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.kv-list--rows .kv-list__note {
+  margin-left: 0;
+}
+
+.kv-list--rows .admin-verification-message-toggle {
+  min-height: 0;
+}
+
+.admin-user-account__top {
+  margin-bottom: 0.25rem;
+}
+
+/* Permissions: equal columns of bordered tiles, checkbox top-aligned with the title. */
+.admin-user-section .user-permissions-form,
+.admin-user-card__additional-details .user-permissions-form {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+.user-permissions-form .user-permission-toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.7rem;
+  min-height: 0;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: #fff;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.user-permissions-form .user-permission-toggle:hover {
+  border-color: var(--app-border-strong);
+}
+
+.user-permissions-form .user-permission-toggle:has(.p-checkbox-checked) {
+  border-color: var(--app-primary);
+  background: var(--app-primary-soft);
+}
+
+.user-permissions-form .user-permission-toggle > p-checkbox {
+  margin-top: 0.05rem;
+}
+
+.user-permission-toggle__text {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.user-permission-toggle__label {
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.user-permission-toggle__text .user-permission-toggle__help {
+  line-height: 1.4;
+}
+
+.user-permissions-actions {
+  padding-top: 1rem;
+  border-top: 1px solid var(--app-border);
+}
+
+@media (max-width: 1000px) {
+  .admin-user-section .user-permissions-form,
+  .admin-user-card__additional-details .user-permissions-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-user-section .user-permissions-form,
+  .admin-user-card__additional-details .user-permissions-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kv-list--rows {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kv-list--rows .kv-list__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+  }
+
+  .kv-list--rows dd {
+    justify-content: flex-end;
+    margin: 0 0 0 auto;
+  }
+
+  .admin-user-account .kv-list--rows dd .p-select {
+    width: 11rem;
+  }
+}
+
+/* User filters: checkboxes sit on the same line as the Bezirk and search fields. */
+.admin-users-toolbar {
+  align-items: flex-end;
+}
+
+.admin-users-toolbar .filter-toggle {
+  min-height: 0;
+  height: var(--admin-filter-field-height, 2.75rem);
+}
+
+@media (max-width: 640px) {
+  .admin-users-toolbar .filter-toggle {
+    height: auto;
+    min-height: 2.25rem;
+  }
+}
+
+/* Open user: keep who you are looking at pinned below the app bar while scrolling through the details. */
+.admin-user-card__header--sticky {
+  position: sticky;
+  top: var(--app-sticky-top, 0px);
+  z-index: 3;
+  margin: -0.5rem -1.125rem 0;
+  padding: 0.5rem 1.125rem;
+  border-radius: var(--app-radius) var(--app-radius) 0 0;
+  background: #fff;
+  transition: box-shadow 0.15s ease;
+}
+
+.admin-user-card__header--sticky.is-stuck,
+.admin-user-sticky-bar.is-stuck {
+  border-radius: 0;
+  box-shadow: 0 6px 12px -6px rgb(23 49 38 / 0.22);
+}
+
+.admin-user-sticky-bar {
+  position: sticky;
+  top: var(--app-sticky-top, 0px);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: 3.5rem;
+  margin-bottom: -3.5rem;
+  padding: 0 1.25rem 0 2.75rem;
+  border-bottom: 1px solid var(--app-border);
+  background: #fff;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.admin-user-sticky-bar.is-stuck {
+  visibility: visible;
+  opacity: 1;
+}
+
+.admin-user-sticky-bar__identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.75rem;
+}
+
+.admin-user-sticky-bar__identity strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-user-sticky-bar__avatar {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  font-size: 0.85rem;
+}
+
+.admin-user-sticky-bar__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .admin-user-card__header--sticky {
+    margin-inline: -0.875rem;
+    padding-inline: 0.875rem;
+  }
+}
+
+/* Clip instead of hide so the pinned user header can stick to the page, not to the card. */
+.admin-users-card,
+.admin-users-card .admin-users-table {
+  overflow: clip;
+}
+
+/* PrimeNG sets overflow inline on the table container, so it needs !important while a user is open. */
+:host ::ng-deep .admin-users-card .p-datatable-table-container:has(.admin-user-details-row) {
+  overflow: visible !important;
+}
+
+/* Open user: a slim one-line bar (name, ID, EinAbs, badge, actions) so the details get the screen. */
+.admin-user-card__header--sticky {
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  padding-block: 0.45rem;
+}
+
+.admin-user-card__header--sticky .admin-user-card__identity {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.admin-user-card__header--sticky .admin-user-card__identity-copy {
+  flex: 1 1 auto;
+}
+
+.admin-user-card__header--sticky .admin-user-card__avatar,
+.admin-user-card__header--sticky .admin-user-card__last-login {
+  display: none;
+}
+
+.admin-user-card__header--sticky h3 {
+  overflow: hidden;
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-user-card__header--sticky .admin-user-card__meta {
+  gap: 0.25rem 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.admin-user-card__header--sticky .admin-user-card__meta .admin-user-card__foodsharing-id {
+  padding: 0 0.4rem;
+}
+
+.admin-user-card__header--sticky .admin-user-card__expand-button {
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding-inline: 0.6rem;
+}
+
+.admin-user-card__header--sticky .admin-user-card__expand-button span {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  /* Verify shrinks to its icon so the name and badges keep the room. */
+  .admin-user-card__header--sticky .admin-user-card__verify {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+  }
+
+  :host ::ng-deep .admin-user-card__header--sticky .admin-user-card__verify .p-button-label {
+    display: none;
+  }
+
+  :host ::ng-deep .admin-user-card__header--sticky .admin-user-card__verify .p-button-icon {
+    margin: 0;
+  }
+}
+
+.admin-bezirke {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-bezirke__hint {
+  margin: 0;
+  color: var(--app-text-muted);
+}
+
+.admin-bezirke__list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-bezirke__list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  background: var(--app-surface-muted);
+}
+
+.admin-bezirke__list li.is-disabled .admin-bezirke__name {
+  color: var(--app-text-muted);
+}
+
+.admin-bezirke__name {
+  display: grid;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-bezirke__name small {
+  color: var(--app-text-muted);
+}
+
+/* Phones: the rarely used (de)activate action is a small round icon button in the row, not a full-width red bar. */
+@media (max-width: 560px) {
+  .admin-bezirke__list li {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.5rem;
+  }
+
+  .admin-bezirke__toggle {
+    width: 2.75rem;
+    padding: 0;
+    gap: 0;
+    border-radius: 50%;
+  }
+
+  .admin-bezirke__toggle ::ng-deep .p-button-label {
+    display: none;
+  }
+}
+
+.admin-bezirk-impact p {
+  margin: 0;
+}
+
+.admin-bezirk-impact h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.admin-bezirk-impact__none {
+  color: var(--app-text-muted);
+}
+
+.admin-bezirk-impact__list {
+  display: grid;
+  gap: 0.35rem;
+  max-height: 16rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.admin-bezirk-impact__list li {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  background: var(--app-surface-muted);
+  overflow-wrap: anywhere;
+}
+
+.admin-bezirk-impact__list small {
+  color: var(--app-text-muted);
+}
+
+.admin-bezirk-impact__users {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.admin-bezirk-impact__users,
+.admin-bezirk-impact__users summary {
+  background: none;
+}
+
+.admin-bezirk-impact__users summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.admin-bezirk-impact__users[open] summary {
+  margin-bottom: 0.5rem;
+}
+
+.admin-bezirk-create {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.admin-bezirk-create h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.admin-bezirk-create__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  align-items: start;
+  gap: 1rem;
+}
+
+.admin-bezirk-create__fields label {
+  display: grid;
+  min-width: 0;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.admin-bezirk-create__fields input {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Fixed "/bezirke/" in front of the short name, so it reads as part of the address. */
+.admin-bezirk-create__slug {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.admin-bezirk-create__prefix {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.6rem;
+  border: 1px solid var(--app-border);
+  border-right: 0;
+  border-radius: 0.5rem 0 0 0.5rem;
+  background: var(--app-surface-muted);
+  color: var(--app-text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.admin-bezirk-create__slug input {
+  flex: 1 1 auto;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.admin-bezirk-create__hint {
+  display: grid;
+  gap: 0.2rem;
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.admin-bezirk-create__preview {
+  color: var(--app-text);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* Desktop user details: action buttons keep their label on one line instead of wrapping in a squeezed column. */
+.admin-users-table .actions-cell {
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.admin-users-table .actions-cell .p-button {
+  white-space: nowrap;
+}
+
+/* Bezirk info page (Markdown): editor and preview share the same box size. */
+.admin-bezirk-info__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.admin-bezirk-info__label {
+  color: var(--app-text);
+  font-weight: 650;
+}
+
+.admin-bezirk-info__editor {
+  width: 100%;
+  min-height: 18rem;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.admin-bezirk-info__preview {
+  min-height: 18rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface);
+}
+
+/* The two info step options side by side, each with its hint below; stacked on phones. */
+.admin-bezirk-info__options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1.5rem;
+}
+
+.admin-bezirk-info__option {
+  display: grid;
+  align-content: start;
+  gap: 0.4rem;
+}
+
+.admin-bezirk-info__option.is-disabled {
+  opacity: 0.55;
+}
+
+@media (max-width: 640px) {
+  .admin-bezirk-info__options {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-bezirk-info__filled {
+  margin-left: 0.35rem;
+  color: var(--app-primary);
+  font-size: 0.75rem;
+}

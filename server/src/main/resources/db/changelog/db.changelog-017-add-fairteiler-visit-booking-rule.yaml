@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 017-add-fairteiler-visit-booking-rule
+      author: codex
+      changes:
+        - addColumn:
+            tableName: bezirke
+            columns:
+              - column:
+                  name: require_fairteiler_visit_by_third_einab
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false

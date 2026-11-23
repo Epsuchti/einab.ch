@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 034-survey-permission
+      author: claude
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column: {name: can_manage_surveys, type: BOOLEAN, defaultValueBoolean: false, constraints: {nullable: false}}
+        # Admins could manage surveys before this permission existed.
+        - sql:
+            sql: UPDATE users SET can_manage_surveys = TRUE WHERE can_manage_users = TRUE

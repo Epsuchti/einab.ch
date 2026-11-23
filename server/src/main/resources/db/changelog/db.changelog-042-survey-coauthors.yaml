@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 042-survey-coauthors
+      author: claude
+      changes:
+        # Users who may edit a survey and read its results besides its owner
+        - createTable:
+            tableName: survey_coauthors
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: survey_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: foodsharing_id, type: VARCHAR(100), constraints: {nullable: false}}
+        - addForeignKeyConstraint:
+            baseTableName: survey_coauthors
+            baseColumnNames: survey_id
+            referencedTableName: surveys
+            referencedColumnNames: id
+            constraintName: fk_survey_coauthors_survey
+        - addUniqueConstraint:
+            tableName: survey_coauthors
+            columnNames: survey_id, foodsharing_id
+            constraintName: uk_survey_coauthors_survey_user
+        - createIndex:
+            tableName: survey_coauthors
+            indexName: idx_survey_coauthors_user
+            columns:
+              - column: {name: foodsharing_id}

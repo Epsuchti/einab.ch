@@ -1,0 +1,210 @@
+<section class="page-shell page-shell--narrow page-stack">
+  <p-card class="page-card--flat">
+    <ng-template pTemplate="title"><i class="pi pi-shield title-icon" aria-hidden="true"></i>{{ i18n.t('privacyPolicy.title') }}</ng-template>
+    @if (i18n.language() === 'en') {
+      <article class="privacy-policy" lang="en">
+        <p class="privacy-policy__version">Version 2026-10-25</p>
+        <aside class="privacy-policy__summary">
+          <h2>In short</h2>
+          <ul>
+            <li>You sign in with a link sent as a foodsharing message. We never see your foodsharing password.</li>
+            <li>We only store what is needed to organise EinAbs: name, Foodsharing ID, phone number, bookings and notes.</li>
+            <li>Only the EinAb guides of your appointment and the ambassadors of your district see these data.</li>
+            <li>No tracking, no advertising cookies, no analytics.</li>
+            <li>Data are deleted at the latest 24 months after your last booking or sign-in. You can delete your account yourself at any time.</li>
+          </ul>
+        </aside>
+
+        <h2>1. Who is responsible</h2>
+        <p>Eric Zürcher, <a href="mailto:info&#64;it4user.ch">info&#64;it4user.ch</a>.</p>
+        <p>Einab.ch is a volunteer tool that foodsharing districts in Switzerland use to organise introductory pickups (EinAbs). It is <strong>not</strong> run by foodsharing e.V. or foodsharing.network. Their own <a href="https://wiki.foodsharing.network/wiki/Datenschutzerkl%C3%A4rung" target="_blank" rel="noopener">privacy policy</a> applies to their platform.</p>
+
+        <h2>2. What we process and why</h2>
+        <p>We only process the data we need to organise EinAbs.</p>
+        <div class="privacy-policy__table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Source</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td data-label="Data">Foodsharing ID, name, district, language</td><td data-label="Source">you and foodsharing.network</td><td data-label="Purpose">sign-in, assigning you to your district</td></tr>
+              <tr><td data-label="Data">Phone number</td><td data-label="Source">you, or your foodsharing profile</td><td data-label="Purpose">so the EinAb guides can reach you about your appointment</td></tr>
+              <tr><td data-label="Data">foodsharing verification status and date</td><td data-label="Source">foodsharing.network</td><td data-label="Purpose">showing your progress towards verification</td></tr>
+              <tr><td data-label="Data">Bookings (appointment, status, time of booking and completion)</td><td data-label="Source">you and the EinAb guides</td><td data-label="Purpose">planning, running and counting EinAbs</td></tr>
+              <tr><td data-label="Data">Notes by EinAb guides about your booking</td><td data-label="Source">the EinAb guides</td><td data-label="Purpose">arrangements for your onboarding</td></tr>
+              <tr><td data-label="Data">Date and version of your consent to this policy</td><td data-label="Source">automatic</td><td data-label="Purpose">proof of consent</td></tr>
+              <tr><td data-label="Data">Time of your last sign-in</td><td data-label="Source">automatic</td><td data-label="Purpose">knowing whether an account is still in use</td></tr>
+              <tr><td data-label="Data">Notification subscription (district, channel, e-mail address, unsubscribe code)</td><td data-label="Source">you, optional</td><td data-label="Purpose">informing you about new EinAb dates</td></tr>
+              <tr><td data-label="Data">Survey answers, with Foodsharing ID and name</td><td data-label="Source">you, optional</td><td data-label="Purpose">evaluation by the person who created the survey</td></tr>
+              <tr><td data-label="Data">Push token of your phone, phone type (Android/iOS), last use (only in the EinAb app)</td><td data-label="Source">automatic, only if you allow push notifications</td><td data-label="Purpose">sending you our messages also as push notifications</td></tr>
+              <tr><td data-label="Data">Past EinAbs (date, store) a district imported from its earlier lists</td><td data-label="Source">the district</td><td data-label="Purpose">keeping your earlier progress</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>For <strong>EinAb guides</strong> additionally: e-mail address, details of their own EinAbs (place, store, meeting point, private info for participants), the private info they save as a template per store (for online EinAbs per EinAb category) for their future EinAbs, together with the store name, and a personal calendar link.</p>
+        <p>We set <strong>no</strong> cookies and use no tracking, advertising or analytics services, and no third-party scripts or fonts. Your browser only keeps what the app needs to work, in its local storage, and none of it is sent to third parties: your sign-in token with your name and role, your language, the district you last opened, and the Foodsharing IDs you recently used to request a sign-in link on this device (at most 10; you can remove them on the sign-in page). If you postpone entering your phone number, the browser remembers that until you close the tab. Signing out removes the sign-in token; clearing this site's data in your browser removes everything. On a shared device, remove your Foodsharing ID from the list after use. The server keeps technical logs (e.g. time and type of a request) to detect errors and abuse.</p>
+
+        <h2>3. Sign-in</h2>
+        <p>You enter your Foodsharing ID and receive a sign-in link as a foodsharing.network message. <strong>We never see or store your foodsharing password.</strong> The link is valid for 30 minutes, the sign-in afterwards for up to 365 days or until you sign out. Sign-in links and sessions are stored only as a check value (hash).</p>
+
+        <h2>4. Who sees your data</h2>
+        <ul>
+          <li><strong>The EinAb guides of your appointment:</strong> name, Foodsharing ID, phone number, your bookings in this district, number of EinAbs, notes, last sign-in.</li>
+          <li><strong>The ambassadors of your district:</strong> the same data, to manage EinAbs and accounts.</li>
+          <li><strong>You:</strong> after booking, the guide's name and phone number, the meeting point and private info about the appointment.</li>
+          <li><strong>Public (without sign-in):</strong> only the guide's name, the date and the general place of an appointment. Participant names are never public.</li>
+          <li><strong>Surveys:</strong> only the person who created the survey.</li>
+        </ul>
+        <p>Everyone with access is a foodsharing member with a role in the district and bound by foodsharing's confidentiality rules. We never sell data or pass it on for advertising.</p>
+
+        <h2>5. Services we use</h2>
+        <ul>
+          <li><strong>foodsharing.network</strong> (Germany): sign-in messages, notifications, lookup of name, phone number and verification.</li>
+          <li><strong>Proton AG</strong> (Switzerland): sending e-mails.</li>
+          <li><strong>Google Firebase Cloud Messaging</strong> (Google Ireland Ltd. and Google LLC, USA), only in the EinAb app with push notifications turned on: delivers push notifications to your phone. It receives the push token and the title and text of the notification. On iPhones, Google hands the notification to the Apple Push Notification service (Apple Inc., USA). Google LLC is certified under the Swiss-U.S. Data Privacy Framework.</li>
+          <li><strong>Hosting provider in Germany:</strong> server and database.</li>
+        </ul>
+        <p>District ambassadors can use extra automations (connections to foodsharing.network and Telegram). These are enabled only for single authorised people and do not involve your account as a participant.</p>
+        <p>Germany and the EU have adequate data protection under Swiss law. For the USA, transfers to companies certified under the Swiss-U.S. Data Privacy Framework are considered adequate.</p>
+        <p>The <strong>EinAb app</strong> (Google Play, App Store) shows this website; it collects no other data than the website, apart from the push token above. Push notifications can be turned off in your profile or in your phone's settings at any time.</p>
+
+        <h2>6. Legal basis</h2>
+        <p>We follow the Swiss Federal Act on Data Protection (FADP) and, where applicable, the GDPR. We process your data to provide the EinAb service you want to use (Art. 6(1)(b) GDPR), in the district's legitimate interest in organised onboarding of new foodsavers (Art. 6(1)(f)), and for notifications and surveys with your consent (Art. 6(1)(a)), which you can withdraw at any time.</p>
+
+        <h2>7. How long we keep data</h2>
+        <div class="privacy-policy__table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Retention</th></tr></thead>
+            <tbody>
+              <tr><td data-label="Data">Sign-in links</td><td data-label="Retention">30 minutes</td></tr>
+              <tr><td data-label="Data">Sign-in sessions</td><td data-label="Retention">up to 365 days</td></tr>
+              <tr><td data-label="Data">Account deletion links</td><td data-label="Retention">24 hours</td></tr>
+              <tr><td data-label="Data">Push token</td><td data-label="Retention">until you turn push off or sign out, at most 180 days after the app was last used</td></tr>
+              <tr><td data-label="Data">Automation logs</td><td data-label="Retention">7 days, then only anonymous daily counts</td></tr>
+              <tr><td data-label="Data">Notification subscription</td><td data-label="Retention">until you unsubscribe</td></tr>
+              <tr><td data-label="Data">Survey answers</td><td data-label="Retention">until the survey is deleted, at most 12 months</td></tr>
+              <tr><td data-label="Data">Account, bookings, notes, past EinAbs</td><td data-label="Retention">up to 24 months after your last booking or sign-in, or earlier on request</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>After that we delete or anonymise the data. We keep anonymous numbers (e.g. EinAbs per month) for statistics.</p>
+
+        <h2>8. Your rights</h2>
+        <p>At any time you can:</p>
+        <ul>
+          <li>ask what data we hold about you and get a copy,</li>
+          <li>have wrong data corrected (you can change your phone number in your profile yourself),</li>
+          <li>delete your account and your data yourself: in your profile under "Delete account", or without signing in at <a href="/konto-loeschen">einab.ch/konto-loeschen</a> (confirmed with a link sent as foodsharing message),</li>
+          <li>object to processing and withdraw consent (you can unsubscribe from notifications with the link in every message).</li>
+        </ul>
+        <p>Write to <a href="mailto:info&#64;it4user.ch">info&#64;it4user.ch</a>. We reply within 30 days. You can also complain to the Swiss Federal Data Protection and Information Commissioner (FDPIC, <a href="https://www.edoeb.admin.ch" target="_blank" rel="noopener">www.edoeb.admin.ch</a>) or, if you live in the EU, to the data protection authority of your country.</p>
+
+        <h2>9. Security</h2>
+        <p>The connection is encrypted (HTTPS). Sign-in links and sessions are stored only as hashes, credentials for foodsharing connections encrypted. Only people with the matching role can access data. If a data breach with high risk still happens, we inform those affected and the FDPIC.</p>
+
+        <h2>10. Changes</h2>
+        <p>If this policy changes materially, we show you the new version at your next sign-in and ask you to confirm it.</p>
+      </article>
+    } @else {
+      <article class="privacy-policy" lang="de">
+        <p class="privacy-policy__version">Version 2026-10-25</p>
+        <aside class="privacy-policy__summary">
+          <h2>Kurz zusammengefasst</h2>
+          <ul>
+            <li>Du meldest dich mit einem Link an, den du als Foodsharing-Nachricht erhältst. Dein Foodsharing-Passwort sehen wir nie.</li>
+            <li>Wir speichern nur, was es für die EinAbs braucht: Name, Foodsharing-ID, Telefonnummer, Buchungen und Notizen.</li>
+            <li>Diese Daten sehen nur die EinAb-Geber:innen deines Termins und die Botschafter:innen deines Bezirks.</li>
+            <li>Kein Tracking, keine Werbe-Cookies, keine Analysedienste.</li>
+            <li>Gelöscht wird spätestens 24 Monate nach deiner letzten Buchung oder Anmeldung. Dein Konto kannst du jederzeit selbst löschen.</li>
+          </ul>
+        </aside>
+
+        <h2>1. Wer ist verantwortlich?</h2>
+        <p>Eric Zürcher, <a href="mailto:info&#64;it4user.ch">info&#64;it4user.ch</a>.</p>
+        <p>Einab.ch ist ein ehrenamtliches Hilfsmittel, mit dem foodsharing-Bezirke in der Schweiz Einführungsabholungen (EinAbs) organisieren. Einab.ch wird <strong>nicht</strong> von foodsharing e.V. oder foodsharing.network betrieben. Für deren Plattform gilt ihre eigene <a href="https://wiki.foodsharing.network/wiki/Datenschutzerkl%C3%A4rung" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>
+
+        <h2>2. Welche Daten wir bearbeiten und wozu</h2>
+        <p>Wir bearbeiten nur die Daten, die wir für die Organisation der EinAbs brauchen.</p>
+        <div class="privacy-policy__table-wrap">
+          <table>
+            <thead><tr><th>Daten</th><th>Woher</th><th>Wozu</th></tr></thead>
+            <tbody>
+              <tr><td data-label="Daten">Foodsharing-ID, Name, Bezirk, Sprache</td><td data-label="Woher">von dir und von foodsharing.network</td><td data-label="Wozu">Anmeldung, Zuordnung zu deinem Bezirk</td></tr>
+              <tr><td data-label="Daten">Telefonnummer</td><td data-label="Woher">von dir, oder aus deinem foodsharing-Profil</td><td data-label="Wozu">damit die EinAb-Gebenden dich bei Fragen zum Termin erreichen</td></tr>
+              <tr><td data-label="Daten">Verifizierungsstatus und -datum bei foodsharing</td><td data-label="Woher">von foodsharing.network</td><td data-label="Wozu">um deinen Fortschritt zur Verifizierung zu zeigen</td></tr>
+              <tr><td data-label="Daten">Buchungen (Termin, Status, Zeitpunkt der Buchung und Durchführung)</td><td data-label="Woher">von dir und den EinAb-Gebenden</td><td data-label="Wozu">EinAbs planen, durchführen und zählen</td></tr>
+              <tr><td data-label="Daten">Notizen der EinAb-Gebenden zu deiner Buchung</td><td data-label="Woher">von den EinAb-Gebenden</td><td data-label="Wozu">Absprachen zur Einarbeitung</td></tr>
+              <tr><td data-label="Daten">Zeitpunkt und Version deiner Zustimmung zu dieser Erklärung</td><td data-label="Woher">automatisch</td><td data-label="Wozu">Nachweis der Zustimmung</td></tr>
+              <tr><td data-label="Daten">Zeitpunkt deiner letzten Anmeldung</td><td data-label="Woher">automatisch</td><td data-label="Wozu">erkennen, ob ein Konto noch genutzt wird</td></tr>
+              <tr><td data-label="Daten">Benachrichtigungs-Abo (Bezirk, Kanal, E-Mail-Adresse, Abmelde-Code)</td><td data-label="Woher">von dir, freiwillig</td><td data-label="Wozu">dich über neue EinAb-Termine informieren</td></tr>
+              <tr><td data-label="Daten">Antworten auf Umfragen, mit Foodsharing-ID und Name</td><td data-label="Woher">von dir, freiwillig</td><td data-label="Wozu">Auswertung durch die Person, die die Umfrage erstellt hat</td></tr>
+              <tr><td data-label="Daten">Push-Token deines Telefons, Telefontyp (Android/iOS), letzte Nutzung (nur in der EinAb-App)</td><td data-label="Woher">automatisch, nur wenn du Push-Mitteilungen erlaubst</td><td data-label="Wozu">dir unsere Nachrichten auch als Push-Mitteilung schicken</td></tr>
+              <tr><td data-label="Daten">Frühere EinAbs (Datum, Betrieb), die ein Bezirk aus seinen bisherigen Listen übernommen hat</td><td data-label="Woher">vom Bezirk</td><td data-label="Wozu">damit dein bisheriger Fortschritt nicht verloren geht</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Für <strong>EinAb-Gebende</strong> zusätzlich: E-Mail-Adresse, Angaben zu den eigenen EinAbs (Ort, Betrieb, Treffpunkt, private Infos für Teilnehmende), die privaten Infos, die sie pro Betrieb (bei Online-EinAbs pro EinAb-Kategorie) mit dem Betriebsnamen als Vorlage für künftige EinAbs speichern, und ein persönlicher Kalender-Link.</p>
+        <p>Wir setzen <strong>keine</strong> Cookies und verwenden keine Tracking-, Werbe- oder Analysedienste und keine Skripte oder Schriften von Dritten. Dein Browser speichert nur, was die App zum Funktionieren braucht, im Local Storage, und nichts davon geht an Dritte: dein Anmelde-Token mit Name und Rolle, deine Sprache, den zuletzt geöffneten Bezirk und die Foodsharing-IDs, mit denen du auf diesem Gerät zuletzt einen Anmelde-Link angefordert hast (höchstens 10; du kannst sie auf der Anmeldeseite entfernen). Wenn du die Eingabe deiner Telefonnummer verschiebst, merkt sich der Browser das, bis du den Tab schliesst. Beim Abmelden wird das Anmelde-Token gelöscht; wenn du die Website-Daten im Browser löschst, ist alles weg. Auf einem geteilten Gerät entferne deine Foodsharing-ID nach der Nutzung aus der Liste. Der Server führt technische Protokolle (z. B. Zeitpunkt und Art einer Anfrage), um Fehler und Missbrauch zu erkennen.</p>
+
+        <h2>3. Anmeldung</h2>
+        <p>Du gibst deine Foodsharing-ID ein. Wir schicken dir über foodsharing.network eine Nachricht mit einem Anmelde-Link. <strong>Dein foodsharing-Passwort sehen und speichern wir nicht.</strong> Der Link ist 30 Minuten gültig, die Anmeldung danach bis zu 365 Tage oder bis du dich abmeldest. Anmelde-Links und Sitzungen speichern wir nur als Prüfwert (Hash).</p>
+
+        <h2>4. Wer deine Daten sieht</h2>
+        <ul>
+          <li><strong>Die EinAb-Gebenden deines Termins:</strong> Name, Foodsharing-ID, Telefonnummer, deine Buchungen in diesem Bezirk, Anzahl EinAbs, Notizen, letzte Anmeldung.</li>
+          <li><strong>Die Botschafter:innen deines Bezirks:</strong> dieselben Daten, um EinAbs und Konten zu verwalten.</li>
+          <li><strong>Du selbst:</strong> nach einer Buchung Name und Telefonnummer der EinAb-Gebenden sowie Treffpunkt und private Infos zum Termin.</li>
+          <li><strong>Öffentlich (ohne Anmeldung):</strong> nur der Name der EinAb-Gebenden, Datum und allgemeiner Ort eines Termins. Namen von Teilnehmenden sind nie öffentlich.</li>
+          <li><strong>Umfragen:</strong> nur die Person, die die Umfrage erstellt hat.</li>
+        </ul>
+        <p>Alle Personen mit Zugriff sind foodsharing-Mitglieder mit einer Aufgabe im Bezirk und an die Vertraulichkeitsregeln von foodsharing gebunden. Wir verkaufen keine Daten und geben sie nicht für Werbung weiter.</p>
+
+        <h2>5. Dienste, die wir nutzen</h2>
+        <ul>
+          <li><strong>foodsharing.network</strong> (Deutschland): Anmelde-Nachrichten, Benachrichtigungen, Abgleich von Name, Telefonnummer und Verifizierung.</li>
+          <li><strong>Proton AG</strong> (Schweiz): Versand von E-Mails.</li>
+          <li><strong>Google Firebase Cloud Messaging</strong> (Google Ireland Ltd. und Google LLC, USA), nur in der EinAb-App mit eingeschalteten Push-Mitteilungen: stellt Push-Mitteilungen auf dein Telefon zu. Dafür erhält Google das Push-Token sowie Titel und Text der Mitteilung. Auf dem iPhone gibt Google die Mitteilung an den Apple Push Notification service (Apple Inc., USA) weiter. Google LLC ist unter dem Swiss-U.S. Data Privacy Framework zertifiziert.</li>
+          <li><strong>Hosting-Anbieter in Deutschland:</strong> Betrieb von Server und Datenbank.</li>
+        </ul>
+        <p>Für Bezirks-Botschafter:innen gibt es zusätzliche Automatisierungen (Verbindung zu foodsharing.network und Telegram). Diese sind nur für einzelne berechtigte Personen freigeschaltet und betreffen nicht dein Konto als Teilnehmer:in.</p>
+        <p>Deutschland und die EU gelten nach Schweizer Recht als Länder mit angemessenem Datenschutz. Für die USA gilt dies für Unternehmen, die unter dem Swiss-U.S. Data Privacy Framework zertifiziert sind.</p>
+        <p>Die <strong>EinAb-App</strong> (Google Play, App Store) zeigt diese Website an. Ausser dem oben genannten Push-Token erhebt sie keine weiteren Daten als die Website. Push-Mitteilungen kannst du jederzeit im Profil oder in den Einstellungen deines Telefons ausschalten.</p>
+
+        <h2>6. Rechtsgrundlagen</h2>
+        <p>Wir halten uns an das Schweizer Datenschutzgesetz (DSG) und, soweit anwendbar, an die DSGVO. Wir bearbeiten deine Daten, um den EinAb-Dienst zu erbringen, den du nutzen möchtest (Art. 6 Abs. 1 lit. b DSGVO), aus dem berechtigten Interesse des Bezirks an einer geordneten Einarbeitung neuer Foodsaver (lit. f), und bei Benachrichtigungen und Umfragen mit deiner Einwilligung (lit. a), die du jederzeit widerrufen kannst.</p>
+
+        <h2>7. Wie lange wir Daten speichern</h2>
+        <div class="privacy-policy__table-wrap">
+          <table>
+            <thead><tr><th>Daten</th><th>Dauer</th></tr></thead>
+            <tbody>
+              <tr><td data-label="Daten">Anmelde-Links</td><td data-label="Dauer">30 Minuten</td></tr>
+              <tr><td data-label="Daten">Anmelde-Sitzungen</td><td data-label="Dauer">höchstens 365 Tage</td></tr>
+              <tr><td data-label="Daten">Links zum Löschen des Kontos</td><td data-label="Dauer">24 Stunden</td></tr>
+              <tr><td data-label="Daten">Push-Token</td><td data-label="Dauer">bis du Push ausschaltest oder dich abmeldest, höchstens 180 Tage nach der letzten Nutzung der App</td></tr>
+              <tr><td data-label="Daten">Protokolle der Automatisierungen</td><td data-label="Dauer">7 Tage, danach nur anonyme Tageszahlen</td></tr>
+              <tr><td data-label="Daten">Benachrichtigungs-Abo</td><td data-label="Dauer">bis du dich abmeldest</td></tr>
+              <tr><td data-label="Daten">Umfrage-Antworten</td><td data-label="Dauer">bis die Umfrage gelöscht wird, höchstens 12 Monate</td></tr>
+              <tr><td data-label="Daten">Konto, Buchungen, Notizen, frühere EinAbs</td><td data-label="Dauer">bis 24 Monate nach deiner letzten Buchung oder Anmeldung, oder früher auf deinen Wunsch</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Danach löschen oder anonymisieren wir die Daten. Anonyme Zahlen (z. B. Anzahl EinAbs pro Monat) behalten wir für die Statistik.</p>
+
+        <h2>8. Deine Rechte</h2>
+        <p>Du kannst jederzeit:</p>
+        <ul>
+          <li>Auskunft verlangen, welche Daten wir über dich haben, und eine Kopie erhalten,</li>
+          <li>falsche Daten berichtigen lassen (deine Telefonnummer kannst du im Profil selbst ändern),</li>
+          <li>dein Konto und deine Daten selbst löschen: im Profil unter «Konto löschen» oder ohne Anmeldung auf <a href="/konto-loeschen">einab.ch/konto-loeschen</a> (bestätigt mit einem Link, den du als foodsharing-Nachricht erhältst),</li>
+          <li>einer Bearbeitung widersprechen und Einwilligungen widerrufen (Benachrichtigungen kannst du über den Link in jeder Nachricht abbestellen).</li>
+        </ul>
+        <p>Schreib dazu an <a href="mailto:info&#64;it4user.ch">info&#64;it4user.ch</a>. Wir antworten innerhalb von 30 Tagen. Du kannst dich auch beim Eidgenössischen Datenschutz- und Öffentlichkeitsbeauftragten (EDÖB, <a href="https://www.edoeb.admin.ch" target="_blank" rel="noopener">www.edoeb.admin.ch</a>) oder, wenn du in der EU wohnst, bei der Datenschutzbehörde deines Landes beschweren.</p>
+
+        <h2>9. Sicherheit</h2>
+        <p>Die Verbindung ist verschlüsselt (HTTPS). Anmelde-Links und Sitzungen speichern wir nur als Hash, Zugangsdaten für foodsharing-Verbindungen verschlüsselt. Zugriff auf Daten haben nur Personen mit der passenden Rolle. Wenn es trotzdem zu einer Datenpanne mit hohem Risiko kommt, informieren wir die Betroffenen und den EDÖB.</p>
+
+        <h2>10. Änderungen</h2>
+        <p>Wenn sich diese Erklärung wesentlich ändert, zeigen wir dir die neue Version bei der nächsten Anmeldung und bitten dich, sie zu bestätigen.</p>
+      </article>
+    }
+  </p-card>
+</section>

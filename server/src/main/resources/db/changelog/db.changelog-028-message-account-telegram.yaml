@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: 028-message-account-telegram
+      author: claude
+      changes:
+        # Remember which Foodsharing user is behind each sending account, so messages the account sends to itself
+        # (e.g. notifications for the Bezirk admin) can be detected and forwarded to Telegram.
+        - addColumn:
+            tableName: foodsharing_bezirk_message_connections
+            columns:
+              - column: {name: foodsharing_user_id, type: VARCHAR(64)}
+        - addColumn:
+            tableName: foodsharing_api_sessions
+            columns:
+              - column: {name: foodsharing_user_id, type: VARCHAR(64)}
+        # Telegram forwarding per sending account. account_key is "bezirk:<connection id>" or "fallback".
+        - createTable:
+            tableName: foodsharing_message_account_telegram
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: account_key, type: VARCHAR(150), constraints: {nullable: false}}
+              - column: {name: enabled, type: BOOLEAN, defaultValueBoolean: true, constraints: {nullable: false}}
+              - column: {name: telegram_bot_token_ciphertext, type: VARCHAR(32600)}
+              - column: {name: telegram_chat_id, type: VARCHAR(255)}
+              - column: {name: telegram_chat_title, type: VARCHAR(255)}
+        - addUniqueConstraint:
+            tableName: foodsharing_message_account_telegram
+            columnNames: account_key
+            constraintName: uk_foodsharing_message_account_telegram_account

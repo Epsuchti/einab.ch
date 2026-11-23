@@ -1,0 +1,50 @@
+{
+  "name": "client",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "npm run openapi:generate && ng serve --proxy-config src/proxy.conf.json",
+    "build": "npm run openapi:generate && node scripts/build.mjs",
+    "watch": "ng build --watch --configuration development",
+    "openapi:generate": "openapi-generator-cli generate -i ../server/src/main/resources/openapi.yaml -g typescript-angular -o src/app/api -c openapi-generator.json --skip-validate-spec",
+    "i18n:check": "node scripts/check-i18n.mjs",
+    "app:sync": "cap sync",
+    "app:android": "cap sync android && cap open android",
+    "app:ios": "cap sync ios && cap open ios",
+    "app:assets": "npx @capacitor/assets@3 generate --iconBackgroundColor \"#25834a\" --splashBackgroundColor \"#f5f8f4\" --ios --android"
+  },
+  "private": true,
+  "packageManager": "npm@11.6.2",
+  "dependencies": {
+    "@angular/animations": "^21.2.0",
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "@angular/service-worker": "^21.2.17",
+    "@capacitor-firebase/messaging": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.2",
+    "@primeuix/themes": "^2.0.3",
+    "firebase": "^12.19.0",
+    "marked": "^16.4.2",
+    "primeicons": "^7.0.0",
+    "primeng": "^21.1.9",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.16",
+    "@angular/cli": "^21.2.16",
+    "@angular/compiler-cli": "^21.2.0",
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/ios": "^8.6.2",
+    "@openapitools/openapi-generator-cli": "^2.23.2",
+    "jsdom": "^28.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2"
+  }
+}

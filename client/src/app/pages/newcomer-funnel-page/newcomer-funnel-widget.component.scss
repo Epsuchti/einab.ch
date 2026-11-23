@@ -1,0 +1,33 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.funnel-widget__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.funnel-widget__title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.funnel-widget__title .pi {
+  color: var(--app-primary);
+}
+
+.funnel-widget__summary {
+  margin: 0 0 1rem;
+  color: var(--app-text-muted);
+}
+
+.funnel-widget__needs {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--app-border);
+}

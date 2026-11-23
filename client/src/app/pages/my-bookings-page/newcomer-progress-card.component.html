@@ -1,0 +1,79 @@
+@if (progress()?.verified) {
+  <section class="progress-banner" role="status">
+    <i class="pi pi-verified" aria-hidden="true"></i>
+    <span><strong>{{ i18n.t('progress.verifiedBannerTitle') }}</strong> {{ i18n.t('progress.verifiedBannerText') }}</span>
+  </section>
+} @else if (progress(); as p) {
+  <section class="progress-card" [attr.aria-label]="i18n.t('progress.title')">
+    <div class="progress-card__summary">
+      <div class="progress-ring" role="img" [attr.aria-label]="i18n.t('progress.ringLabel').replace('{done}', '' + p.countedEinAbs).replace('{total}', '' + p.targetEinAbs)">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="progress-ring__track" cx="60" cy="60" [attr.r]="ringRadius"></circle>
+          <circle
+            class="progress-ring__value"
+            [class.progress-ring__value--complete]="p.verified"
+            cx="60"
+            cy="60"
+            [attr.r]="ringRadius"
+            [attr.stroke-dasharray]="ringCircumference"
+            [attr.stroke-dashoffset]="ringOffset()"
+          ></circle>
+        </svg>
+        <div class="progress-ring__label">
+          @if (p.verified) {
+            <i class="pi pi-verified" aria-hidden="true"></i>
+          } @else {
+            <strong>{{ p.countedEinAbs }}<span>/{{ p.targetEinAbs }}</span></strong>
+            <small>{{ i18n.t('progress.einAbs') }}</small>
+          }
+        </div>
+      </div>
+
+      <div class="progress-card__text">
+        <span class="progress-card__eyebrow">{{ i18n.t('progress.title') }}</span>
+        <h2>{{ nextStepText() }}</h2>
+        @if (p.upcomingEinAbs > 0 && !p.verified) {
+          <p>{{ i18n.t('progress.upcoming').replace('{count}', '' + p.upcomingEinAbs) }}</p>
+        }
+        @if (p.nextStep === NewcomerNextStep.BookEinab || p.nextStep === NewcomerNextStep.BookFairteilerEinab) {
+          <a
+            pButton
+            icon="pi pi-calendar-plus"
+            [routerLink]="bezirkContext.route()"
+            [queryParams]="p.nextStep === NewcomerNextStep.BookFairteilerEinab ? { fairteiler: 1 } : {}"
+            [label]="p.nextStep === NewcomerNextStep.BookFairteilerEinab ? i18n.t('progress.action.bookFairteiler') : i18n.t('progress.action.book')"
+          ></a>
+        }
+      </div>
+    </div>
+
+    <ol class="progress-steps">
+      @for (step of steps(); track $index) {
+        <li class="progress-step" [class]="'progress-step--' + step.state">
+          <span class="progress-step__dot" aria-hidden="true">
+            @if (step.state === 'done') {
+              <i class="pi pi-check"></i>
+            } @else if (step.fairteiler) {
+              <i class="pi pi-heart"></i>
+            } @else if (step.state === 'booked') {
+              <i class="pi pi-clock"></i>
+            }
+          </span>
+          <span class="progress-step__label">{{ step.label }}</span>
+          <span class="progress-step__state">{{ stepStateLabel(step.state) }}</span>
+        </li>
+      }
+    </ol>
+
+    @if (!p.verified && p.doneCategories.length) {
+      <p class="progress-card__categories">
+        <span>{{ i18n.t('progress.doneCategories') }}</span>
+        @for (category of p.doneCategories; track category) {
+          <span class="progress-chip">{{ i18n.categoryLabel(category) }}</span>
+        }
+      </p>
+    }
+  </section>
+} @else if (loading()) {
+  <app-loading-indicator [compact]="true" />
+}

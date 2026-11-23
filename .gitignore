@@ -1,0 +1,15 @@
+/.idea/
+.idea/
+client/node_modules/
+client/.angular/
+client/dist/
+server/target/
+/client/node/
+/client/src/app/api/
+/server/data/foodsharing.mv.db
+/server/data/foodsharing.trace.db
+/server/local-secrets.properties
+
+# Claude Code: share settings.json, keep local state and worktrees out
+.claude/*
+!.claude/settings.json

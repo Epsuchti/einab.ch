@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Push notifications. Xcode switches this to "production" for App Store / TestFlight builds. -->
+	<key>aps-environment</key>
+	<string>development</string>
+	<!-- Universal Links: einab.ch links (e.g. the sign-in link) open in the app.
+	     Verified through https://einab.ch/.well-known/apple-app-site-association, served by the server. -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:einab.ch</string>
+		<string>applinks:test-foodsharing.it4user.ch</string>
+	</array>
+</dict>
+</plist>

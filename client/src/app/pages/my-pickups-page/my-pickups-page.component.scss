@@ -1,0 +1,146 @@
+.pickups-delay-info {
+  display: block;
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+  color: var(--app-info);
+  font-size: 0.9rem;
+}
+
+/* A plain "Gut zu wissen" link, not a shaded section header. */
+.pickups-delay-info summary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.75rem;
+  background: none;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.pickups-delay-info ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+  color: var(--app-text);
+  line-height: 1.5;
+}
+
+.pickups-intro,
+.pickups-empty {
+  margin: 0 0 1rem;
+  color: var(--app-text-muted);
+}
+
+.pickup-stores {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.pickup-store {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
+  overflow: hidden;
+}
+
+.pickup-store__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface-muted);
+}
+
+.pickup-store__header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.pickup-store__refreshed {
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+}
+
+.pickup-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pickup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
+}
+
+.pickup-row + .pickup-row {
+  border-top: 1px solid var(--app-border);
+}
+
+.pickup-row--past {
+  opacity: 0.6;
+}
+
+.pickup-row__main {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.pickup-row__date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pickup-row__date i {
+  color: var(--app-primary);
+}
+
+.pickup-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  color: var(--app-text-muted);
+  font-size: 0.875rem;
+}
+
+.pickup-row__people {
+  overflow-wrap: anywhere;
+}
+
+.pickup-row__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .pickup-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pickup-row__status {
+    justify-content: flex-start;
+  }
+}
+
+.pickups-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  color: var(--app-text-muted);
+  text-align: center;
+}

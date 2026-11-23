@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 046-linked-store-exemptions
+      author: claude
+      changes:
+        # Members exempt from one linked store rule (Foodsharing id and a reason); the link does not apply to them.
+        - createTable:
+            tableName: foodsharing_store_automation_linked_store_exemptions
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: link_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: foodsharing_id, type: VARCHAR(100), constraints: {nullable: false}}
+              - column: {name: reason, type: VARCHAR(1000), constraints: {nullable: false}}
+        - addForeignKeyConstraint:
+            baseTableName: foodsharing_store_automation_linked_store_exemptions
+            baseColumnNames: link_id
+            referencedTableName: foodsharing_store_automation_linked_stores
+            referencedColumnNames: id
+            constraintName: fk_foodsharing_linked_store_exemptions_link
+            onDelete: CASCADE
+        - addUniqueConstraint:
+            tableName: foodsharing_store_automation_linked_store_exemptions
+            columnNames: link_id, foodsharing_id
+            constraintName: uk_foodsharing_linked_store_exemptions

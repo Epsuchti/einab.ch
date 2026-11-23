@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: 038-user-refresh-jobs
+      author: claude
+      changes:
+        # Slow background queue that refreshes user data from Foodsharing (one user per interval).
+        - createTable:
+            tableName: user_refresh_jobs
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: user_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: bezirk_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: batch_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: status, type: VARCHAR(16), constraints: {nullable: false}}
+              - column: {name: attempts, type: INT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: error_code, type: VARCHAR(64)}
+        - addForeignKeyConstraint:
+            baseTableName: user_refresh_jobs
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_user_refresh_jobs_user
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: user_refresh_jobs
+            baseColumnNames: bezirk_id
+            referencedTableName: bezirke
+            referencedColumnNames: id
+            constraintName: fk_user_refresh_jobs_bezirk
+            onDelete: CASCADE
+        - createIndex:
+            tableName: user_refresh_jobs
+            indexName: idx_user_refresh_jobs_status_created
+            columns:
+              - column: {name: status}
+              - column: {name: created_at}
+        - createIndex:
+            tableName: user_refresh_jobs
+            indexName: idx_user_refresh_jobs_batch
+            columns:
+              - column: {name: batch_id}

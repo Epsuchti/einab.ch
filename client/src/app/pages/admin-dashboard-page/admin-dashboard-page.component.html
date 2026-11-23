@@ -1,0 +1,1494 @@
+<section class="page-shell page-stack">
+  <nav class="admin-tabs" role="tablist" [attr.aria-label]="i18n.t('nav.admin')">
+    @for (tab of adminTabs; track tab.key) {
+      <button type="button" role="tab" class="admin-tabs__tab" [class.is-active]="activeTab() === tab.key" [attr.aria-selected]="activeTab() === tab.key" (click)="selectTab(tab.key)">
+        <span>{{ i18n.t(tab.label) }}</span>
+        @if (tab.key === 'support' && supportBadge.openCount() > 0) {<span class="nav-badge" [attr.aria-label]="i18n.t('admin.supportOpenBadge').replace('{0}', '' + supportBadge.openCount())">{{ supportBadge.openCount() }}</span>}
+      </button>
+    }
+  </nav>
+
+  @if (activeTab() === 'users') {
+  <p-card class="admin-users-card page-card--flat">
+    <div class="admin-users-toolbar">
+      <label>
+        {{ i18n.t('bezirk.label') }}
+        <p-select
+          [options]="userFilterOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="selectedBezirkFilter()"
+          (ngModelChange)="setBezirkFilter($event)"
+          appendTo="body"
+        >
+        </p-select>
+      </label>
+      <label>
+        {{ i18n.t('admin.searchUsers') }}
+        <input
+          pInputText
+          type="search"
+          [ngModel]="userSearch()"
+          (ngModelChange)="setUserSearch($event)"
+          [placeholder]="i18n.t('admin.searchUsersPlaceholder')"
+        />
+      </label>
+      <label class="filter-toggle">
+        <p-checkbox
+          [binary]="true"
+          [ngModel]="activeOnly()"
+          (onChange)="setActiveOnly($event.checked)"
+        ></p-checkbox>
+        <span>{{ i18n.t('admin.onlyActiveUsers') }}</span>
+      </label>
+      <label class="filter-toggle">
+        <p-checkbox
+          [binary]="true"
+          [ngModel]="unverifiedOnly()"
+          (onChange)="setUnverifiedOnly($event.checked)"
+        ></p-checkbox>
+        <span>{{ i18n.t('admin.onlyUnverifiedUsers') }}</span>
+      </label>
+      <label class="filter-toggle">
+        <p-checkbox
+          [binary]="true"
+          [ngModel]="onlyThreePickups()"
+          (onChange)="setOnlyThreePickups($event.checked)"
+        ></p-checkbox>
+        <span>{{ i18n.t('admin.onlyThreePickups') }}</span>
+      </label>
+      <span class="admin-users-count"
+        >{{ usersPage()?.totalElements ?? 0 }} {{ i18n.t('admin.users') }}</span
+      >
+    </div>
+
+    @if (usersLoading()) {
+      <app-loading-indicator />
+    } @else if (usersPage()?.users?.length) {
+      <p-table
+        class="admin-users-table admin-users-table--desktop"
+        [value]="userPanels()"
+        dataKey="user.id"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th></th>
+            <th>{{ i18n.t('common.name') }}</th>
+            <th>{{ i18n.t('common.foodsharingId') }}</th>
+            <th>{{ i18n.t('admin.progress') }}</th>
+            <th>{{ i18n.t('admin.lastLoginAt') }}</th>
+            <th><span class="sr-only">{{ i18n.t('common.actions') }}</span></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-user let-expanded="expanded">
+          <tr class="admin-users-table__expandable-row" [pRowToggler]="user" [attr.data-user-row]="user.user.id">
+            <td class="admin-users-table__expand-cell">
+              <button
+                type="button"
+                class="user-expand-button"
+                [class.user-expand-button--expanded]="expanded"
+                [attr.aria-expanded]="expanded"
+                [attr.aria-controls]="'desktop-user-pickups-' + user.user.id"
+                [attr.aria-label]="i18n.t('admin.userDetails')"
+              >
+                <i
+                  class="pi"
+                  [class.pi-chevron-down]="expanded"
+                  [class.pi-chevron-right]="!expanded"
+                  aria-hidden="true"
+                >
+                </i>
+              </button>
+            </td>
+            <td>{{ user.user.name }}</td>
+            <td>{{ user.user.foodsharingId }}</td>
+            <td><ng-container *ngTemplateOutlet="userProgress; context: { $implicit: user }"></ng-container></td>
+            <td class="nowrap">{{ relativeTime(user.user.lastLoginAt) }}</td>
+            <td class="actions-cell">
+              @if (isReadyToVerify(user)) {
+                <button pButton type="button" size="small" severity="success" [outlined]="true" icon="pi pi-verified" [label]="i18n.t('admin.verifyShort')" (click)="$event.stopPropagation(); verifyBookingUser(user)"></button>
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="expandedrow" let-user>
+          <tr class="admin-user-details-row">
+            <td [attr.colspan]="6">
+              <div class="admin-user-sticky-bar" [attr.data-sticky-user]="user.user.id">
+                <div class="admin-user-sticky-bar__identity">
+                  <span class="admin-user-sticky-bar__avatar" aria-hidden="true"><i class="pi pi-user"></i></span>
+                  <strong>{{ user.user.name }}</strong>
+                  <span class="admin-user-sticky-bar__meta"><i class="pi pi-id-card" aria-hidden="true"></i>{{ user.user.foodsharingId }}</span>
+                  <ng-container *ngTemplateOutlet="userProgress; context: { $implicit: user }"></ng-container>
+                </div>
+                <button
+                  type="button"
+                  class="user-expand-button user-expand-button--expanded"
+                  [pRowToggler]="user"
+                  [attr.aria-controls]="'desktop-user-pickups-' + user.user.id"
+                  aria-expanded="true"
+                  (click)="scrollToUser(user)"
+                >
+                  <span>{{ i18n.t('admin.userDetails') }}</span>
+                  <i class="pi pi-chevron-up" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div
+                class="page-stack admin-user-details"
+                [id]="'desktop-user-pickups-' + user.user.id"
+              >
+                <ng-container *ngTemplateOutlet="userAccount; context: { $implicit: user }"></ng-container>
+                <section class="admin-user-section admin-user-details__permissions">
+                  <header class="admin-user-section__header">
+                    <h4>
+                      <i class="pi pi-shield" aria-hidden="true"></i
+                      >{{ i18n.t('admin.userPermissions') }}
+                    </h4>
+                    <p>{{ i18n.t('admin.userPermissionsHelp') }}</p>
+                  </header>
+                  <ng-container
+                    *ngTemplateOutlet="permissionsForm; context: { $implicit: user }"
+                  ></ng-container>
+                </section>
+
+                <section class="admin-user-section admin-user-details__pickups">
+                  <header class="admin-user-section__header">
+                    <h4>
+                      <i class="pi pi-shopping-bag" aria-hidden="true"></i
+                      >{{ i18n.t('admin.userPickups') }}
+                    </h4>
+                  </header>
+                  @if (user.bookings.length) {
+                    <p-table [value]="user.bookings" [paginator]="true" [alwaysShowPaginator]="false" [rows]="5">
+                      <ng-template pTemplate="header">
+                        <tr>
+                          <th>{{ i18n.t('slots.category') }}</th>
+                          <th>{{ i18n.t('common.visitFairteiler') }}</th>
+                          <th>{{ i18n.t('slots.date') }}</th>
+                          <th>{{ i18n.t('common.location') }}</th>
+                          <th>{{ i18n.t('slots.teacher') }}</th>
+                          <th>{{ i18n.t('common.status') }}</th>
+                          <th>{{ i18n.t('common.comment') }}</th>
+                          <th>{{ i18n.t('common.actions') }}</th>
+                        </tr>
+                      </ng-template>
+                      <ng-template pTemplate="body" let-booking>
+                        <tr>
+                          <td>{{ i18n.categoryLabel(booking.category) }}</td>
+                          <td class="admin-user-slot-visit">
+                            @if (booking.visitFairteiler) {
+                              <p-tag
+                                severity="info"
+                                icon="pi pi-check"
+                                [value]="i18n.t('common.visitFairteiler')"
+                              ></p-tag>
+                            } @else {
+                              <span class="admin-user-slot-visit__none">-</span>
+                            }
+                          </td>
+                          <td>{{ booking.startDateTime | zurichDateTime }}</td>
+                          <td>{{ booking.location ?? '-' }}</td>
+                          <td>{{ booking.teacherName }}</td>
+                          <td><p-tag [value]="i18n.statusLabel(booking.status)"></p-tag></td>
+                          <td class="admin-user-slot-comments">
+                            @for (comment of slotComments(user, booking.slotId); track comment.id) {
+                              <p>{{ comment.comment }}</p>
+                            }
+                          </td>
+                          <td class="actions-cell">
+                            <button
+                              pButton
+                              type="button"
+                              size="small"
+                              severity="secondary"
+                              [outlined]="true"
+                              icon="pi pi-comment"
+                              [label]="i18n.t('teacherBookings.addComment')"
+                              (click)="openCommentDialog(booking)"
+                            ></button>
+                            @if (
+                              isPast(booking.startDateTime) &&
+                              (booking.status === SlotStatus.Booked ||
+                                booking.status === SlotStatus.Done)
+                            ) {
+                              <button
+                                pButton
+                                type="button"
+                                size="small"
+                                severity="danger"
+                                [label]="i18n.t('admin.markNotCounted')"
+                                (click)="confirmBookingCount(booking, false)"
+                              ></button>
+                            } @else if (
+                              isPast(booking.startDateTime) &&
+                              booking.status === SlotStatus.Cancelled
+                            ) {
+                              <button
+                                pButton
+                                type="button"
+                                size="small"
+                                severity="success"
+                                [label]="i18n.t('admin.countAgain')"
+                                (click)="confirmBookingCount(booking, true)"
+                              ></button>
+                            }
+                            @if (canRemoveUserBooking(booking)) {
+                              <button
+                                pButton
+                                type="button"
+                                size="small"
+                                severity="danger"
+                                [outlined]="true"
+                                icon="pi pi-user-minus"
+                                [label]="i18n.t('admin.removeFromEinAb')"
+                                [loading]="removingBookingSlotId() === booking.slotId"
+                                (click)="confirmRemoveUserBooking(booking)"
+                              ></button>
+                            }
+                          </td>
+                        </tr>
+                      </ng-template>
+                    </p-table>
+                  } @else {
+                    <p class="empty-state">{{ i18n.t('admin.noPickups') }}</p>
+                  }
+                </section>
+
+                <section class="admin-user-section">
+                  <header class="admin-user-section__header">
+                    <h4>
+                      <i class="pi pi-comments" aria-hidden="true"></i
+                      >{{ i18n.t('admin.userComments') }}
+                    </h4>
+                  </header>
+                  @if (user.comments.length) {
+                    <p-table [value]="user.comments" [paginator]="true" [alwaysShowPaginator]="false" [rows]="5">
+                      <ng-template pTemplate="header">
+                        <tr>
+                          <th>{{ i18n.t('slots.teacher') }}</th>
+                          <th>{{ i18n.t('common.comment') }}</th>
+                          <th>{{ i18n.t('common.createdAt') }}</th>
+                        </tr>
+                      </ng-template>
+                      <ng-template pTemplate="body" let-comment>
+                        <tr>
+                          <td>{{ comment.teacherName }}</td>
+                          <td>{{ comment.comment }}</td>
+                          <td>{{ comment.createdAt | zurichDateTime }}</td>
+                        </tr>
+                      </ng-template>
+                    </p-table>
+                  } @else {
+                    <p class="empty-state">{{ i18n.t('admin.noComments') }}</p>
+                  }
+                </section>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <div class="admin-user-cards admin-user-cards--mobile">
+        @for (user of userPanels(); track user.user.id) {
+          <article class="admin-user-card">
+            <div
+              class="admin-user-card__header"
+              [class.admin-user-card__header--sticky]="isUserPickupsExpanded(user)"
+              [attr.data-sticky-user]="isUserPickupsExpanded(user) ? user.user.id : null"
+            >
+              <div class="admin-user-card__identity">
+                <div class="admin-user-card__avatar" aria-hidden="true">
+                  <i class="pi pi-user"></i>
+                </div>
+                <div class="admin-user-card__identity-copy">
+                  <h3>{{ user.user.name }}</h3>
+                  <div class="admin-user-card__meta">
+                  <span
+                    class="admin-user-card__foodsharing-id"
+                    [attr.aria-label]="
+                      i18n.t('common.foodsharingId') + ': ' + user.user.foodsharingId
+                    "
+                  >
+                    <i class="pi pi-id-card" aria-hidden="true"></i>
+                    {{ user.user.foodsharingId }}
+                  </span>
+                  <span class="admin-user-card__foodsharing-id admin-user-card__last-login" [attr.aria-label]="i18n.t('admin.lastLoginAt') + ': ' + relativeTime(user.user.lastLoginAt)">
+                    <i class="pi pi-sign-in" aria-hidden="true"></i>
+                    {{ relativeTime(user.user.lastLoginAt) }}
+                  </span>
+                  <ng-container *ngTemplateOutlet="userProgress; context: { $implicit: user }"></ng-container>
+                  </div>
+                </div>
+              </div>
+              @if (isReadyToVerify(user)) {
+                <button pButton type="button" size="small" severity="success" icon="pi pi-verified" class="admin-user-card__verify" [label]="i18n.t('admin.verifyShort')" [attr.aria-label]="i18n.t('admin.verifyShort')" [attr.title]="i18n.t('admin.verifyShort')" (click)="verifyBookingUser(user)"></button>
+              }
+              <button
+                type="button"
+                class="user-expand-button admin-user-card__expand-button"
+                [class.user-expand-button--expanded]="isUserPickupsExpanded(user)"
+                [attr.aria-expanded]="isUserPickupsExpanded(user)"
+                [attr.aria-controls]="'mobile-user-pickups-' + user.user.id"
+                [attr.aria-label]="i18n.t('admin.userDetails')"
+                (click)="toggleUserPickups(user)"
+              >
+                <span>{{ i18n.t('admin.userDetails') }}</span>
+                <i
+                  class="pi"
+                  [class.pi-chevron-up]="isUserPickupsExpanded(user)"
+                  [class.pi-chevron-down]="!isUserPickupsExpanded(user)"
+                  aria-hidden="true"
+                >
+                </i>
+              </button>
+            </div>
+
+            @if (isUserPickupsExpanded(user)) {
+              <section
+                class="admin-user-card__pickups"
+                [id]="'mobile-user-pickups-' + user.user.id"
+              >
+                <ng-container *ngTemplateOutlet="userAccount; context: { $implicit: user }"></ng-container>
+                <section class="admin-user-section">
+                  <header class="admin-user-section__header">
+                    <h4>
+                      <i class="pi pi-shopping-bag" aria-hidden="true"></i
+                      >{{ i18n.t('admin.userPickups') }}
+                    </h4>
+                  </header>
+                  @if (user.bookings.length) {
+                    <div class="admin-user-slot-list">
+                      @for (booking of user.bookings; track booking.slotId) {
+                        <article class="admin-user-slot-card">
+                          <div class="admin-user-slot-card__header">
+                            <strong>{{ i18n.categoryLabel(booking.category) }}</strong>
+                            @if (booking.visitFairteiler) {
+                              <p-tag
+                                severity="info"
+                                icon="pi pi-check"
+                                [value]="i18n.t('common.visitFairteiler')"
+                              ></p-tag>
+                            }
+                            <p-tag [value]="i18n.statusLabel(booking.status)"></p-tag>
+                          </div>
+                          <div class="admin-user-slot-card__facts">
+                            <div>
+                              <span class="admin-user-card__label">{{ i18n.t('slots.date') }}</span>
+                              <span>{{ booking.startDateTime | zurichDateTime }}</span>
+                            </div>
+                            <div>
+                              <span class="admin-user-card__label">{{
+                                i18n.t('common.location')
+                              }}</span>
+                              <span>{{ booking.location ?? '-' }}</span>
+                            </div>
+                            <div>
+                              <span class="admin-user-card__label">{{
+                                i18n.t('slots.teacher')
+                              }}</span>
+                              <span>{{ booking.teacherName }}</span>
+                            </div>
+                            @for (comment of slotComments(user, booking.slotId); track comment.id) {
+                              <div>
+                                <span class="admin-user-card__label">{{
+                                  i18n.t('common.comment')
+                                }}</span>
+                                <span>{{ comment.comment }}</span>
+                              </div>
+                            }
+                          </div>
+                          <div class="actions-cell">
+                            <button
+                              pButton
+                              type="button"
+                              size="small"
+                              severity="secondary"
+                              [outlined]="true"
+                              icon="pi pi-comment"
+                              [label]="i18n.t('teacherBookings.addComment')"
+                              (click)="openCommentDialog(booking)"
+                            ></button>
+                            @if (
+                              isPast(booking.startDateTime) &&
+                              (booking.status === SlotStatus.Booked ||
+                                booking.status === SlotStatus.Done)
+                            ) {
+                              <button
+                                pButton
+                                type="button"
+                                size="small"
+                                severity="danger"
+                                [label]="i18n.t('admin.markNotCounted')"
+                                (click)="confirmBookingCount(booking, false)"
+                              ></button>
+                            } @else if (
+                              isPast(booking.startDateTime) &&
+                              booking.status === SlotStatus.Cancelled
+                            ) {
+                              <button
+                                pButton
+                                type="button"
+                                size="small"
+                                severity="success"
+                                [label]="i18n.t('admin.countAgain')"
+                                (click)="confirmBookingCount(booking, true)"
+                              ></button>
+                            }
+                            @if (canRemoveUserBooking(booking)) {
+                              <button
+                                pButton
+                                type="button"
+                                size="small"
+                                severity="danger"
+                                [outlined]="true"
+                                icon="pi pi-user-minus"
+                                [label]="i18n.t('admin.removeFromEinAb')"
+                                [loading]="removingBookingSlotId() === booking.slotId"
+                                (click)="confirmRemoveUserBooking(booking)"
+                              ></button>
+                            }
+                          </div>
+                        </article>
+                      }
+                    </div>
+                  } @else {
+                    <p class="empty-state">{{ i18n.t('admin.noPickups') }}</p>
+                  }
+                </section>
+
+                <details class="app-collapsible admin-user-card__additional-details">
+                  <summary>{{ i18n.t('admin.userPermissions') }}</summary>
+                  <p>{{ i18n.t('admin.userPermissionsHelp') }}</p>
+                  <ng-container
+                    *ngTemplateOutlet="permissionsForm; context: { $implicit: user }"
+                  ></ng-container>
+                </details>
+
+                <details class="app-collapsible admin-user-card__additional-details">
+                  <summary>{{ i18n.t('admin.userComments') }}</summary>
+                  @if (user.comments.length) {
+                    <div class="admin-user-comment-list">
+                      @for (comment of user.comments; track comment.id) {
+                        <article class="admin-user-comment">
+                          <div>
+                            <strong>{{ comment.teacherName }}</strong>
+                            <small>{{ comment.createdAt | zurichDateTime }}</small>
+                          </div>
+                          <p>{{ comment.comment }}</p>
+                        </article>
+                      }
+                    </div>
+                  } @else {
+                    <p class="empty-state">{{ i18n.t('admin.noComments') }}</p>
+                  }
+                </details>
+              </section>
+            }
+          </article>
+        }
+      </div>
+
+      <p-paginator [alwaysShow]="false"
+        [rows]="pageSize"
+        [totalRecords]="usersPage()?.totalElements ?? 0"
+        [first]="(usersPage()?.page ?? 0) * pageSize"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first} - {last} / {totalRecords}"
+        (onPageChange)="onUsersPageChange($event)"
+      >
+      </p-paginator>
+    } @else {
+      <p class="empty-state">{{ i18n.t('admin.noUsers') }}</p>
+    }
+  </p-card>
+  }
+  @if (activeTab() === 'einabs') {
+    <p-card class="page-card--flat">
+    @if (einAbsLoading()) {
+      <app-loading-indicator />
+    } @else if (einAbsPage()?.einAbs?.length) {
+      <ng-template #adminEinAbSlots let-einAb>
+        <div class="einab-slots">
+          <ul class="slot-list">
+            @for (booking of einAb.bookings; track booking.slotId) {
+              <li class="slot-entry">
+                <div class="slot-entry__head">
+                  <span class="slot-entry__avatar" aria-hidden="true">{{ initials(booking.name) }}</span>
+                  <div class="slot-entry__who">
+                    <strong>{{ booking.name }}</strong>
+                    <small><i class="pi pi-id-card" aria-hidden="true"></i>ID {{ booking.foodsharingId }}</small>
+                  </div>
+                </div>
+                <div class="slot-entry__actions">
+                  <span class="slot-entry__spacer"></span>
+                  <button
+                    pButton
+                    type="button"
+                    size="small"
+                    severity="danger"
+                    [text]="true"
+                    icon="pi pi-user-minus"
+                    [label]="i18n.t('admin.removeFromEinAb')"
+                    [loading]="removingBookingSlotId() === booking.slotId"
+                    (click)="confirmRemoveBooking(einAb, booking)"
+                  ></button>
+                </div>
+              </li>
+            }
+            @if (!isOnlineEinAb(einAb)) {
+              @for (free of freeSlotPlaceholders(einAb); track $index) {
+                <li class="slot-entry slot-entry--free">
+                  <i class="pi pi-circle" aria-hidden="true"></i>
+                  <span>{{ i18n.t('teacher.freeSlot') }}</span>
+                </li>
+              }
+            }
+          </ul>
+        </div>
+      </ng-template>
+      <p-table class="desktop-table" [value]="einAbsPage()!.einAbs" dataKey="id">
+        <ng-template pTemplate="header">
+          <tr>
+            <th></th>
+            <th>{{ i18n.t('slots.date') }}</th>
+            <th>{{ i18n.t('slots.category') }}</th>
+            <th>{{ i18n.t('common.location') }}</th>
+            <th>{{ i18n.t('admin.einAbTeacher') }}</th>
+            <th>{{ i18n.t('teacher.bookedColumn') }}</th>
+            <th><span class="sr-only">{{ i18n.t('common.actions') }}</span></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-einAb let-expanded="expanded">
+          <tr class="einab-expandable-row" [pRowToggler]="einAb">
+            <td><button type="button" pButton size="small" severity="secondary" [text]="true" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" [attr.aria-label]="i18n.t('teacher.showSlots')" [attr.aria-expanded]="expanded"></button></td>
+            <td class="nowrap">{{ einAb.startDateTime | zurichDateTime }}</td>
+            <td>{{ i18n.categoryLabel(einAb.category) }}@if (einAb.visitFairteiler) { <span class="einab-badge"><i class="pi pi-box" aria-hidden="true"></i> {{ i18n.t('slots.withFairteiler') }}</span> }</td>
+            <td>{{ einAbLocation(einAb) }}</td>
+            <td>{{ einAb.teacher.name }}</td>
+            <td class="nowrap">{{ isOnlineEinAb(einAb) ? i18n.t('common.unlimited') : einAb.bookings.length + ' / ' + einAb.slotCount }}</td>
+            <td class="actions-cell">
+              <button pButton type="button" size="small" severity="secondary" [text]="true" icon="pi pi-ellipsis-v" [attr.aria-label]="i18n.t('common.actions')" (click)="$event.stopPropagation(); openEinAbActions($event, einAb)"></button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="expandedrow" let-einAb>
+          <tr class="einab-slots-row">
+            <td colspan="7">
+              <ng-container *ngTemplateOutlet="adminEinAbSlots; context: { $implicit: einAb }"></ng-container>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+      <div class="einab-cards">
+        @for (einAb of einAbsPage()!.einAbs; track einAb.id) {
+          <article class="einab-card">
+            <div class="einab-card__topline">
+              <div class="einab-card__title">
+                <strong>{{ einAb.startDateTime | zurichDateTime: 'date' }} · {{ einAb.startDateTime | zurichDateTime: 'time' }}</strong>
+                <span>{{ i18n.categoryLabel(einAb.category) }}@if (einAb.businessName) { · {{ einAb.businessName }}}</span>
+              </div>
+              <button pButton type="button" size="small" severity="secondary" [text]="true" icon="pi pi-ellipsis-v" [attr.aria-label]="i18n.t('common.actions')" (click)="openEinAbActions($event, einAb)"></button>
+            </div>
+            <div class="einab-card__meta">
+              <span><i class="pi pi-user" aria-hidden="true"></i> {{ einAb.teacher.name }}</span>
+              <span><i class="pi pi-users" aria-hidden="true"></i> {{ isOnlineEinAb(einAb) ? i18n.t('common.unlimited') : i18n.t('teacher.bookedOf').replace('{0}', '' + einAb.bookings.length).replace('{1}', '' + einAb.slotCount) }}</span>
+              @if (einAb.visitFairteiler) { <span class="einab-badge"><i class="pi pi-box" aria-hidden="true"></i> {{ i18n.t('slots.withFairteiler') }}</span> }
+            </div>
+            <ng-container *ngTemplateOutlet="adminEinAbSlots; context: { $implicit: einAb }"></ng-container>
+          </article>
+        }
+      </div>
+
+      <p-paginator [alwaysShow]="false"
+        [rows]="pageSize"
+        [totalRecords]="einAbsPage()?.totalElements ?? 0"
+        [first]="(einAbsPage()?.page ?? 0) * pageSize"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first} - {last} / {totalRecords}"
+        (onPageChange)="onEinAbsPageChange($event)"
+      >
+      </p-paginator>
+    } @else {
+      <p class="empty-state">{{ i18n.t('admin.noEinAbs') }}</p>
+    }
+  </p-card>
+  }
+  @if (activeTab() === 'record') {
+  <h2 class="admin-section-title"><i class="pi pi-history title-icon" aria-hidden="true"></i>{{ i18n.t('pastEinAb.title') }}</h2>
+    <p-card class="page-card--flat">
+      <app-past-einab-form
+        mode="admin"
+        [bezirkSlug]="currentBezirkSlug()"
+        [categories]="categoryOptions()"
+        [searchUsers]="searchMigrationUsers"
+        [giverName]="currentAdminName()"
+        (recorded)="loadUsersPage(0)"
+      ></app-past-einab-form>
+    </p-card>
+  <h2 class="admin-section-title"><i class="pi pi-upload title-icon" aria-hidden="true"></i>{{ i18n.t('import.title') }}</h2>
+    <p-card class="page-card--flat">
+      <app-past-einab-import></app-past-einab-import>
+    </p-card>
+  }
+  @if (activeTab() === 'add') {
+  <p-card class="page-card--flat">
+    <div class="form-grid">
+      <label>
+        {{ i18n.t('common.foodsharingId') }}
+        <input
+          pInputText
+          type="text"
+          [ngModel]="newUserFoodsharingId()"
+          (ngModelChange)="newUserFoodsharingId.set($event)"
+          [placeholder]="i18n.t('common.foodsharingId')"
+          (keyup.enter)="createBookingUser()"
+        />
+      </label>
+      <div class="dialog-actions">
+        <button
+          pButton
+          type="button"
+          icon="pi pi-user-plus"
+          [label]="i18n.t('admin.createUser')"
+          [loading]="creatingUser()"
+          [disabled]="!newUserFoodsharingId().trim()"
+          (click)="createBookingUser()"
+        ></button>
+      </div>
+    </div>
+
+    <div class="bulk-teachers">
+      <h3>{{ i18n.t('admin.bulkTeachers.title') }}</h3>
+      <p class="bulk-teachers__hint">{{ i18n.t('admin.bulkTeachers.hint') }}</p>
+      <div class="form-grid">
+        <label>
+          {{ i18n.t('admin.bulkTeachers.ids') }}
+          <textarea
+            pTextarea
+            rows="6"
+            [ngModel]="bulkTeacherIdsText()"
+            (ngModelChange)="bulkTeacherIdsText.set($event)"
+            placeholder="876792&#10;328434&#10;481450"
+          ></textarea>
+        </label>
+        <div class="dialog-actions">
+          <button
+            pButton
+            type="button"
+            icon="pi pi-users"
+            [label]="i18n.t('admin.bulkTeachers.submit').replace('{count}', '' + bulkTeacherIds().length)"
+            [loading]="bulkTeachersSaving()"
+            [disabled]="bulkTeacherIds().length === 0"
+            (click)="addBulkTeachers()"
+          ></button>
+        </div>
+      </div>
+      @if (bulkTeacherResults().length > 0) {
+        <ul class="bulk-teachers__results" aria-live="polite">
+          @for (result of bulkTeacherResults(); track result.foodsharingId) {
+            <li>
+              <span class="bulk-teachers__id">{{ result.foodsharingId }}</span>
+              <span class="bulk-teachers__name">
+                {{ result.name && result.name !== result.foodsharingId ? result.name : '' }}
+                @if (result.errorCode) {
+                  <small>{{ bulkTeacherError(result) }}</small>
+                }
+              </span>
+              <p-tag [severity]="bulkTeacherSeverity(result)" [value]="i18n.t('admin.bulkTeachers.status.' + result.status)"></p-tag>
+            </li>
+          }
+        </ul>
+        @if (bulkTeacherRefreshQueued() > 0) {
+          <p class="bulk-teachers__hint">
+            {{ i18n.t('admin.bulkTeachers.refreshQueued').replace('{count}', '' + bulkTeacherRefreshQueued()) }}
+          </p>
+        }
+      }
+    </div>
+  </p-card>
+  }
+  @if (activeTab() === 'notes') {
+    <app-admin-info-notes />
+  }
+  @if (activeTab() === 'support') {
+    <app-admin-support-page [embedded]="true" />
+  }
+
+  @if (activeTab() === 'settings') {
+  <h2 class="admin-section-title"><i class="pi pi-sliders-h title-icon" aria-hidden="true"></i>{{ i18n.t('admin.rulesTitle') }}: {{ bezirkSettings()?.name }}</h2>
+    <p-card class="page-card--flat" styleClass="admin-settings-card">
+      <div class="stack-form">
+        <label>
+          {{ i18n.t('admin.cleaningStoreId') }}
+          <p-inputNumber
+            [ngModel]="cleaningStoreId()"
+            (ngModelChange)="cleaningStoreId.set($event)"
+            [useGrouping]="false"
+            [min]="1"
+            [placeholder]="i18n.t('admin.cleaningStoreIdPlaceholder')"
+          >
+          </p-inputNumber>
+        </label>
+        <fieldset class="admin-category-settings">
+          <legend>{{ i18n.t('admin.enabledCategories') }}</legend>
+          <small>{{ i18n.t('admin.enabledCategoriesHint') }}</small>
+          <div class="admin-category-settings__list">
+            @for (option of allCategoryOptions; track option.value) {
+              <label class="admin-booking-settings__toggle">
+                <p-checkbox
+                  [binary]="true"
+                  [ngModel]="!disabledCategories().includes(option.value)"
+                  (onChange)="toggleEnabledCategory(option.value, $event.checked)"
+                >
+                </p-checkbox>
+                <span>{{ option.label }}</span>
+              </label>
+            }
+          </div>
+        </fieldset>
+        <div class="admin-booking-settings">
+          <label>
+            {{ i18n.t('admin.ignoredCategories') }}
+            <p-multiselect
+              [options]="categoryOptions()"
+              optionLabel="label"
+              optionValue="value"
+              [ngModel]="ignoredCategories()"
+              (ngModelChange)="ignoredCategories.set($event)"
+              [placeholder]="i18n.t('admin.selectCategories')"
+              appendTo="body"
+            >
+            </p-multiselect>
+          </label>
+          <label class="admin-booking-settings__toggle">
+            <p-checkbox
+              [binary]="true"
+              [ngModel]="preventDuplicateTeacherBookings()"
+              (onChange)="preventDuplicateTeacherBookings.set($event.checked)"
+            >
+            </p-checkbox>
+            <span>{{ i18n.t('admin.preventDuplicateTeacherBookings') }}</span>
+          </label>
+          <label class="admin-booking-settings__toggle">
+            <p-checkbox
+              [binary]="true"
+              [ngModel]="preventDuplicateCategoryBookings()"
+              (onChange)="preventDuplicateCategoryBookings.set($event.checked)"
+            >
+            </p-checkbox>
+            <span>{{ i18n.t('admin.preventDuplicateCategoryBookings') }}</span>
+          </label>
+          <label class="admin-booking-settings__toggle">
+            <p-checkbox
+              [binary]="true"
+              [ngModel]="requireFairteilerVisitByThirdEinAb()"
+              (onChange)="requireFairteilerVisitByThirdEinAb.set($event.checked)"
+            >
+            </p-checkbox>
+            <span>{{ i18n.t('admin.requireFairteilerVisitByThirdEinAb') }}</span>
+          </label>
+          <label class="admin-booking-settings__toggle">
+            <p-checkbox
+              [binary]="true"
+              [ngModel]="useFoodsharingUserInfoApi()"
+              (onChange)="useFoodsharingUserInfoApi.set($event.checked)"
+            >
+            </p-checkbox>
+            <span>{{ i18n.t('admin.useFoodsharingUserInfoApi') }}</span>
+          </label>
+          <small>{{ i18n.t('admin.useFoodsharingUserInfoApiHint') }}</small>
+          <label>
+            {{ i18n.t('admin.maxActiveBookingsPerUser') }}
+            <p-inputNumber
+              [ngModel]="maxActiveBookingsPerUser()"
+              (ngModelChange)="maxActiveBookingsPerUser.set($event)"
+              [useGrouping]="false"
+              [min]="1"
+            >
+            </p-inputNumber>
+          </label>
+          <small>{{ i18n.t('admin.maxActiveBookingsPerUserHint') }}</small>
+          <label>
+            {{ i18n.t('admin.pickupEinAbLeadMinutes') }}
+            <p-inputNumber
+              [ngModel]="pickupEinAbLeadMinutes()"
+              (ngModelChange)="pickupEinAbLeadMinutes.set($event)"
+              [useGrouping]="false"
+              [min]="0"
+              [max]="120"
+              [suffix]="' min'"
+            >
+            </p-inputNumber>
+          </label>
+          <small>{{ i18n.t('admin.pickupEinAbLeadMinutesHint') }}</small>
+        </div>
+        <div class="dialog-actions admin-sticky-actions">
+          <button pButton type="button" icon="pi pi-save" [label]="i18n.t('admin.saveRules')" [loading]="settingsSaving()" (click)="saveBezirkSettings()"></button>
+        </div>
+      </div>
+    </p-card>
+    <h2 class="admin-section-title"><i class="pi pi-map-marker title-icon" aria-hidden="true"></i>{{ i18n.t('admin.bezirkInfo.title') }}</h2>
+    <p-card class="page-card--flat" styleClass="admin-settings-card">
+      <div class="stack-form admin-bezirk-info">
+        <p class="form-inline-note">{{ i18n.t('admin.bezirkInfo.intro') }}</p>
+        <div class="admin-bezirk-info__options">
+          <div class="admin-bezirk-info__option">
+            <label class="admin-booking-settings__toggle">
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="infoStepEnabled()"
+                (onChange)="infoStepEnabled.set($event.checked)"
+              >
+              </p-checkbox>
+              <span>{{ i18n.t('admin.bezirkInfo.stepEnabled') }}</span>
+            </label>
+            <small>{{ i18n.t('admin.bezirkInfo.stepEnabledHint') }}</small>
+          </div>
+          <div class="admin-bezirk-info__option" [class.is-disabled]="!infoStepEnabled()">
+            <label class="admin-booking-settings__toggle">
+              <p-checkbox
+                [binary]="true"
+                [disabled]="!infoStepEnabled()"
+                [ngModel]="infoStepOnlyUnverified()"
+                (onChange)="infoStepOnlyUnverified.set($event.checked)"
+              >
+              </p-checkbox>
+              <span>{{ i18n.t('admin.bezirkInfo.onlyUnverified') }}</span>
+            </label>
+            <small>{{ i18n.t('admin.bezirkInfo.onlyUnverifiedHint') }}</small>
+          </div>
+        </div>
+        @if (infoStepEnabled() && !hasAnyInfoText()) {
+          <small class="field-error" role="status">{{ i18n.t('admin.bezirkInfo.stepNeedsText') }}</small>
+        }
+        <div class="admin-bezirk-info__head">
+          <div class="segmented admin-bezirk-info__languages" role="group" [attr.aria-label]="i18n.t('admin.bezirkInfo.language')">
+            @for (language of infoLanguages; track language.value) {
+              <button type="button" class="segmented__item" [class.is-active]="infoLanguage() === language.value" [attr.aria-pressed]="infoLanguage() === language.value" (click)="infoLanguage.set(language.value)">
+                {{ i18n.t(language.label) }}
+                @if (infoTexts()[language.value].trim()) { <i class="pi pi-check admin-bezirk-info__filled" [attr.aria-label]="i18n.t('admin.bezirkInfo.filled')"></i> }
+              </button>
+            }
+          </div>
+          <div class="segmented" role="group" [attr.aria-label]="i18n.t('admin.bezirkInfo.text')">
+            <button type="button" class="segmented__item" [class.is-active]="!infoPreview()" [attr.aria-pressed]="!infoPreview()" (click)="infoPreview.set(false)"><i class="pi pi-pencil" aria-hidden="true"></i>{{ i18n.t('admin.bezirkInfo.edit') }}</button>
+            <button type="button" class="segmented__item" [class.is-active]="infoPreview()" [attr.aria-pressed]="infoPreview()" (click)="infoPreview.set(true)"><i class="pi pi-eye" aria-hidden="true"></i>{{ i18n.t('admin.bezirkInfo.preview') }}</button>
+          </div>
+        </div>
+        <span class="admin-bezirk-info__label" id="bezirk-info-label">{{ i18n.t('admin.bezirkInfo.text') }} · {{ i18n.t('lang.' + infoLanguage() + 'Long') }}</span>
+        @if (infoLanguage() !== 'de' && !infoText().trim()) {
+          <small>{{ i18n.t('admin.bezirkInfo.fallbackHint') }}</small>
+        }
+        @if (infoPreview()) {
+          <div class="admin-bezirk-info__preview">
+            @if (infoText().trim() || infoTexts().de.trim()) {
+              <app-markdown-view [markdown]="infoText().trim() ? infoText() : infoTexts().de" />
+            } @else {
+              <p class="form-inline-note">{{ i18n.t('bezirkInfo.empty') }}</p>
+            }
+          </div>
+        } @else {
+          <textarea
+            pTextarea
+            class="admin-bezirk-info__editor"
+            aria-labelledby="bezirk-info-label"
+            rows="16"
+            spellcheck="true"
+            [placeholder]="i18n.t('admin.bezirkInfo.placeholder')"
+            [ngModel]="infoText()"
+            (ngModelChange)="setInfoText($event)"
+          ></textarea>
+        }
+        <small>{{ i18n.t('admin.bezirkInfo.markdownHint') }}</small>
+        <div class="dialog-actions admin-sticky-actions">
+          <button pButton type="button" icon="pi pi-save" [label]="i18n.t('admin.bezirkInfo.save')" [loading]="settingsSaving()" (click)="saveBezirkSettings()"></button>
+        </div>
+      </div>
+    </p-card>
+    <h2 class="admin-section-title"><i class="pi pi-link title-icon" aria-hidden="true"></i>{{ i18n.t('admin.accountsTitle') }}</h2>
+    <p-card class="page-card--flat" styleClass="admin-settings-card">
+      <div class="stack-form">
+        <div class="admin-foodsharing-message-settings">
+          <div>
+            <h3>{{ i18n.t('admin.foodsharingMessaging') }}</h3>
+            <p>
+              {{
+                i18n.t(
+                  bezirkSettings()?.foodsharingMessagingConfigured
+                    ? 'admin.foodsharingMessagingConfigured'
+                    : 'admin.foodsharingMessagingFallback'
+                )
+              }}
+            </p>
+          </div>
+          @if (bezirkSettings()?.foodsharingMessagingConfigured) {
+            <div class="admin-foodsharing-message-settings__connection">
+              <span>{{ i18n.t('admin.foodsharingMessagingConnectedAccount') }}</span>
+              <strong>{{ bezirkSettings()?.foodsharingMessagingEmail }}</strong>
+              <span class="admin-foodsharing-message-settings__actions">
+                @if (!changingFoodsharingMessagingPassword()) {
+                  <button
+                    pButton
+                    type="button"
+                    severity="secondary"
+                    size="small"
+                    icon="pi pi-key"
+                    [label]="i18n.t('foodsharingAccount.changePassword')"
+                    [disabled]="settingsSaving()"
+                    (click)="changingFoodsharingMessagingPassword.set(true)"
+                  ></button>
+                }
+                <button
+                  pButton
+                  type="button"
+                  severity="danger"
+                  size="small"
+                  icon="pi pi-trash"
+                  [label]="i18n.t('admin.removeFoodsharingMessagingAccount')"
+                  [disabled]="settingsSaving()"
+                  (click)="removeFoodsharingMessagingConnection()"
+                ></button>
+              </span>
+            </div>
+            @if (changingFoodsharingMessagingPassword()) {
+              <label>
+                {{ i18n.t('foodsharingAccount.newPassword') }}
+                <input pInputText type="password" autocomplete="new-password" [(ngModel)]="foodsharingMessagingPassword" />
+              </label>
+              <div class="admin-foodsharing-message-settings__actions">
+                <button
+                  pButton
+                  type="button"
+                  size="small"
+                  icon="pi pi-save"
+                  [label]="i18n.t('foodsharingAccount.savePassword')"
+                  [disabled]="!foodsharingMessagingPassword || settingsSaving()"
+                  [loading]="settingsSaving()"
+                  (click)="saveBezirkSettings()"
+                ></button>
+                <button
+                  pButton
+                  type="button"
+                  severity="secondary"
+                  size="small"
+                  [text]="true"
+                  [label]="i18n.t('common.cancel')"
+                  (click)="cancelFoodsharingMessagingPasswordChange()"
+                ></button>
+              </div>
+              <small>{{ i18n.t('foodsharingAccount.changePasswordHint') }}</small>
+            }
+          }
+          @if (!bezirkSettings()?.foodsharingMessagingConfigured) {
+            <label>
+              {{ i18n.t('admin.foodsharingMessagingEmail') }}
+              <input
+                pInputText
+                type="email"
+                [ngModel]="foodsharingMessagingEmail()"
+                (ngModelChange)="foodsharingMessagingEmail.set($event)"
+              />
+            </label>
+            <label>
+              {{ i18n.t('admin.foodsharingMessagingPassword') }}
+              <input pInputText type="password" [(ngModel)]="foodsharingMessagingPassword" />
+            </label>
+            <small>{{ i18n.t('admin.foodsharingMessagingPasswordHint') }}</small>
+          }
+        </div>
+        <div class="dialog-actions">
+          <button pButton type="button" icon="pi pi-save" [label]="i18n.t('admin.saveAccount')" [loading]="settingsSaving()" (click)="saveBezirkSettings()"></button>
+        </div>
+        @if (messagingTelegram(); as telegram) {
+          <div class="admin-foodsharing-message-settings admin-messaging-telegram">
+            <div>
+              <h3>{{ i18n.t('admin.messagingTelegram') }}</h3>
+              <p>{{ i18n.t('admin.messagingTelegramDescription') }}</p>
+            </div>
+            <div class="admin-foodsharing-message-settings__connection">
+              <span>{{
+                i18n.t(
+                  telegram.fallbackAccount
+                    ? 'admin.messagingTelegramFallbackAccount'
+                    : 'admin.messagingTelegramBezirkAccount'
+                )
+              }}</span>
+              <strong>{{ telegram.accountEmail || '–' }}</strong>
+            </div>
+            @if (telegram.fallbackAccount) {
+              <small>{{ i18n.t('admin.messagingTelegramFallbackHint') }}</small>
+            }
+            <details class="admin-messaging-telegram__setup" [open]="!telegram.telegramBotTokenConfigured">
+              <summary>{{ i18n.t('admin.setupSteps') }}</summary>
+            <ol class="admin-messaging-telegram__steps">
+              <li>{{ i18n.t('admin.messagingTelegramStep1') }}</li>
+              <li>{{ i18n.t('admin.messagingTelegramStep2') }}</li>
+              <li>{{ i18n.t('admin.messagingTelegramStep3') }}</li>
+            </ol>
+            </details>
+            @if (telegram.telegramBotTokenConfigured) {
+              <div class="admin-foodsharing-message-settings__connection">
+                <span>{{ i18n.t('admin.messagingTelegramBotToken') }}</span>
+                <strong>{{ i18n.t('admin.messagingTelegramBotTokenConfigured') }}</strong>
+                <button
+                  pButton
+                  type="button"
+                  severity="danger"
+                  size="small"
+                  icon="pi pi-trash"
+                  [label]="i18n.t('admin.messagingTelegramRemove')"
+                  [disabled]="messagingTelegramBusy()"
+                  (click)="removeMessagingTelegram()"
+                ></button>
+              </div>
+              <div class="admin-messaging-telegram__chat">
+                <label>
+                  {{ i18n.t('admin.messagingTelegramChat') }}
+                  <p-select
+                    [options]="messagingTelegramChatOptions()"
+                    [ngModel]="messagingTelegramChatId()"
+                    (ngModelChange)="messagingTelegramChatId.set($event)"
+                    [placeholder]="i18n.t('admin.messagingTelegramChatPlaceholder')"
+                    [showClear]="true"
+                    appendTo="body"
+                  ></p-select>
+                </label>
+                <button
+                  pButton
+                  type="button"
+                  severity="secondary"
+                  icon="pi pi-refresh"
+                  [label]="i18n.t('admin.messagingTelegramRefreshChats')"
+                  (click)="refreshMessagingTelegramChats()"
+                ></button>
+              </div>
+              <label class="admin-booking-settings__toggle">
+                <p-checkbox
+                  [binary]="true"
+                  [ngModel]="messagingTelegramEnabled()"
+                  (ngModelChange)="messagingTelegramEnabled.set($event)"
+                ></p-checkbox>
+                <span>{{ i18n.t('admin.messagingTelegramEnabled') }}</span>
+              </label>
+            } @else {
+              <label>
+                {{ i18n.t('admin.messagingTelegramBotToken') }}
+                <input
+                  pInputText
+                  type="password"
+                  autocomplete="off"
+                  [(ngModel)]="messagingTelegramBotToken"
+                />
+              </label>
+            }
+            <div class="dialog-actions">
+              @if (telegram.telegramBotTokenConfigured && telegram.telegramChatId) {
+                <button
+                  pButton
+                  type="button"
+                  severity="secondary"
+                  icon="pi pi-send"
+                  [label]="i18n.t('admin.messagingTelegramSendTest')"
+                  [disabled]="messagingTelegramBusy()"
+                  (click)="sendMessagingTelegramTestMessage()"
+                ></button>
+              }
+              <button
+                pButton
+                type="button"
+                icon="pi pi-save"
+                [label]="i18n.t('admin.messagingTelegramSave')"
+                [loading]="messagingTelegramBusy()"
+                [disabled]="
+                  !telegram.telegramBotTokenConfigured && !messagingTelegramBotToken.trim()
+                "
+                (click)="
+                  saveMessagingTelegram(
+                    telegram.telegramBotTokenConfigured
+                      ? messagingTelegramEnabled() && !!messagingTelegramChatId()
+                      : false
+                  )
+                "
+              ></button>
+            </div>
+          </div>
+        }
+      </div>
+    </p-card>
+  }
+  @if (activeTab() === 'bezirke') {
+    <h2 class="admin-section-title"><i class="pi pi-map title-icon" aria-hidden="true"></i>{{ i18n.t('admin.bezirke.title') }}</h2>
+    <p-card class="page-card--flat" styleClass="admin-settings-card">
+      <div class="admin-bezirke">
+        <p class="admin-bezirke__hint">{{ i18n.t('admin.bezirke.hint') }}</p>
+        @if (adminBezirkeLoading()) {
+          <app-loading-indicator />
+        } @else {
+          <ul class="admin-bezirke__list">
+            @for (bezirk of adminBezirke(); track bezirk.id) {
+              <li [class.is-disabled]="!bezirk.active">
+                <span class="admin-bezirke__name">
+                  <strong>{{ bezirk.name }}</strong>
+                  <small>{{ bezirk.slug }}</small>
+                </span>
+                <p-tag
+                  [severity]="bezirk.active ? 'success' : 'secondary'"
+                  [value]="i18n.t(bezirk.active ? 'admin.bezirke.active' : 'admin.bezirke.disabled')"
+                ></p-tag>
+                @if (bezirk.active) {
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-ban"
+                    severity="danger"
+                    [outlined]="true"
+                    [label]="i18n.t('admin.bezirke.disable')"
+                    [attr.aria-label]="i18n.t('admin.bezirke.disable') + ': ' + bezirk.name"
+                    class="admin-bezirke__toggle"
+                    [loading]="bezirkToggling() === bezirk.slug"
+                    [disabled]="activeAdminBezirkCount() <= 1"
+                    (click)="disableBezirk(bezirk)"
+                  ></button>
+                } @else {
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-check"
+                    [outlined]="true"
+                    [label]="i18n.t('admin.bezirke.enable')"
+                    [attr.aria-label]="i18n.t('admin.bezirke.enable') + ': ' + bezirk.name"
+                    class="admin-bezirke__toggle"
+                    [loading]="bezirkToggling() === bezirk.slug"
+                    (click)="setBezirkActive(bezirk, true)"
+                  ></button>
+                }
+              </li>
+            }
+          </ul>
+        }
+        <div class="admin-bezirk-create">
+          <h3>{{ i18n.t('admin.bezirke.createTitle') }}</h3>
+          <div class="admin-bezirk-create__fields">
+            <label>
+              {{ i18n.t('admin.bezirke.name') }}
+              <input
+                pInputText
+                type="text"
+                maxlength="200"
+                [ngModel]="newBezirkName()"
+                (ngModelChange)="onNewBezirkNameChange($event)"
+                [placeholder]="i18n.t('admin.bezirke.namePlaceholder')"
+              />
+            </label>
+            <label>
+              {{ i18n.t('admin.bezirke.slug') }}
+              <span class="admin-bezirk-create__slug">
+                <span class="admin-bezirk-create__prefix" aria-hidden="true">/bezirke/</span>
+                <input
+                  pInputText
+                  type="text"
+                  maxlength="100"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  [ngModel]="newBezirkSlug()"
+                  (ngModelChange)="onNewBezirkSlugChange($event)"
+                  placeholder="zuerich"
+                  (keyup.enter)="createBezirk()"
+                />
+              </span>
+              <span class="admin-bezirk-create__hint">
+                @if (newBezirkSlug()) {
+                  <span class="admin-bezirk-create__preview">{{ bezirkAddressPreview() }}</span>
+                }
+                <span>{{ i18n.t('admin.bezirke.slugHint') }}</span>
+              </span>
+            </label>
+          </div>
+          <div class="dialog-actions">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-plus"
+              [label]="i18n.t('admin.bezirke.create')"
+              [loading]="creatingBezirk()"
+              [disabled]="!canCreateBezirk()"
+              (click)="createBezirk()"
+            ></button>
+          </div>
+        </div>
+      </div>
+    </p-card>
+  }
+</section>
+
+<p-dialog
+  [(visible)]="bezirkDisableDialogVisible"
+  [modal]="true"
+  [style]="{ width: 'min(40rem, 96vw)' }"
+  [header]="i18n.t('admin.bezirke.disableConfirmTitle').replace('{0}', bezirkDisableTarget()?.name ?? '')"
+>
+  <div class="stack-form admin-bezirk-impact">
+    <p>{{ i18n.t('admin.bezirke.disableConfirmMessage') }}</p>
+    @if (bezirkDisableImpactLoading()) {
+      <app-loading-indicator />
+    } @else if (bezirkDisableImpact(); as impact) {
+      @if (impact.upcomingEinAbCount === 0 && impact.assignedUserCount === 0) {
+        <p class="admin-bezirk-impact__none">{{ i18n.t('admin.bezirke.impactNone') }}</p>
+      } @else {
+        <p class="admin-einab-delete-warning">
+          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+          <span>{{ i18n.t('admin.bezirke.impactSummary').replace('{einabs}', '' + impact.upcomingEinAbCount).replace('{users}', '' + impact.assignedUserCount) }}</span>
+        </p>
+      }
+      @if (impact.upcomingEinAbs.length) {
+        <section>
+          <h3>{{ i18n.t('admin.bezirke.impactEinAbs').replace('{0}', '' + impact.upcomingEinAbCount) }}</h3>
+          <ul class="admin-bezirk-impact__list">
+            @for (einAb of impact.upcomingEinAbs; track einAb.id) {
+              <li>
+                <strong>{{ einAb.startDateTime | zurichDateTime: 'date' }} · {{ einAb.startDateTime | zurichDateTime: 'time' }}</strong>
+                <span>{{ i18n.categoryLabel(einAb.category) }}@if (einAb.businessName) { · {{ einAb.businessName }}}@if (einAb.teacherName) { · {{ einAb.teacherName }}}</span>
+                <small>
+                  @if (einAb.bookedUsers.length) {
+                    {{ i18n.t('admin.bezirke.impactBooked') }}: {{ impactUserNames(einAb.bookedUsers) }}
+                  } @else {
+                    {{ i18n.t('admin.bezirke.impactNoBookings') }}
+                  }
+                </small>
+              </li>
+            }
+          </ul>
+          @if (impact.upcomingEinAbCount > impact.upcomingEinAbs.length) {
+            <small>{{ i18n.t('admin.bezirke.impactMore').replace('{0}', '' + (impact.upcomingEinAbCount - impact.upcomingEinAbs.length)) }}</small>
+          }
+        </section>
+      }
+      @if (impact.assignedUsers.length) {
+        <details class="admin-bezirk-impact__users">
+          <summary>{{ i18n.t('admin.bezirke.impactUsers').replace('{0}', '' + impact.assignedUserCount) }}</summary>
+          <p>{{ i18n.t('admin.bezirke.impactUsersHint') }}</p>
+          <ul class="admin-bezirk-impact__list">
+            @for (user of impact.assignedUsers; track user.id) {
+              <li><span>{{ user.name }}@if (user.foodsharingId && user.foodsharingId !== user.name) { <small>· {{ user.foodsharingId }}</small> }</span></li>
+            }
+          </ul>
+          @if (impact.assignedUserCount > impact.assignedUsers.length) {
+            <small>{{ i18n.t('admin.bezirke.impactMore').replace('{0}', '' + (impact.assignedUserCount - impact.assignedUsers.length)) }}</small>
+          }
+        </details>
+      }
+    }
+    <div class="dialog-actions">
+      <button
+        pButton
+        type="button"
+        severity="secondary"
+        [outlined]="true"
+        [label]="i18n.t('common.cancel')"
+        (click)="bezirkDisableDialogVisible.set(false)"
+      ></button>
+      <button
+        pButton
+        type="button"
+        severity="danger"
+        icon="pi pi-ban"
+        [label]="i18n.t('admin.bezirke.disable')"
+        [loading]="bezirkToggling() === bezirkDisableTarget()?.slug"
+        [disabled]="bezirkDisableImpactLoading()"
+        (click)="confirmDisableBezirk()"
+      ></button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="einAbDeleteDialogVisible"
+  [modal]="true"
+  [style]="{ width: 'min(36rem, 96vw)' }"
+  [header]="i18n.t('admin.deleteEinAbReasonTitle')"
+>
+  <form class="stack-form" [formGroup]="einAbDeleteForm">
+    <div>
+      <strong>{{ einAbDeleteTarget() ? i18n.categoryLabel(einAbDeleteTarget()!.category) : '' }}@if (einAbDeleteTarget()?.businessName) { · {{ einAbDeleteTarget()?.businessName }}}</strong>
+      <div>{{ einAbDeleteTarget()?.startDateTime | zurichDateTime }} · {{ einAbDeleteTarget()?.teacher?.name }}</div>
+    </div>
+    @if (einAbDeleteTarget()?.bookings?.length) {
+      <p class="admin-einab-delete-warning">
+        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+        <span>{{ deleteEinAbBookedNotice(einAbDeleteTarget()!) }}</span>
+      </p>
+    }
+    <label>
+      <span>{{ i18n.t('admin.deleteEinAbReasonLabel') }}</span>
+      <textarea pTextarea rows="4" formControlName="reason"></textarea>
+    </label>
+    <div class="dialog-actions">
+      <button
+        pButton
+        type="button"
+        severity="secondary"
+        [label]="i18n.t('common.cancel')"
+        (click)="einAbDeleteDialogVisible.set(false)"
+      ></button>
+      <button
+        pButton
+        type="button"
+        severity="danger"
+        icon="pi pi-trash"
+        [label]="i18n.t('common.delete')"
+        [loading]="einAbDeleteLoading()"
+        [disabled]="einAbDeleteForm.invalid"
+        (click)="saveEinAbDeletion()"
+      ></button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="commentDialogVisible"
+  [modal]="true"
+  [style]="{ width: 'min(36rem, 96vw)' }"
+  [header]="i18n.t('teacherBookings.addComment')"
+>
+  <form class="stack-form" [formGroup]="commentForm">
+    <div>
+      <strong>{{ commentTarget()?.bookingUser?.name }}</strong>
+      <div>{{ commentTarget()?.bookingUser?.foodsharingId }}</div>
+    </div>
+    <label>
+      <span>{{ i18n.t('common.comment') }}</span>
+      <textarea pTextarea rows="5" formControlName="comment"></textarea>
+    </label>
+    <div class="dialog-actions">
+      <button
+        pButton
+        type="button"
+        severity="secondary"
+        [label]="i18n.t('common.cancel')"
+        (click)="commentDialogVisible.set(false)"
+      ></button>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-save"
+        [label]="i18n.t('common.save')"
+        [loading]="commentLoading()"
+        [disabled]="commentForm.invalid"
+        (click)="saveComment()"
+      ></button>
+    </div>
+  </form>
+</p-dialog>
+
+<ng-template #verificationMessageToggle let-user>
+  <label class="filter-toggle admin-verification-message-toggle">
+    <p-checkbox
+      [binary]="true"
+      [ngModel]="!!user.user.verificationMessageSentAt"
+      (onChange)="setVerificationMessageSent(user, $event.checked)"
+    ></p-checkbox>
+    <span>
+      @if (user.user.verificationMessageSentAt) {
+        {{ i18n.t('admin.verificationMessageSentOn') }}
+        {{ user.user.verificationMessageSentAt | zurichDateTime }}
+      } @else {
+        {{ i18n.t('admin.verificationMessageNotSent') }}
+      }
+    </span>
+  </label>
+</ng-template>
+
+<ng-template #permissionsForm let-user>
+  <div class="user-permissions-form">
+    @for (permission of permissionOptions(); track permission.key) {
+      <label class="user-permission-toggle"
+        ><p-checkbox [binary]="true" [(ngModel)]="user.user[permission.key]"></p-checkbox
+        ><span class="user-permission-toggle__text"
+          ><span class="user-permission-toggle__label">{{ permission.label }}</span
+          ><small class="user-permission-toggle__help">{{ permission.help }}</small></span
+        ></label
+      >
+    }
+  </div>
+  <div class="dialog-actions user-permissions-actions">
+    <button
+      pButton
+      type="button"
+      icon="pi pi-save"
+      [label]="i18n.t('common.save')"
+      (click)="saveUserPermissions(user)"
+    ></button>
+  </div>
+</ng-template>
+
+<ng-template #userProgress let-user>
+  <span class="user-progress">
+    <span class="user-progress__count">{{ i18n.t('admin.einAbCount').replace('{0}', '' + user.pickupCount) }}</span>
+    @if (user.user.verified) {
+      <span class="user-progress__badge user-progress__badge--done"><i class="pi pi-verified" aria-hidden="true"></i> {{ i18n.t('admin.verified') }}</span>
+    } @else if (isReadyToVerify(user)) {
+      <span class="user-progress__badge user-progress__badge--ready">{{ i18n.t('admin.ready') }}</span>
+    }
+  </span>
+</ng-template>
+
+<ng-template #userAccount let-user>
+  <section class="admin-user-section admin-user-account">
+    <div class="admin-user-account__top">
+      <h4><i class="pi pi-user" aria-hidden="true"></i>{{ i18n.t('admin.userAccount') }}</h4>
+      <div class="admin-user-account__primary">
+        @if (!user.user.verified) {
+          <button pButton type="button" size="small" icon="pi pi-verified" [label]="i18n.t('admin.verifyBookingUser')" (click)="verifyBookingUser(user)"></button>
+        }
+        <button pButton type="button" size="small" icon="pi pi-refresh" severity="secondary" [text]="true" [label]="i18n.t('admin.refreshUserData')" [loading]="isRefreshingUser(user)" (click)="refreshUserData(user)"></button>
+        <button pButton type="button" size="small" icon="pi pi-ellipsis-v" severity="secondary" [text]="true" [attr.aria-label]="i18n.t('common.more')" (click)="openUserActions($event, user)"></button>
+      </div>
+    </div>
+    <dl class="kv-list kv-list--rows admin-user-account__facts-list">
+      <div class="kv-list__row">
+        <dt>{{ i18n.t('common.phoneNumber') }}</dt>
+        <dd>@if (user.user.phoneNumber) { <a [href]="'tel:' + user.user.phoneNumber">{{ user.user.phoneNumber }}</a> } @else { - }</dd>
+      </div>
+      <div class="kv-list__row">
+        <dt>{{ i18n.t('common.status') }}</dt>
+        <dd><p-tag [severity]="user.user.active ? 'success' : 'warn'" [value]="user.user.active ? i18n.t('common.active') : i18n.t('common.inactive')"></p-tag></dd>
+      </div>
+      <div class="kv-list__row">
+        <dt>{{ i18n.t('admin.verification') }}</dt>
+        <dd>
+          <p-tag [severity]="user.user.verified ? 'success' : 'warn'" [value]="user.user.verified ? i18n.t('admin.verified') : i18n.t('admin.notVerified')"></p-tag>
+          @if (user.user.lastVerifiedAt) { <small class="kv-list__note">{{ user.user.lastVerifiedAt | zurichDateTime: 'date' }}</small> }
+        </dd>
+      </div>
+      <div class="kv-list__row">
+        <dt>{{ i18n.t('admin.verificationMessageSent') }}</dt>
+        <dd><ng-container *ngTemplateOutlet="verificationMessageToggle; context: { $implicit: user }"></ng-container></dd>
+      </div>
+      <div class="kv-list__row">
+        <dt>{{ i18n.t('admin.lastLoginAt') }}</dt>
+        <dd>{{ relativeTime(user.user.lastLoginAt) }}</dd>
+      </div>
+      <div class="kv-list__row">
+        <dt>{{ i18n.t('admin.einAbsDone') }}</dt>
+        <dd>{{ user.pickupCount }}</dd>
+      </div>
+      <div class="kv-list__row">
+        <dt>{{ i18n.t('bezirk.label') }}</dt>
+        <dd>
+          <p-select
+            [options]="bezirkOptions()"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="selectedBezirkSlug(user)"
+            (ngModelChange)="setSelectedBezirkSlug(user, $event)"
+            appendTo="body"
+            [ariaLabel]="i18n.t('admin.changeBezirk')"
+          ></p-select>
+        </dd>
+      </div>
+    </dl>
+  </section>
+</ng-template>
+
+<p-menu #userActionsMenu [model]="userActionItems()" [popup]="true" appendTo="body"></p-menu>
+<p-menu #einAbActionsMenu [model]="einAbActionItems()" [popup]="true" appendTo="body"></p-menu>

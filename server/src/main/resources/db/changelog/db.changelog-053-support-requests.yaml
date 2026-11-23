@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: 053-support-requests
+      author: claude
+      changes:
+        # Questions, problems and ideas sent from the help page; admins work through them on the support page.
+        - createTable:
+            tableName: support_requests
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: user_id, type: UUID}
+              - column: {name: contact_foodsharing_id, type: VARCHAR(64), constraints: {nullable: false}}
+              - column: {name: contact_name, type: VARCHAR(255)}
+              - column: {name: bezirk_id, type: UUID}
+              - column: {name: category, type: VARCHAR(20), constraints: {nullable: false}}
+              - column: {name: message, type: VARCHAR(4000), constraints: {nullable: false}}
+              - column: {name: status, type: VARCHAR(20), constraints: {nullable: false}}
+              - column: {name: client_version, type: VARCHAR(50)}
+              - column: {name: server_version, type: VARCHAR(50)}
+              - column: {name: platform, type: VARCHAR(20)}
+              - column: {name: page_url, type: VARCHAR(500)}
+              - column: {name: user_agent, type: VARCHAR(500)}
+              - column: {name: done_at, type: TIMESTAMP WITH TIME ZONE}
+              - column: {name: done_by_name, type: VARCHAR(255)}
+        # Keep the request (with the typed contact) when the user or Bezirk is deleted.
+        - addForeignKeyConstraint:
+            baseTableName: support_requests
+            baseColumnNames: user_id
+            constraintName: fk_support_requests_user
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: SET NULL
+        - addForeignKeyConstraint:
+            baseTableName: support_requests
+            baseColumnNames: bezirk_id
+            constraintName: fk_support_requests_bezirk
+            referencedTableName: bezirke
+            referencedColumnNames: id
+            onDelete: SET NULL
+        - createIndex:
+            tableName: support_requests
+            indexName: idx_support_requests_status_created
+            columns:
+              - column: {name: status}
+              - column: {name: created_at}

@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: 058-bezirk-info-languages
+      author: claude
+      changes:
+        # The Bezirk info page per app language: info_markdown stays German (and the fallback), plus English and
+        # Swiss German. Same type as info_markdown (see 056).
+        - addColumn:
+            tableName: bezirke
+            columns:
+              - column:
+                  name: info_markdown_en
+                  type: VARCHAR(1000000)
+              - column:
+                  name: info_markdown_gws
+                  type: VARCHAR(1000000)

@@ -1,0 +1,222 @@
+<div class="past-import">
+  @if (result(); as done) {
+    <section class="past-import__panel" aria-live="polite">
+      <h3>{{ i18n.t('import.result.title') }}</h3>
+      <ul class="past-import__result">
+        <li>{{ i18n.t('import.result.created') }}: <strong>{{ done.created }}</strong></li>
+        <li>{{ i18n.t('import.result.skipped') }}: <strong>{{ done.skipped }}</strong></li>
+        <li>{{ i18n.t('import.result.needsAttention') }}: <strong>{{ done.needsAttention }}</strong></li>
+        <li>{{ i18n.t('import.result.usersCreated') }}: <strong>{{ done.usersCreated }}</strong></li>
+        @if (done.teachersUpdated > 0) {
+          <li>{{ i18n.t('import.result.teachersUpdated') }}: <strong>{{ done.teachersUpdated }}</strong></li>
+        }
+      </ul>
+      <p class="past-import__hint">{{ i18n.t('import.safeToRepeat') }}</p>
+      <button pButton type="button" severity="secondary" icon="pi pi-upload" [label]="i18n.t('import.another')" (click)="reset()"></button>
+    </section>
+  } @else if (!preview()) {
+    <section class="past-import__panel">
+      <p class="past-import__hint">{{ i18n.t('import.intro') }}</p>
+      <label class="past-import__file">
+        <span>{{ i18n.t('import.file') }}</span>
+        <input #csvFile class="sr-only" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.csv,text/csv,text/plain" (change)="onFileSelected($event)" />
+        <span class="past-import__picker">
+          <span class="p-button p-button-secondary p-button-outlined p-button-sm" aria-hidden="true"><i class="pi pi-file"></i>&nbsp;{{ i18n.t('import.chooseFile') }}</span>
+          <span class="past-import__filename">{{ fileName() || i18n.t('import.noFile') }}</span>
+        </span>
+      </label>
+      <details class="past-import__example">
+        <summary>{{ i18n.t('import.exampleTitle') }}</summary>
+        <pre>{{ i18n.t('import.example') }}</pre>
+      </details>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-search"
+        [label]="i18n.t('import.analyse')"
+        [loading]="busy()"
+        [disabled]="!upload()"
+        (click)="analyse()"
+      ></button>
+    </section>
+  } @else {
+    @if (preview(); as data) {
+      <section class="past-import__panel">
+        <p class="past-import__file-name"><i class="pi pi-file" aria-hidden="true"></i> {{ fileName() }}</p>
+        <div class="past-import__counts">
+          <div class="past-import__count past-import__count--ok">
+            <strong>{{ data.counts.willCreate }}</strong><span>{{ i18n.t('import.count.willCreate') }}</span>
+          </div>
+          <div class="past-import__count">
+            <strong>{{ data.counts.willSkip }}</strong><span>{{ i18n.t('import.count.willSkip') }}</span>
+          </div>
+          <div class="past-import__count past-import__count--warn">
+            <strong>{{ data.counts.needsAttention }}</strong><span>{{ i18n.t('import.count.needsAttention') }}</span>
+          </div>
+          <div class="past-import__count">
+            <strong>{{ data.counts.newUsers }}</strong><span>{{ i18n.t('import.count.newUsers') }}</span>
+          </div>
+        </div>
+        <p class="past-import__hint">
+          {{ i18n.t('import.count.existingUsers') }}: {{ data.counts.existingUsers }}
+          @if (data.counts.newTeachers > 0) {
+            · {{ i18n.t('import.count.newTeachers') }}: {{ data.counts.newTeachers }}
+          }
+          @if (data.counts.teacherUpdates > 0) {
+            · {{ i18n.t('import.count.teacherUpdates') }}: {{ data.counts.teacherUpdates }}
+          }
+        </p>
+
+        @if (data.storeMappings.length > 0 || data.categoryMappings.length > 0) {
+          <details class="app-collapsible past-import__mappings">
+            <summary>{{ i18n.t('import.mappings') }}</summary>
+            @if (data.storeMappings.length > 0) {
+              <h4>{{ i18n.t('import.mappings.stores') }}</h4>
+              <ul>
+                @for (mapping of data.storeMappings; track mapping.from) {
+                  <li>{{ mapping.from }} <i class="pi pi-arrow-right" aria-hidden="true"></i> {{ mapping.to }} ({{ mapping.count }})</li>
+                }
+              </ul>
+            }
+            @if (data.categoryMappings.length > 0) {
+              <h4>{{ i18n.t('import.mappings.categories') }}</h4>
+              <ul>
+                @for (mapping of data.categoryMappings; track mapping.from) {
+                  <li>{{ mapping.from }} <i class="pi pi-arrow-right" aria-hidden="true"></i> {{ i18n.categoryLabel(mapping.to) }} ({{ mapping.count }})</li>
+                }
+              </ul>
+            }
+          </details>
+        }
+
+        <div class="past-import__filters" role="group" [attr.aria-label]="i18n.t('import.filter')">
+          @for (option of ['ALL', 'CREATE', 'SKIP', 'NEEDS_ATTENTION']; track option) {
+            <button
+              type="button"
+              class="past-import__chip"
+              [class.past-import__chip--active]="filter() === option"
+              (click)="filter.set($any(option))"
+            >
+              {{ i18n.t('import.filter.' + option) }} ({{ filterCount($any(option)) }})
+            </button>
+          }
+        </div>
+
+        <div class="past-import__table-wrap">
+          <table class="past-import__table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>{{ i18n.t('import.col.id') }}</th>
+                <th>{{ i18n.t('common.date') }}</th>
+                <th>{{ i18n.t('common.businessName') }}</th>
+                <th>{{ i18n.t('slots.category') }}</th>
+                <th>{{ i18n.t('import.col.teacher') }}</th>
+                <th>{{ i18n.t('common.status') }}</th>
+                <th>{{ i18n.t('import.col.notes') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows(); track row.line) {
+                <tr>
+                  <td>{{ row.line }}</td>
+                  <td>
+                    {{ row.foodsharingId ?? '-' }}
+                    @if (row.newUser && row.foodsharingId) {
+                      <p-tag severity="info" [value]="i18n.t('import.newUser')"></p-tag>
+                    }
+                  </td>
+                  <td>{{ row.date ? (row.date | date: 'dd.MM.yyyy') : row.rawDate || '-' }}</td>
+                  <td>{{ row.store || '-' }}</td>
+                  <td>
+                    {{ row.category ? i18n.categoryLabel(row.category) : row.rawCategory || '-' }}
+                    @if (row.visitFairteiler) {
+                      <p-tag severity="info" icon="pi pi-check" [value]="i18n.t('common.visitFairteiler')"></p-tag>
+                    }
+                  </td>
+                  <td>
+                    {{ row.teacherName || '-' }}
+                    @if (row.teacherFoodsharingId) {
+                      <span class="past-import__hint">({{ row.teacherFoodsharingId }})</span>
+                    }
+                    @if (row.newTeacher) {
+                      <p-tag severity="info" [value]="i18n.t('import.newUser')"></p-tag>
+                    }
+                  </td>
+                  <td><p-tag [severity]="severity(row)" [value]="i18n.t('import.status.' + row.status)"></p-tag></td>
+                  <td>{{ reasonLabels(row).join(', ') }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="past-import__cards">
+          @for (row of rows(); track row.line) {
+            <article class="past-import__card">
+              <div class="past-import__card-head">
+                <strong>#{{ row.line }} · {{ row.foodsharingId ?? '-' }}</strong>
+                <p-tag [severity]="severity(row)" [value]="i18n.t('import.status.' + row.status)"></p-tag>
+              </div>
+              <div>
+                {{ row.date ? (row.date | date: 'dd.MM.yyyy') : row.rawDate || '-' }} · {{ row.store || '-' }}
+              </div>
+              <div>
+                {{ row.category ? i18n.categoryLabel(row.category) : row.rawCategory || '-' }}
+                @if (row.visitFairteiler) {
+                  <p-tag severity="info" icon="pi pi-check" [value]="i18n.t('common.visitFairteiler')"></p-tag>
+                }
+                @if (row.newUser && row.foodsharingId) {
+                  <p-tag severity="info" [value]="i18n.t('import.newUser')"></p-tag>
+                }
+              </div>
+              @if (row.teacherName) {
+                <div>
+                  {{ i18n.t('import.col.teacher') }}: {{ row.teacherName }}
+                  @if (row.teacherFoodsharingId) {
+                    ({{ row.teacherFoodsharingId }})
+                  }
+                </div>
+              }
+              @if (row.reasons.length > 0) {
+                <div class="past-import__hint">{{ reasonLabels(row).join(', ') }}</div>
+              }
+            </article>
+          }
+        </div>
+
+        <div class="past-import__actions">
+          <button
+            pButton
+            type="button"
+            icon="pi pi-check"
+            [label]="i18n.t('import.confirm').replace('{count}', '' + importableCount())"
+            [loading]="busy()"
+            [disabled]="importableCount() === 0"
+            (click)="confirm()"
+          ></button>
+          <button pButton type="button" severity="secondary" icon="pi pi-times" [label]="i18n.t('import.changeFile')" (click)="reset()"></button>
+        </div>
+        <p class="past-import__hint">{{ i18n.t('import.refreshHint') }}</p>
+      </section>
+    }
+  }
+
+  @if (progress(); as refresh) {
+    @if (refresh.total > 0) {
+      <section class="past-import__panel past-import__progress" aria-live="polite">
+        <h3>{{ i18n.t('import.progress.title') }}</h3>
+        <p-progressbar [value]="progressPercent()" [showValue]="true"></p-progressbar>
+        <p class="past-import__hint">
+          {{ progressText() }}
+          @if (refresh.failed > 0) {
+            · {{ i18n.t('import.progress.failed').replace('{failed}', '' + refresh.failed) }}
+          }
+          @if (!refresh.active) {
+            · {{ i18n.t('import.progress.finished') }}
+          }
+        </p>
+      </section>
+    }
+  }
+</div>

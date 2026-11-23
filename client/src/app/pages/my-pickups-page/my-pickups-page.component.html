@@ -1,0 +1,75 @@
+<section class="page-shell">
+  <p-card class="page-card--flat">
+    <ng-template pTemplate="title"><i class="pi pi-shopping-bag title-icon" aria-hidden="true"></i>{{ i18n.t('pickups.title') }}</ng-template>
+    <p class="pickups-intro">{{ i18n.t('pickups.intro') }}</p>
+    <details class="pickups-delay-info">
+      <summary><i class="pi pi-info-circle" aria-hidden="true"></i> {{ i18n.t('pickups.goodToKnow') }}</summary>
+      <ul>
+        <li>{{ i18n.t('pickups.biebInfo') }}</li>
+        <li>{{ i18n.t('pickups.delayInfo') }}</li>
+      </ul>
+    </details>
+
+    @if (loading()) {
+      <div class="pickups-loading" role="status" aria-live="polite">
+        <p-progressspinner strokeWidth="4" [style]="{ width: '2.5rem', height: '2.5rem' }" ariaLabel="Loading"></p-progressspinner>
+        <span>{{ i18n.t('pickups.loading') }}</span>
+      </div>
+    }
+
+    @if (!loading() && stores().length === 0) {
+      <div class="empty-state">
+        <i class="pi pi-shopping-bag" aria-hidden="true"></i>
+        <p>{{ i18n.t('pickups.empty') }}</p>
+        <a pButton severity="secondary" [outlined]="true" icon="pi pi-external-link" [label]="i18n.t('pickups.openFoodsharing')" href="https://foodsharing.network/dashboard" target="_blank" rel="noopener"></a>
+      </div>
+    }
+
+    <div class="pickup-stores">
+      @for (store of stores(); track store.storeId) {
+        <section class="pickup-store">
+          <header class="pickup-store__header">
+            <h2>{{ store.storeName }}</h2>
+            <span class="pickup-store__refreshed">{{ i18n.t('pickups.refreshedAt') }} {{ store.refreshedAt | zurichDateTime: 'short' }}</span>
+          </header>
+
+          <ul class="pickup-list">
+            @for (pickup of store.pickups; track pickup.pickupDate) {
+              <li class="pickup-row" [class.pickup-row--past]="isPast(pickup)">
+                <div class="pickup-row__main">
+                  <div class="pickup-row__date">
+                    <i class="pi pi-calendar" aria-hidden="true"></i>
+                    <strong>{{ pickup.pickupDate | zurichDateTime }}</strong>
+                  </div>
+                  <div class="pickup-row__meta">
+                    <span>{{ i18n.t('pickups.slots') }}: {{ pickup.occupiedSlots }} / {{ pickup.totalSlots }}</span>
+                    <span class="pickup-row__people">{{ pickup.participantNames.join(', ') }}</span>
+                  </div>
+                </div>
+                <div class="pickup-row__status">
+                  <p-tag
+                    [severity]="pickup.confirmed ? 'success' : 'warn'"
+                    [value]="pickup.confirmed ? i18n.t('pickups.confirmed') : i18n.t('pickups.unconfirmed')"></p-tag>
+                  @if (pickup.extraSlotAdded) {
+                    <p-tag severity="info" icon="pi pi-plus" [value]="i18n.t('pickups.slotAdded') + (pickup.extraSlotAddedBy ? ' (' + pickup.extraSlotAddedBy + ')' : '')"></p-tag>
+                  } @else if (pickup.canAddExtraSlot) {
+                    <button
+                      pButton
+                      type="button"
+                      size="small"
+                      icon="pi pi-plus"
+                      [label]="i18n.t('pickups.addSlot')"
+                      [loading]="savingKey() === key(store, pickup)"
+                      loadingIcon="pi pi-spinner pi-spin"
+                      [disabled]="savingKey() !== null"
+                      (click)="confirmAddSlot(store, pickup)"></button>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    </div>
+  </p-card>
+</section>

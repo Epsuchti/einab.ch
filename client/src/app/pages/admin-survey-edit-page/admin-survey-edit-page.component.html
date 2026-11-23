@@ -1,0 +1,104 @@
+<section class="page-shell page-shell--narrow page-stack">
+  <p-card class="page-card--flat">
+    <ng-template pTemplate="title"><i class="pi pi-pencil title-icon" aria-hidden="true"></i>{{ i18n.t(surveyId() ? 'surveys.editTitle' : 'surveys.newTitle') }}</ng-template>
+    @if (loading()) {
+      <app-loading-indicator />
+    } @else {
+    <form class="stack-form" (ngSubmit)="save()">
+      <label>
+        <span>{{ i18n.t('surveys.fieldTitle') }}</span>
+        <input pInputText name="title" maxlength="200" [(ngModel)]="title" />
+      </label>
+      <label>
+        <span>{{ i18n.t('surveys.fieldDescription') }}</span>
+        <textarea pTextarea name="description" rows="3" maxlength="4000" [(ngModel)]="description"></textarea>
+      </label>
+      @if (isOwner()) {
+        <label>
+          <span>{{ i18n.t('surveys.coauthors') }}</span>
+          <p-multiselect
+            name="coauthors"
+            [options]="coauthorCandidates()"
+            optionLabel="label"
+            optionValue="foodsharingId"
+            display="chip"
+            [filter]="true"
+            appendTo="body"
+            [placeholder]="i18n.t('surveys.coauthorsPlaceholder')"
+            [emptyMessage]="i18n.t('surveys.coauthorsNoCandidates')"
+            [(ngModel)]="coauthorIds"></p-multiselect>
+          <small>{{ i18n.t('surveys.coauthorsHint') }}</small>
+        </label>
+      } @else {
+        <div class="survey-authors">
+          <span><i class="pi pi-user" aria-hidden="true"></i> {{ i18n.t('surveys.createdBy') }} <strong>{{ ownerName() }}</strong></span>
+          @if (coauthors().length > 0) {
+            <span><i class="pi pi-users" aria-hidden="true"></i> {{ i18n.t('surveys.coauthors') }}:
+              @for (coauthor of coauthors(); track coauthor.foodsharingId) {
+                <strong>{{ coauthor.name || coauthor.foodsharingId }}</strong>@if (!$last) {, }
+              }
+            </span>
+          }
+        </div>
+      }
+      @if (responseCount() > 0) {
+        <p class="survey-warning">{{ i18n.t('surveys.editWarning') }}</p>
+      }
+
+      <h3>{{ i18n.t('surveys.questions') }}</h3>
+      @for (question of questions(); track $index) {
+        <details class="survey-question survey-question--edit" [open]="!question.label || questions().length <= 2">
+          <summary class="survey-question__summary">
+            <span class="survey-question__number">{{ $index + 1 }}</span>
+            <span class="survey-question__title">{{ question.label || i18n.t('surveys.untitledQuestion') }}<small>{{ typeLabel(question.type) }}</small></span>
+            <span class="survey-question__tools">
+              <button pButton type="button" size="small" severity="secondary" [text]="true" icon="pi pi-arrow-up" [disabled]="$first" [attr.aria-label]="i18n.t('surveys.moveUp')" (click)="$event.preventDefault(); move($index, -1)"></button>
+              <button pButton type="button" size="small" severity="secondary" [text]="true" icon="pi pi-arrow-down" [disabled]="$last" [attr.aria-label]="i18n.t('surveys.moveDown')" (click)="$event.preventDefault(); move($index, 1)"></button>
+              <button pButton type="button" size="small" severity="danger" [text]="true" icon="pi pi-trash" [attr.aria-label]="i18n.t('surveys.removeQuestion')" (click)="$event.preventDefault(); removeQuestion($index)"></button>
+            </span>
+          </summary>
+          <div class="survey-question__body">
+            <label>
+              <span>{{ i18n.t('surveys.questionLabel') }}</span>
+              <textarea pTextarea [autoResize]="true" rows="1" [name]="'label' + $index" maxlength="500" [(ngModel)]="question.label"></textarea>
+            </label>
+            <label>
+              <span>{{ i18n.t('surveys.questionType') }}</span>
+              <p-select
+                [name]="'type' + $index"
+                [options]="typeOptions()"
+                optionLabel="label"
+                optionValue="value"
+                appendTo="body"
+                [(ngModel)]="question.type"></p-select>
+            </label>
+            @if (isChoice(question)) {
+              <label>
+                <span>{{ i18n.t('surveys.options') }}</span>
+                <textarea pTextarea [autoResize]="true" [name]="'options' + $index" rows="3" [(ngModel)]="question.optionsText"></textarea>
+                <small>{{ i18n.t('surveys.optionsHint') }}</small>
+              </label>
+            }
+            @if (question.type === SurveyQuestionType.Store) {
+              <p class="survey-hint">{{ i18n.t('surveys.storeQuestionHint') }}</p>
+            } @else {
+              <label class="checkbox-row">
+                <p-checkbox [name]="'required' + $index" [binary]="true" [(ngModel)]="question.required"></p-checkbox>
+                <span>{{ i18n.t('surveys.required') }}</span>
+              </label>
+            }
+          </div>
+        </details>
+      }
+      <div>
+        <button pButton type="button" severity="secondary" icon="pi pi-plus" [label]="i18n.t('surveys.addQuestion')" (click)="addQuestion()"></button>
+      </div>
+
+      <div class="toolbar-row sticky-save-bar">
+        <button pButton type="submit" icon="pi pi-save" [label]="i18n.t('common.save')" [loading]="saving()" [disabled]="loading()"></button>
+        <a pButton severity="secondary" [label]="i18n.t('common.cancel')" [routerLink]="bezirkContext.route('admin', 'surveys')"></a>
+      </div>
+    </form>
+    }
+  </p-card>
+</section>

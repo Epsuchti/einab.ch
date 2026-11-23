@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: 037-linked-store-window-before-after
+      author: claude
+      changes:
+        - addColumn:
+            tableName: foodsharing_store_automation_linked_stores
+            columns:
+              - column: {name: window_days_before, type: INT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: window_days_after, type: INT, defaultValueNumeric: 0, constraints: {nullable: false}}
+        # The former single value applied to both sides.
+        - sql:
+            sql: UPDATE foodsharing_store_automation_linked_stores SET window_days_before = window_days, window_days_after = window_days
+        - dropColumn:
+            tableName: foodsharing_store_automation_linked_stores
+            columnName: window_days

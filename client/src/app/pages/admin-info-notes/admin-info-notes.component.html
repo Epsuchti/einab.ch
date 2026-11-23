@@ -1,0 +1,114 @@
+<section class="admin-info-notes">
+  <div class="admin-info-notes__head">
+    <p class="admin-info-notes__intro">{{ i18n.t('adminInfoNotes.intro') }}</p>
+    <button pButton type="button" icon="pi pi-plus" [label]="i18n.t('adminInfoNotes.create')" (click)="openCreate()"></button>
+  </div>
+
+  @if (loading()) {
+    <app-loading-indicator />
+  } @else if (!notes().length) {
+    <div class="empty-state">
+      <i class="pi pi-megaphone" aria-hidden="true"></i>
+      <p>{{ i18n.t('adminInfoNotes.empty') }}</p>
+    </div>
+  } @else {
+    <ul class="admin-info-notes__list">
+      @for (note of sortedNotes(); track note.id) {
+        @let noteState = state(note);
+        <li class="info-note-item" [class.info-note-item--ended]="noteState === 'ended'" [class.info-note-item--warning]="note.severity === Severity.Warning">
+          <div class="info-note-item__tags">
+            <p-tag [severity]="stateSeverity(noteState)" [value]="i18n.t('adminInfoNotes.state.' + noteState)"></p-tag>
+            <p-tag severity="secondary" [icon]="note.bezirkSlug ? 'pi pi-map-marker' : 'pi pi-globe'" [value]="note.bezirkName || i18n.t('adminInfoNotes.siteWide')"></p-tag>
+            @if (note.severity === Severity.Warning) {
+              <p-tag severity="warn" icon="pi pi-exclamation-triangle" [value]="i18n.t('adminInfoNotes.severityWarning')"></p-tag>
+            }
+          </div>
+          <div class="info-note-item__text">
+            @if (note.title) { <strong>{{ note.title }}</strong> }
+            <p>{{ note.message }}</p>
+          </div>
+          <small class="info-note-item__period">
+            <i class="pi pi-calendar" aria-hidden="true"></i>
+            {{ note.startsAt | zurichDateTime }} – {{ note.endsAt | zurichDateTime }}
+            @if (note.createdByName) { · {{ i18n.t('adminInfoNotes.createdBy').replace('{0}', note.createdByName) }} }
+          </small>
+          <div class="info-note-item__actions">
+            <button pButton type="button" size="small" icon="pi pi-pencil" severity="secondary" [outlined]="true" [label]="i18n.t('common.edit')" (click)="openEdit(note)"></button>
+            @if (noteState === 'active') {
+              <button pButton type="button" size="small" icon="pi pi-stop-circle" severity="secondary" [outlined]="true" [label]="i18n.t('adminInfoNotes.endNow')" [loading]="busyId() === note.id" (click)="endNow(note)"></button>
+            }
+            <button pButton type="button" size="small" icon="pi pi-trash" severity="danger" [text]="true" [label]="i18n.t('common.delete')" [disabled]="busyId() === note.id" (click)="remove(note)"></button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+<p-dialog
+  [visible]="dialogVisible()"
+  (visibleChange)="dialogVisible.set($event)"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  styleClass="sheet-dialog"
+  [style]="{ width: 'min(36rem, 96vw)' }"
+  [header]="i18n.t(editingId() ? 'adminInfoNotes.editTitle' : 'adminInfoNotes.createTitle')">
+  <form class="stack-form admin-info-note-form" (ngSubmit)="save()">
+    <label>
+      <span>{{ i18n.t('adminInfoNotes.target') }}</span>
+      <p-select
+        name="target"
+        [options]="targetOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="target()"
+        (ngModelChange)="target.set($event)"
+        appendTo="body"></p-select>
+      <small>{{ i18n.t(target() ? 'adminInfoNotes.targetBezirkHint' : 'adminInfoNotes.targetSiteHint') }}</small>
+    </label>
+
+    <div class="admin-info-note-form__field">
+      <span class="admin-info-note-form__label">{{ i18n.t('adminInfoNotes.severity') }}</span>
+      <div class="segmented admin-info-note-form__severity" role="radiogroup" [attr.aria-label]="i18n.t('adminInfoNotes.severity')">
+        <button type="button" role="radio" class="segmented__item" [class.is-active]="severity() === Severity.Info" [attr.aria-checked]="severity() === Severity.Info" (click)="severity.set(Severity.Info)"><i class="pi pi-info-circle" aria-hidden="true"></i> {{ i18n.t('adminInfoNotes.severityInfo') }}</button>
+        <button type="button" role="radio" class="segmented__item" [class.is-active]="severity() === Severity.Warning" [attr.aria-checked]="severity() === Severity.Warning" (click)="severity.set(Severity.Warning)"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i> {{ i18n.t('adminInfoNotes.severityWarning') }}</button>
+      </div>
+    </div>
+
+    <label>
+      <span>{{ i18n.t('adminInfoNotes.title') }}</span>
+      <input pInputText type="text" name="title" maxlength="200" [ngModel]="title()" (ngModelChange)="title.set($event)" [placeholder]="i18n.t('adminInfoNotes.titlePlaceholder')" />
+    </label>
+
+    <label>
+      <span>{{ i18n.t('adminInfoNotes.message') }} *</span>
+      <textarea pTextarea name="message" rows="5" [maxlength]="maxMessageLength" required [ngModel]="message()" (ngModelChange)="message.set($event)" [placeholder]="i18n.t('adminInfoNotes.messagePlaceholder')" [attr.aria-invalid]="submitted() && messageMissing() ? 'true' : null"></textarea>
+      @if (submitted() && messageMissing()) { <small class="field-error" role="alert">{{ i18n.t('adminInfoNotes.messageRequired') }}</small> }
+    </label>
+
+    <div class="admin-info-note-form__dates">
+      <label>
+        <span>{{ i18n.t('adminInfoNotes.startsAt') }} *</span>
+        <p-datepicker name="startsAt" dateFormat="dd.mm.yy" [showTime]="true" hourFormat="24" [showIcon]="true" appendTo="body" [ngModel]="startsAt()" (ngModelChange)="startsAt.set($event)" [invalid]="submitted() && !startsAt()"></p-datepicker>
+      </label>
+      <label>
+        <span>{{ i18n.t('adminInfoNotes.endsAt') }} *</span>
+        <p-datepicker name="endsAt" dateFormat="dd.mm.yy" [showTime]="true" hourFormat="24" [showIcon]="true" appendTo="body" [minDate]="startsAt()" [ngModel]="endsAt()" (ngModelChange)="endsAt.set($event)" [invalid]="(submitted() && !endsAt()) || endBeforeStart()"></p-datepicker>
+      </label>
+    </div>
+    @if (endBeforeStart()) {
+      <small class="field-error" role="alert">{{ i18n.t('adminInfoNotes.endBeforeStart') }}</small>
+    } @else if (submitted() && datesMissing()) {
+      <small class="field-error" role="alert">{{ i18n.t('adminInfoNotes.datesRequired') }}</small>
+    } @else if (endInPast()) {
+      <small class="admin-info-note-form__hint"><i class="pi pi-info-circle" aria-hidden="true"></i> {{ i18n.t('adminInfoNotes.endInPast') }}</small>
+    }
+
+    <div class="dialog-actions">
+      <button pButton type="button" severity="secondary" [text]="true" [label]="i18n.t('common.cancel')" (click)="dialogVisible.set(false)"></button>
+      <button pButton type="submit" icon="pi pi-check" [label]="i18n.t(editingId() ? 'common.save' : 'adminInfoNotes.publish')" [loading]="saving()"></button>
+    </div>
+  </form>
+</p-dialog>

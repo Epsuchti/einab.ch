@@ -1,0 +1,217 @@
+.past-import {
+  display: grid;
+  gap: 1rem;
+  padding: 0.25rem;
+}
+
+.past-import__panel {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+
+  h3,
+  h4,
+  p {
+    margin: 0;
+  }
+}
+
+.past-import__file,
+.past-import__toggle {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.past-import__toggle {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.past-import__file input {
+  max-width: 100%;
+}
+
+.past-import__file-name {
+  overflow-wrap: anywhere;
+  color: var(--app-text);
+  font-weight: 650;
+}
+
+.past-import__hint {
+  color: var(--app-muted, #5c6b63);
+  font-size: 0.9rem;
+}
+
+.past-import__counts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.past-import__count {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: #fff;
+
+  strong {
+    font-size: 1.5rem;
+  }
+
+  span {
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+  }
+}
+
+.past-import__count--ok {
+  border-color: var(--app-primary-strong);
+}
+
+.past-import__count--warn {
+  border-color: #d08a00;
+}
+
+.past-import__mappings {
+  ul {
+    margin: 0.35rem 0;
+    padding-left: 1.1rem;
+    overflow-wrap: anywhere;
+  }
+}
+
+.past-import__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.past-import__chip {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--app-text);
+  cursor: pointer;
+  font: inherit;
+}
+
+.past-import__chip--active {
+  border-color: var(--app-primary-strong);
+  background: var(--app-primary-strong);
+  color: #fff;
+}
+
+.past-import__table-wrap {
+  overflow-x: auto;
+}
+
+.past-import__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid var(--app-border);
+    text-align: left;
+    vertical-align: top;
+  }
+}
+
+.past-import__cards {
+  display: none;
+  gap: 0.6rem;
+}
+
+.past-import__card {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: #fff;
+  overflow-wrap: anywhere;
+}
+
+.past-import__card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.past-import__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.past-import__result {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .past-import__table-wrap {
+    display: none;
+  }
+
+  .past-import__cards {
+    display: grid;
+  }
+
+  .past-import__counts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .past-import__actions button {
+    flex: 1 1 100%;
+  }
+}
+
+.past-import__picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+
+.past-import__file:focus-within .p-button {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
+}
+
+.past-import__filename {
+  color: var(--app-text-muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.past-import__example,
+.past-import__example summary {
+  background: none;
+}
+
+.past-import__example summary {
+  min-height: 2.25rem;
+  padding-block: 0.4rem;
+  color: var(--app-primary-strong);
+  font-size: 0.88rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.past-import__example pre {
+  /* Wrap long CSV lines instead of scrolling sideways on phone. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 0.6rem;
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+  font-size: 0.78rem;
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status bar icon for push notifications: white heart (from favicon.svg) on transparent. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M32,49.2 L12.7,30.9C5.1,23.7 7.5,11 17.7,11c5.3,0 10.2,2.9 12.7,7.5C32.9,13.9 37.8,11 43.1,11c10.2,0 12.6,12.7 5,19.9z" />
+</vector>

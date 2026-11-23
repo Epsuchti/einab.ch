@@ -1,0 +1,40 @@
+<ol class="stepper" [class.stepper--compact]="compact()" [class.stepper--selectable]="selectable()">
+  @for (step of steps(); track $index) {
+    <li
+      class="stepper__step"
+      [class.stepper__step--empty]="step.userCount === 0"
+      [class.stepper__step--verified]="isVerified(step)"
+      [class.stepper__step--selected]="selectedIndex() === $index"
+    >
+      @if (selectable()) {
+        <button type="button" class="stepper__target" [attr.aria-pressed]="selectedIndex() === $index" (click)="select($index)">
+          <ng-container *ngTemplateOutlet="content; context: { $implicit: step }"></ng-container>
+        </button>
+      } @else {
+        <div class="stepper__target">
+          <ng-container *ngTemplateOutlet="content; context: { $implicit: step }"></ng-container>
+        </div>
+      }
+    </li>
+  }
+</ol>
+
+<ng-template #content let-step>
+  <span class="stepper__circle">
+    <strong>{{ step.userCount }}</strong>
+    @if (step.stalledCount > 0) {
+      <span class="stepper__stalled" [attr.title]="stalledTooltip(step)" [attr.aria-label]="stalledTooltip(step)">
+        <i class="pi pi-clock" aria-hidden="true"></i>{{ step.stalledCount }}
+      </span>
+    }
+  </span>
+  <span class="stepper__text">
+    <span class="stepper__label">{{ stepLabel(step) }}</span>
+    @if (!compact() && step.stalledCount > 0) {
+      <small class="stepper__stalled-text">{{ stalledText(step) }}</small>
+    }
+    @if (!compact() && step.medianDaysInStep !== null && step.medianDaysInStep !== undefined) {
+      <small>{{ i18n.t('funnel.step.medianDaysShort').replace('{days}', '' + step.medianDaysInStep) }}</small>
+    }
+  </span>
+</ng-template>

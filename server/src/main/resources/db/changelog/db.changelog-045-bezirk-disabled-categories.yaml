@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 045-bezirk-disabled-categories
+      author: claude
+      changes:
+        # Categories a Bezirk does not have; they are not offered for new EinAbs there.
+        - createTable:
+            tableName: bezirk_disabled_categories
+            columns:
+              - column: {name: bezirk_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: category, type: VARCHAR(64), constraints: {nullable: false}}
+        - addPrimaryKey:
+            tableName: bezirk_disabled_categories
+            columnNames: bezirk_id, category
+            constraintName: pk_bezirk_disabled_categories
+        - addForeignKeyConstraint:
+            baseTableName: bezirk_disabled_categories
+            baseColumnNames: bezirk_id
+            referencedTableName: bezirke
+            referencedColumnNames: id
+            constraintName: fk_bezirk_disabled_categories_bezirk
+            onDelete: CASCADE

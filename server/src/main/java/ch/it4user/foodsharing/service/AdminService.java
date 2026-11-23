@@ -1,0 +1,487 @@
+package ch.it4user.foodsharing.service;
+
+import ch.it4user.foodsharing.domain.entity.Bezirk;
+import ch.it4user.foodsharing.domain.entity.BookingComment;
+import ch.it4user.foodsharing.domain.entity.User;
+import ch.it4user.foodsharing.domain.entity.EinAb;
+import ch.it4user.foodsharing.domain.enumtype.LanguageCode;
+import ch.it4user.foodsharing.domain.entity.Slot;
+import ch.it4user.foodsharing.domain.enumtype.SlotStatus;
+import ch.it4user.foodsharing.repository.BookingCommentRepository;
+import ch.it4user.foodsharing.repository.EinAbRepository;
+import ch.it4user.foodsharing.repository.UserRepository;
+import ch.it4user.foodsharing.repository.SlotRepository;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.time.Instant;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class AdminService {
+
+    private static final List<SlotStatus> ACTIVE_BOOKING_STATUSES = List.of(SlotStatus.BOOKED, SlotStatus.DONE);
+    private static final List<SlotStatus> USER_BOOKING_DISPLAY_STATUSES = List.of(SlotStatus.BOOKED, SlotStatus.DONE, SlotStatus.CANCELLED);
+    private static final int MAX_DELETE_REASON_LENGTH = 1000;
+
+    private final TeacherService teacherService;
+    private final BezirkService bezirkService;
+    private final BookingUserService bookingUserService;
+    private final SlotRepository slotRepository;
+    private final UserRepository userRepository;
+    private final BookingCommentRepository bookingCommentRepository;
+    private final EinAbRepository einAbRepository;
+    private final FoodsharingMessageService foodsharingMessageService;
+    private final MessageTemplateService messageTemplateService;
+    private final UserRefreshQueueService userRefreshQueueService;
+
+    public AdminService(TeacherService teacherService,
+                        BezirkService bezirkService,
+                        BookingUserService bookingUserService,
+                        SlotRepository slotRepository,
+                        UserRepository userRepository,
+                        BookingCommentRepository bookingCommentRepository,
+                        EinAbRepository einAbRepository,
+                        FoodsharingMessageService foodsharingMessageService,
+                        MessageTemplateService messageTemplateService,
+                        UserRefreshQueueService userRefreshQueueService) {
+        this.teacherService = teacherService;
+        this.bezirkService = bezirkService;
+        this.bookingUserService = bookingUserService;
+        this.slotRepository = slotRepository;
+        this.userRepository = userRepository;
+        this.bookingCommentRepository = bookingCommentRepository;
+        this.einAbRepository = einAbRepository;
+        this.foodsharingMessageService = foodsharingMessageService;
+        this.messageTemplateService = messageTemplateService;
+        this.userRefreshQueueService = userRefreshQueueService;
+    }
+
+    public Page<User> getTeachers(String bezirkSlug, int page, int size) {
+        return teacherService.findAllTeachers(bezirkSlug, page, size);
+    }
+
+    public Page<User> getAdmins(int page, int size) {
+        return userRepository.findAllByCanManageUsersTrueOrderByNameAsc(
+                org.springframework.data.domain.PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100)));
+    }
+
+    public User setTeacherActive(java.util.UUID teacherId, boolean active) {
+        return teacherService.setTeacherActive(teacherId, active);
+    }
+
+    public User setTeacherAdmin(UUID teacherId, boolean admin) {
+        return teacherService.setTeacherAdmin(teacherId, admin);
+    }
+
+    @Transactional
+    public User createBookingUser(String foodsharingId, String bezirkSlug) {
+        Bezirk bezirk = bezirkService.requireActive(bezirkSlug);
+        User user = bookingUserService.getOrCreate(foodsharingId, LanguageCode.DE, bezirk);
+        bookingUserService.assignToBezirk(user, bezirk);
+        user.setActive(true);
+        return user;
+    }
+
+    /**
+     * Makes the user with this Foodsharing ID a teacher ("EinAbs geben") in the Bezirk, creating the user first when
+     * it does not exist yet. Existing users keep their name and language; only new users are looked up on Foodsharing.
+     */
+    @Transactional
+    public TeacherGrantResult addTeacherByFoodsharingId(String foodsharingId, String bezirkSlug) {
+        Bezirk bezirk = bezirkService.requireActive(bezirkSlug);
+        String normalizedFoodsharingId = foodsharingId == null ? "" : foodsharingId.trim();
+        if (!normalizedFoodsharingId.matches("\\d+")) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, ApiErrorCode.VALIDATION_FAILED);
+        }
+        User existing = userRepository.findByFoodsharingIdIgnoreCaseForUpdate(normalizedFoodsharingId).orElse(null);
+        if (existing != null) {
+            bookingUserService.assignToBezirk(existing, bezirk);
+            boolean alreadyTeacher = existing.isCanGiveEinAbs() && existing.isActive();
+            existing.setCanGiveEinAbs(true);
+            existing.setActive(true);
+            return new TeacherGrantResult(existing, false, alreadyTeacher);
+        }
+        User created = bookingUserService.getOrCreate(normalizedFoodsharingId, LanguageCode.DE, bezirk);
+        bookingUserService.assignToBezirk(created, bezirk);
+        created.setCanGiveEinAbs(true);
+        created.setActive(true);
+        return new TeacherGrantResult(created, true, false);
+    }
+
+    /**
+     * Queues a background refresh from Foodsharing for teachers added in bulk who already existed here, so their name,
+     * phone number and verification are current. New users are not queued: they were just read from Foodsharing.
+     */
+    public int queueTeacherRefresh(String bezirkSlug, Collection<User> existingTeachers) {
+        if (existingTeachers.isEmpty()) {
+            return 0;
+        }
+        return userRefreshQueueService.enqueue(bezirkService.requireActive(bezirkSlug), existingTeachers);
+    }
+
+    public Page<EinAb> getEinAbs(String bezirkSlug, int page, int size) {
+        return einAbRepository.findAllByBezirkAndStartDateTimeGreaterThanEqualOrderByStartDateTimeAsc(
+                bezirkService.requireActive(bezirkSlug),
+                Instant.now(),
+                org.springframework.data.domain.PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100)));
+    }
+
+    /** Booked and done slots of the given EinAbs, grouped by EinAb id. */
+    public Map<UUID, List<Slot>> findBookedSlotsByEinAb(Collection<EinAb> einAbs) {
+        if (einAbs.isEmpty()) {
+            return Map.of();
+        }
+        return slotRepository.findAllByEinAbInAndStatusInOrderByBookedAtAsc(einAbs, TeacherService.BLOCKING_STATUSES).stream()
+                .filter(slot -> slot.getBookingUser() != null)
+                .collect(Collectors.groupingBy(slot -> slot.getEinAb().getId()));
+    }
+
+    public void removeBooking(String bezirkSlug, User admin, UUID slotId) {
+        teacherService.removeBookingAsAdmin(bezirkSlug, admin, slotId);
+    }
+
+    public void deleteEinAb(String bezirkSlug, User admin, UUID einAbId, String reason) {
+        EinAb einAb = einAbRepository.findWithTeacherByIdAndBezirk(einAbId, bezirkService.requireActive(bezirkSlug))
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiErrorCode.EINAB_NOT_FOUND));
+        boolean ownEinAb = einAb.getTeacher().getId().equals(admin.getId());
+        String normalizedReason = reason == null || reason.isBlank() ? null : reason.trim();
+        if (!ownEinAb && (normalizedReason == null || normalizedReason.length() > MAX_DELETE_REASON_LENGTH)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, ApiErrorCode.VALIDATION_FAILED, List.of("reason"));
+        }
+        teacherService.deleteEinAbAsAdmin(bezirkSlug, admin, einAbId);
+        if (!ownEinAb) {
+            sendEinAbDeletedMessage(einAb, admin, normalizedReason);
+        }
+    }
+
+    private void sendEinAbDeletedMessage(EinAb einAb, User admin, String reason) {
+        User teacher = einAb.getTeacher();
+        LanguageCode language = teacher.getPreferredLanguage() == null ? LanguageCode.DE : teacher.getPreferredLanguage();
+        foodsharingMessageService.send(
+                teacher.getFoodsharingId(),
+                messageTemplateService.adminEinAbDeletedSubject(language),
+                messageTemplateService.adminEinAbDeletedBody(language, einAb, admin.getName(), reason));
+    }
+
+    @Transactional
+    public EinAb createHistoricalEinAb(String bezirkSlug, User admin, UUID bookingUserId,
+                                       ch.it4user.foodsharing.openapi.model.CreateHistoricalEinAbRequest request) {
+        Bezirk bezirk = bezirkService.requireActive(bezirkSlug);
+        User bookingUser = userRepository.findWithBezirkById(bookingUserId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiErrorCode.BOOKING_USER_NOT_FOUND));
+        if (bookingUser.getBezirk() != null && bookingUser.getBezirk().isActive()
+                && !bookingUser.getBezirk().getId().equals(bezirk.getId())) {
+            throw new ApiException(HttpStatus.CONFLICT, ApiErrorCode.USER_BEZIRK_MISMATCH);
+        }
+        EinAb einAb = teacherService.createHistoricalEinAb(
+                bezirkSlug, admin,
+                ch.it4user.foodsharing.domain.enumtype.EinAbCategory.valueOf(request.getCategory().getValue()),
+                request.getStartDateTime().toInstant(), request.getBusinessName(),
+                Boolean.TRUE.equals(request.getVisitFairteiler()));
+        Slot slot = slotRepository.findAllByEinAbOrderByCreatedAtAsc(einAb).stream().findFirst()
+                .orElseThrow(() -> new ApiException(HttpStatus.CONFLICT, ApiErrorCode.BOOKING_NOT_FOUND));
+        slot.setBookingUser(bookingUser);
+        slot.setStatus(SlotStatus.DONE);
+        slot.setDoneAt(Instant.now());
+        String comment = request.getComment() == null ? "" : request.getComment().trim();
+        if (!comment.isEmpty()) {
+            BookingComment bookingComment = new BookingComment();
+            bookingComment.setBookingUser(bookingUser);
+            bookingComment.setSlot(slot);
+            bookingComment.setTeacher(admin);
+            bookingComment.setComment(comment);
+            bookingCommentRepository.save(bookingComment);
+        }
+        return einAb;
+    }
+
+    public Page<Slot> getBookings(String bezirkSlug, int page, int size) {
+        Bezirk bezirk = bezirkService.requireActive(bezirkSlug);
+        return slotRepository.findAllByStatusInAndBezirkOrderByEinAbStartDateTimeAsc(
+                ACTIVE_BOOKING_STATUSES,
+                bezirk,
+                org.springframework.data.domain.PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100)));
+    }
+
+    @Transactional
+    public Slot setBookingCounted(String bezirkSlug, UUID slotId, boolean counted) {
+        Bezirk bezirk = bezirkService.requireActive(bezirkSlug);
+        Slot slot = slotRepository.findForUpdateByIdAndBezirk(slotId, bezirk)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiErrorCode.BOOKING_NOT_FOUND));
+        if (slot.getBookingUser() == null) {
+            throw new ApiException(HttpStatus.CONFLICT, ApiErrorCode.BOOKING_NOT_FOUND);
+        }
+        if (!slot.getEinAb().getStartDateTime().isBefore(java.time.Instant.now())) {
+            throw new ApiException(HttpStatus.CONFLICT, ApiErrorCode.ONLY_PAST_APPOINTMENTS_COUNTABLE);
+        }
+        if (counted) {
+            if (slot.getStatus() != SlotStatus.CANCELLED) {
+                throw new ApiException(HttpStatus.CONFLICT, ApiErrorCode.ONLY_CANCELLED_APPOINTMENTS_COUNTABLE);
+            }
+            slot.setStatus(SlotStatus.BOOKED);
+        } else {
+            if (slot.getStatus() != SlotStatus.BOOKED && slot.getStatus() != SlotStatus.DONE) {
+                throw new ApiException(HttpStatus.CONFLICT, ApiErrorCode.ONLY_COUNTED_APPOINTMENTS_NOT_COUNTABLE);
+            }
+            slot.setStatus(SlotStatus.CANCELLED);
+        }
+        slot.setDoneAt(null);
+        return slot;
+    }
+
+    @Transactional
+    public BookingComment addBookingComment(String bezirkSlug, UUID slotId, User admin, String comment) {
+        Bezirk bezirk = bezirkService.requireActive(bezirkSlug);
+        Slot slot = slotRepository.findByIdAndEinAbBezirk(slotId, bezirk)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiErrorCode.SLOT_NOT_FOUND));
+        if (slot.getBookingUser() == null) {
+            throw new ApiException(HttpStatus.CONFLICT, ApiErrorCode.BOOKING_NOT_FOUND);
+        }
+        BookingComment bookingComment = new BookingComment();
+        bookingComment.setBookingUser(slot.getBookingUser());
+        bookingComment.setSlot(slot);
+        bookingComment.setTeacher(admin);
+        bookingComment.setComment(comment.trim());
+        return bookingCommentRepository.save(bookingComment);
+    }
+
+    public AdminUsersView getUsers(String bezirkSlug,
+                                   String search,
+                                   boolean unassigned,
+                                   boolean allBezirke,
+                                   int page,
+                                   int size,
+                                   boolean threePickupsOnly,
+                                   boolean activeOnly,
+                                   boolean unverifiedOnly) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        String normalizedSearch = search == null ? "" : search.trim().toLowerCase(Locale.ROOT);
+        Bezirk bezirk = unassigned || allBezirke ? null : bezirkService.requireActive(bezirkSlug);
+        List<User> users = allBezirke
+                ? userRepository.findAllWithBezirk()
+                : unassigned
+                ? userRepository.findAllWithoutActiveBezirk()
+                : userRepository.findAllByBezirk(bezirk);
+        Map<UUID, List<Slot>> bookingsByUser = groupBookings(users, bezirk, allBezirke);
+        Map<UUID, List<BookingComment>> commentsByUser = groupComments(users);
+        List<User> sortedUsers = users.stream()
+                .filter(user -> matchesSearch(user, normalizedSearch))
+                .filter(user -> !activeOnly || user.isActive())
+                .filter(user -> !unverifiedOnly || !user.isVerified())
+                .filter(user -> !threePickupsOnly || isReadyToVerify(user, bezirk, bookingsByUser, commentsByUser))
+                .sorted(Comparator
+                        .comparing((User user) -> latestPickupAt(bookingsByUser.getOrDefault(user.getId(), List.of())),
+                                Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(User::getCreatedAt, Comparator.reverseOrder()))
+                .toList();
+        int fromIndex = Math.min(safePage * safeSize, sortedUsers.size());
+        int toIndex = Math.min(fromIndex + safeSize, sortedUsers.size());
+        Page<User> bookingUsers = new org.springframework.data.domain.PageImpl<>(
+                sortedUsers.subList(fromIndex, toIndex),
+                org.springframework.data.domain.PageRequest.of(safePage, safeSize),
+                sortedUsers.size());
+        // Same check as the "Bereit zum Verifizieren" filter, so the list only offers Verifizieren where the filter would show the user.
+        Set<UUID> readyToVerifyUserIds = bookingUsers.getContent().stream()
+                .filter(user -> isReadyToVerify(user, bezirk, bookingsByUser, commentsByUser))
+                .map(User::getId)
+                .collect(Collectors.toSet());
+        return new AdminUsersView(bookingUsers, bookingsByUser, commentsByUser, readyToVerifyUserIds);
+    }
+
+    /** Person search of the admin past EinAb form: at most 10 people of the Bezirk or without a Bezirk. */
+    public List<User> searchBookingUsers(String bezirkSlug, String query) {
+        Bezirk bezirk = bezirkService.requireActive(bezirkSlug);
+        String text = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+        if (text.length() < 2) {
+            return List.of();
+        }
+        String escaped = text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+        return userRepository.searchByBezirkOrWithoutBezirk(
+                bezirk, "%" + escaped + "%", escaped + "%", org.springframework.data.domain.PageRequest.of(0, 10));
+    }
+
+    private boolean matchesSearch(User user, String search) {
+        return search.isBlank()
+                || user.getName().toLowerCase(Locale.ROOT).contains(search)
+                || user.getFoodsharingId().toLowerCase(Locale.ROOT).contains(search);
+    }
+
+    @Transactional
+    public User disableBookingUser(UUID bookingUserId) {
+        return bookingUserService.disable(bookingUserId);
+    }
+
+    @Transactional
+    public User enableBookingUser(UUID bookingUserId) {
+        return bookingUserService.enable(bookingUserId);
+    }
+
+    @Transactional
+    public User verifyBookingUser(UUID bookingUserId) {
+        return bookingUserService.verify(bookingUserId);
+    }
+
+    @Transactional
+    public User unverifyBookingUser(UUID bookingUserId) {
+        return bookingUserService.unverify(bookingUserId);
+    }
+
+    @Transactional
+    public User setVerificationMessageSent(UUID bookingUserId, boolean sent) {
+        return bookingUserService.setVerificationMessageSent(bookingUserId, sent);
+    }
+
+    @Transactional
+    public User refreshBookingUser(UUID bookingUserId) {
+        return bookingUserService.refreshUserData(bookingUserId);
+    }
+
+    @Transactional
+    public User grantBookingUserAdmin(UUID bookingUserId) {
+        User bookingUser = userRepository.findWithBezirkById(bookingUserId)
+                .filter(User::isActive)
+                .filter(user -> !user.isCanGiveEinAbs())
+                .orElseThrow(() -> new ApiException(org.springframework.http.HttpStatus.NOT_FOUND, ApiErrorCode.BOOKING_USER_NOT_FOUND));
+        bookingUser.setCanManageUsers(true);
+        bookingUser.setActive(true);
+        return bookingUser;
+    }
+
+    @Transactional
+    public User setAdminActive(UUID adminUserId, boolean active) {
+        User adminUser = userRepository.findWithBezirkById(adminUserId)
+                .filter(User::isCanManageUsers)
+                .orElseThrow(() -> new ApiException(org.springframework.http.HttpStatus.NOT_FOUND, ApiErrorCode.RESOURCE_NOT_FOUND));
+        if (adminUser.isCanGiveEinAbs()) {
+            return teacherService.setTeacherActive(adminUserId, active);
+        }
+        adminUser.setActive(active);
+        return adminUser;
+    }
+
+    @Transactional
+    public User setUserPermissions(UUID userId, UserPermissions permissions) {
+        User user = userRepository.findWithBezirkById(userId)
+                .orElseThrow(() -> new ApiException(org.springframework.http.HttpStatus.NOT_FOUND, ApiErrorCode.RESOURCE_NOT_FOUND));
+        user.setCanGiveEinAbs(permissions.canGiveEinAbs());
+        user.setCanManageUsers(permissions.canManageUsers());
+        user.setCanUseAutomations(permissions.canUseAutomations());
+        user.setCanSeeUserPickupCountGrouping(permissions.canSeeUserPickupCountGrouping());
+        user.setCanSeeAllAutomationDecisions(permissions.canSeeAllAutomationDecisions());
+        user.setCanManageSurveys(permissions.canManageSurveys());
+        if (permissions.canManageUsers()) {
+            user.setActive(true);
+        }
+        return user;
+    }
+
+    @Transactional
+    public User setUserBezirk(UUID userId, String bezirkSlug) {
+        User user = userRepository.findWithBezirkById(userId)
+                .orElseThrow(() -> new ApiException(org.springframework.http.HttpStatus.NOT_FOUND, ApiErrorCode.RESOURCE_NOT_FOUND));
+        user.setBezirk(bezirkSlug == null || bezirkSlug.isBlank() ? null : bezirkService.requireActive(bezirkSlug));
+        return user;
+    }
+
+    @Transactional
+    public User setAdminAdmin(UUID adminUserId, boolean admin) {
+        User adminUser = userRepository.findWithBezirkById(adminUserId)
+                .filter(User::isCanManageUsers)
+                .orElseThrow(() -> new ApiException(org.springframework.http.HttpStatus.NOT_FOUND, ApiErrorCode.RESOURCE_NOT_FOUND));
+        adminUser.setCanManageUsers(admin);
+        if (admin) {
+            adminUser.setActive(true);
+        }
+        return adminUser;
+    }
+
+    private Map<UUID, List<Slot>> groupBookings(Collection<User> users, Bezirk bezirk, boolean allBezirke) {
+        if (users.isEmpty() || (!allBezirke && bezirk == null)) {
+            return Map.of();
+        }
+        List<Slot> bookings = allBezirke
+                ? slotRepository.findAllByActiveBookingUsersAndStatuses(users, USER_BOOKING_DISPLAY_STATUSES)
+                : slotRepository.findAllByActiveBookingUsersAndStatusesAndBezirk(users, USER_BOOKING_DISPLAY_STATUSES, bezirk);
+        return bookings.stream().collect(Collectors.groupingBy(slot -> slot.getBookingUser().getId()));
+    }
+
+    private Map<UUID, List<BookingComment>> groupComments(Collection<User> users) {
+        if (users.isEmpty()) {
+            return Map.of();
+        }
+        List<BookingComment> comments = bookingCommentRepository.findAllByBookingUserInOrderByCreatedAtAsc(users);
+        return comments.stream().collect(Collectors.groupingBy(comment -> comment.getBookingUser().getId()));
+    }
+
+    private java.time.Instant latestPickupAt(List<Slot> bookings) {
+        return bookings.stream()
+                .filter(slot -> ACTIVE_BOOKING_STATUSES.contains(slot.getStatus()))
+                .map(slot -> slot.getEinAb().getStartDateTime())
+                .max(Comparator.naturalOrder())
+                .orElse(null);
+    }
+
+    /** The "Bereit zum Verifizieren" condition: enough DONE EinAbs, each commented on by its EinAb-Geber:in. */
+    private boolean isReadyToVerify(User user,
+                                    Bezirk selectedBezirk,
+                                    Map<UUID, List<Slot>> bookingsByUser,
+                                    Map<UUID, List<BookingComment>> commentsByUser) {
+        return hasThreeCommentedPickups(
+                requiredDonePickups(user, selectedBezirk),
+                bookingsByUser.getOrDefault(user.getId(), List.of()),
+                commentsByUser.getOrDefault(user.getId(), List.of()));
+    }
+
+    /**
+     * True when the user has at least {@code requiredPickups} successful (DONE) EinAbs and
+     * every teacher of those EinAbs has left at least one comment on the user.
+     */
+    private boolean hasThreeCommentedPickups(int requiredPickups, List<Slot> bookings, List<BookingComment> comments) {
+        List<Slot> doneBookings = bookings.stream()
+                .filter(slot -> slot.getStatus() == SlotStatus.DONE)
+                .toList();
+        if (doneBookings.size() < requiredPickups) {
+            return false;
+        }
+        Set<UUID> commentingTeacherIds = comments.stream()
+                .map(comment -> comment.getTeacher().getId())
+                .collect(Collectors.toSet());
+        return doneBookings.stream()
+                .map(slot -> slot.getEinAb().getTeacher().getId())
+                .allMatch(commentingTeacherIds::contains);
+    }
+
+    /**
+     * The Bezirk's booking limit (maxActiveBookingsPerUser): the selected Bezirk, or the
+     * user's own Bezirk when listing all Bezirke. Falls back to the default of 3.
+     */
+    private int requiredDonePickups(User user, Bezirk selectedBezirk) {
+        Bezirk bezirk = selectedBezirk != null ? selectedBezirk : user.getBezirk();
+        return bezirk == null ? 3 : Math.max(1, bezirk.getMaxActiveBookingsPerUser());
+    }
+
+    public record TeacherGrantResult(User user, boolean created, boolean alreadyTeacher) {
+    }
+
+    public record UserPermissions(boolean canGiveEinAbs, boolean canManageUsers, boolean canUseAutomations,
+                                  boolean canSeeUserPickupCountGrouping,
+                                  boolean canSeeAllAutomationDecisions, boolean canManageSurveys) {
+    }
+
+    public record AdminUsersView(Page<User> users,
+                                 Map<UUID, List<Slot>> bookingsByUser,
+                                 Map<UUID, List<BookingComment>> commentsByUser,
+                                 Set<UUID> readyToVerifyUserIds) {
+    }
+}

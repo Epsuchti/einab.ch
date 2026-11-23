@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">EinAb</string>
+    <string name="title_activity_main">EinAb</string>
+    <string name="package_name">ch.einab.app</string>
+    <string name="custom_url_scheme">ch.einab.app</string>
+    <!-- Created by the web app (PushNotificationService) when push is turned on. -->
+    <string name="default_notification_channel_id">einab</string>
+</resources>

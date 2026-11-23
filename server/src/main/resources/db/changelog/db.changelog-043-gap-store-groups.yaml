@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: 043-gap-store-groups
+      author: claude
+      changes:
+        # The gap rule of these stores shares one minimum gap and also counts pickups in the group's other stores.
+        - createTable:
+            tableName: foodsharing_gap_store_groups
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: admin_connection_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: minimum_gap_days, type: INT, defaultValueNumeric: 1, constraints: {nullable: false}}
+        - addForeignKeyConstraint:
+            baseTableName: foodsharing_gap_store_groups
+            baseColumnNames: admin_connection_id
+            referencedTableName: foodsharing_admin_connections
+            referencedColumnNames: id
+            constraintName: fk_foodsharing_gap_store_groups_connection
+            onDelete: CASCADE
+        - createTable:
+            tableName: foodsharing_gap_store_group_members
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: group_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: store_id, type: BIGINT, constraints: {nullable: false}}
+              - column: {name: store_name, type: VARCHAR(255), defaultValue: '', constraints: {nullable: false}}
+        - addForeignKeyConstraint:
+            baseTableName: foodsharing_gap_store_group_members
+            baseColumnNames: group_id
+            referencedTableName: foodsharing_gap_store_groups
+            referencedColumnNames: id
+            constraintName: fk_foodsharing_gap_store_group_members_group
+            onDelete: CASCADE
+        - addUniqueConstraint:
+            tableName: foodsharing_gap_store_group_members
+            columnNames: store_id
+            constraintName: uk_foodsharing_gap_store_group_members_store

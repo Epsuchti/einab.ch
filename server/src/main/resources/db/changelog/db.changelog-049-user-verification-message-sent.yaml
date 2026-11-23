@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 049-user-verification-message-sent
+      author: claude
+      changes:
+        # Set manually by admins once they contacted the user about the verification. NULL means no message was sent.
+        - addColumn:
+            tableName: users
+            columns:
+              - column: {name: verification_message_sent_at, type: TIMESTAMP WITH TIME ZONE}

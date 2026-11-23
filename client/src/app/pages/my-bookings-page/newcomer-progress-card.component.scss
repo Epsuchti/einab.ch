@@ -1,0 +1,248 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.progress-card {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  background: linear-gradient(135deg, var(--app-primary-soft), var(--app-surface) 60%);
+  box-shadow: var(--app-shadow);
+}
+
+.progress-card__summary {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.progress-card__text {
+  display: grid;
+  min-width: 0;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+.progress-card__text h2,
+.progress-card__text p {
+  margin: 0;
+}
+
+.progress-card__text h2 {
+  font-size: 1.2rem;
+  line-height: 1.3;
+}
+
+.progress-card__text p {
+  color: var(--app-text-muted);
+}
+
+.progress-card__eyebrow,
+.progress-step__state,
+.progress-card__categories > span:first-child {
+  color: var(--app-text-muted);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.progress-ring {
+  position: relative;
+  flex: 0 0 auto;
+  width: 7.5rem;
+  height: 7.5rem;
+}
+
+.progress-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.progress-ring circle {
+  fill: none;
+  stroke-width: 12;
+}
+
+.progress-ring__track {
+  stroke: var(--app-border);
+}
+
+.progress-ring__value {
+  stroke: var(--app-primary);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.progress-ring__value--complete {
+  stroke: var(--app-primary-strong);
+}
+
+.progress-ring__label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  color: var(--app-text);
+}
+
+.progress-ring__label strong {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.progress-ring__label strong span {
+  color: var(--app-text-muted);
+  font-size: 1.1rem;
+}
+
+.progress-ring__label small {
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+}
+
+.progress-ring__label .pi {
+  color: var(--app-primary);
+  font-size: 2.4rem;
+}
+
+.progress-steps {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-step {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+  text-align: center;
+}
+
+/* Connector line to the previous step. */
+.progress-step + .progress-step::before {
+  position: absolute;
+  top: 1rem;
+  right: 50%;
+  width: 100%;
+  height: 3px;
+  background: var(--app-border);
+  content: '';
+}
+
+.progress-step--done + .progress-step::before {
+  background: var(--app-primary);
+}
+
+.progress-step__dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 3px solid var(--app-border-strong);
+  border-radius: 50%;
+  background: var(--app-surface);
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+}
+
+.progress-step--done .progress-step__dot {
+  border-color: var(--app-primary);
+  background: var(--app-primary);
+  color: #fff;
+}
+
+.progress-step--booked .progress-step__dot {
+  border-color: var(--app-primary);
+  border-style: dashed;
+  color: var(--app-primary);
+}
+
+.progress-step__label {
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.progress-card__categories {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.progress-chip {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  background: var(--app-surface);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 560px) {
+  .progress-card {
+    padding: 1rem;
+  }
+
+  .progress-card__summary {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .progress-card__text {
+    justify-items: center;
+  }
+
+  /* Vertical timeline on phones. */
+  .progress-steps {
+    grid-auto-flow: row;
+    gap: 0.75rem;
+  }
+
+  .progress-step {
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    align-items: center;
+    justify-items: start;
+    gap: 0.75rem;
+    text-align: left;
+  }
+
+  .progress-step + .progress-step::before {
+    top: auto;
+    right: auto;
+    bottom: 50%;
+    left: calc(1rem - 1.5px);
+    width: 3px;
+    height: calc(100% + 0.75rem);
+  }
+}
+
+.progress-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid #b9dbbf;
+  border-radius: var(--app-radius);
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  line-height: 1.45;
+}
+
+.progress-banner .pi {
+  font-size: 1.4rem;
+}

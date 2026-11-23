@@ -1,0 +1,75 @@
+<section class="page-shell page-shell--narrow">
+  <p-card class="page-card--flat">
+    <ng-template pTemplate="title">
+      @if (step() === 'info') {
+        <span class="privacy-title"><i class="pi pi-map-marker title-icon" aria-hidden="true"></i>{{ bezirkName() ? i18n.t('bezirkInfo.titleFor').replace('{0}', bezirkName()) : i18n.t('bezirkInfo.title') }}</span>
+      } @else {
+        <span class="privacy-title"><i class="pi pi-shield title-icon" aria-hidden="true"></i>{{ i18n.t('privacy.title') }}</span>
+      }
+    </ng-template>
+    @if (steps.length > 1) {
+      <ol class="privacy-steps" [attr.aria-label]="i18n.t('privacy.steps')">
+        @for (entry of steps; track entry.id; let index = $index) {
+          <li [class.is-active]="index === stepIndex()" [class.is-done]="index < stepIndex()" [attr.aria-current]="index === stepIndex() ? 'step' : null">
+            <span class="privacy-step-dot">@if (index < stepIndex()) { <i class="pi pi-check" aria-hidden="true"></i> } @else { {{ index + 1 }} }</span>
+            <span class="privacy-step-label">{{ i18n.t(entry.label) }}</span>
+          </li>
+        }
+      </ol>
+    }
+    <div class="privacy-content">
+      @switch (step()) {
+        @case ('consent') {
+          <p class="privacy-lead">{{ i18n.t('privacy.intro') }}</p>
+          <div class="privacy-note">
+            <i class="pi pi-info-circle" aria-hidden="true"></i>
+            <ul class="privacy-facts">
+              <li>{{ i18n.t('privacy.fact.what') }}</li>
+              <li>{{ i18n.t('privacy.fact.who') }}</li>
+              <li>{{ i18n.t('privacy.fact.rights') }}</li>
+            </ul>
+          </div>
+          <a class="privacy-link" routerLink="/privacy" target="_blank">
+            <span>{{ i18n.t('privacy.reference') }}</span>
+            <i class="pi pi-external-link" aria-hidden="true"></i>
+          </a>
+          <label class="privacy-consent">
+            <p-checkbox [binary]="true" [ngModel]="accepted()" (onChange)="accepted.set($event.checked)"></p-checkbox>
+            <span>{{ i18n.t('privacy.accept') }} *</span>
+          </label>
+          @if (error()) { <p class="privacy-error" role="alert">{{ error() }}</p> }
+          <div class="privacy-actions">
+            <button pButton type="button" [icon]="phoneRequired || infoRequired ? 'pi pi-arrow-right' : 'pi pi-check'" iconPos="right" [label]="i18n.t('privacy.confirm')" [disabled]="!accepted()" [loading]="saving()" (click)="next()"></button>
+          </div>
+        }
+        @case ('phone') {
+          <p class="privacy-lead">{{ i18n.t('privacy.phoneIntro') }}</p>
+          <div class="privacy-phone">
+            <label for="privacy-phone">{{ i18n.t('common.phoneNumber') }} *</label>
+            <input pInputText id="privacy-phone" type="tel" inputmode="tel" name="phoneNumber" autocomplete="tel" placeholder="+41 79 123 45 67" maxlength="50" required aria-required="true" [attr.aria-invalid]="phoneInvalid() ? 'true' : null" [ngModel]="phoneNumber()" (ngModelChange)="phoneNumber.set($event)" (keydown.enter)="accept()" />
+            @if (phoneInvalid()) { <small class="privacy-error" role="alert">{{ i18n.t('common.phoneNumberInvalid') }}</small> }
+            <small>{{ i18n.t('profile.phoneNumberHint') }}</small>
+          </div>
+          @if (error()) { <p class="privacy-error" role="alert">{{ error() }}</p> }
+          <div class="privacy-actions privacy-actions--split">
+            <button pButton type="button" severity="secondary" [outlined]="true" icon="pi pi-arrow-left" [label]="i18n.t('privacy.back')" [disabled]="saving()" (click)="back()"></button>
+            <button pButton type="button" [icon]="infoRequired ? 'pi pi-arrow-right' : 'pi pi-check'" [iconPos]="infoRequired ? 'right' : 'left'" [label]="i18n.t('privacy.finish')" [disabled]="!phoneValid()" [loading]="saving()" (click)="accept()"></button>
+          </div>
+        }
+        @case ('info') {
+          <p class="privacy-lead">{{ i18n.t('bezirkInfo.stepIntro') }}</p>
+          @if (bezirkInfo(); as markdown) {
+            <app-markdown-view class="privacy-bezirk-info" [markdown]="markdown" />
+          } @else if (bezirkInfo() === null) {
+            <app-loading-indicator />
+          }
+          <p class="privacy-later"><i class="pi pi-bookmark" aria-hidden="true"></i>{{ i18n.t('bezirkInfo.laterHint') }}</p>
+          @if (error()) { <p class="privacy-error" role="alert">{{ error() }}</p> }
+          <div class="privacy-actions">
+            <button pButton type="button" icon="pi pi-check" [label]="i18n.t('bezirkInfo.done')" [disabled]="bezirkInfo() === null" [loading]="saving()" (click)="finishInfo()"></button>
+          </div>
+        }
+      }
+    </div>
+  </p-card>
+</section>

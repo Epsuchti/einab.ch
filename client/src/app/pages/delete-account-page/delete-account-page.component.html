@@ -1,0 +1,30 @@
+<section class="page-shell page-shell--narrow page-stack">
+  <p-card class="page-card--flat">
+    <ng-template pTemplate="title"><i class="pi pi-trash title-icon" aria-hidden="true"></i>{{ i18n.t('deleteAccount.title') }}</ng-template>
+
+    @if (done()) {
+      <p role="status">{{ i18n.t('deleteAccount.done') }}</p>
+    } @else if (token()) {
+      <p>{{ i18n.t('deleteAccount.confirmIntro') }}</p>
+      <p class="form-inline-note">{{ i18n.t('deleteAccount.whatHappens') }}</p>
+      @if (error(); as message) { <p class="field-error" role="alert">{{ message }}</p> }
+      <button pButton type="button" severity="danger" icon="pi pi-trash" [label]="i18n.t('deleteAccount.confirmButton')" [loading]="busy()" (click)="confirm()"></button>
+    } @else if (sent()) {
+      <p role="status">{{ i18n.t('deleteAccount.sent') }}</p>
+    } @else {
+      <p>{{ i18n.t('deleteAccount.intro') }}</p>
+      <p class="form-inline-note">{{ i18n.t('deleteAccount.whatHappens') }}</p>
+      @if (sessionService.session()) {
+        <p class="form-inline-note"><a [routerLink]="bezirkContext.route('profile')">{{ i18n.t('deleteAccount.signedInHint') }}</a></p>
+      }
+      <form class="stack-form" [formGroup]="form" (ngSubmit)="requestLink()">
+        <label>
+          <span>{{ i18n.t('deleteAccount.foodsharingId') }}</span>
+          <input pInputText formControlName="foodsharingId" inputmode="numeric" autocomplete="username" />
+        </label>
+        @if (error(); as message) { <p class="field-error" role="alert">{{ message }}</p> }
+        <button pButton type="submit" severity="danger" [outlined]="true" icon="pi pi-send" [label]="i18n.t('deleteAccount.send')" [loading]="busy()" [disabled]="form.invalid"></button>
+      </form>
+    }
+  </p-card>
+</section>

@@ -1,0 +1,6132 @@
+openapi: 3.0.3
+info:
+  title: Foodsharing EinAb API
+  version: 1.0.0
+servers:
+  - url: /
+tags:
+  - name: public
+  - name: auth
+  - name: user
+  - name: teacher
+  - name: admin
+  - name: survey
+  - name: admin-import
+  - name: support
+  - name: infoNote
+  - name: account
+paths:
+  /api/public/bezirke:
+    get:
+      tags: [public]
+      operationId: getBezirke
+      responses:
+        '200':
+          description: Active Bezirke
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BezirkListResponse'
+  /api/public/foodsharing-status:
+    get:
+      tags: [public]
+      operationId: getFoodsharingAvailability
+      responses:
+        '200':
+          description: Whether foodsharing.at is reachable (login and approvals need it)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingStatusResponse'
+  /api/public/demo-login:
+    get:
+      tags: [public]
+      operationId: getDemoLoginStatus
+      description: Whether the one-tap demo accounts are available (test server only).
+      responses:
+        '200':
+          description: Demo login availability
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemoLoginStatusResponse'
+  /api/public/bezirke/{bezirkSlug}/slots/available:
+    get:
+      tags: [public]
+      operationId: getAvailableSlots
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/EinAbCategory'
+        - name: visitFairteiler
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Available bookable slots
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailableSlotListResponse'
+  /api/public/notifications/unsubscribe:
+    post:
+      tags: [public]
+      operationId: unsubscribeNotifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationUnsubscribeRequest'
+      responses:
+        '200':
+          description: Subscription disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSubscriptionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/auth/bezirke/{bezirkSlug}/request-login:
+    post:
+      tags: [auth]
+      operationId: requestLogin
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Foodsharing message requested
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          description: Too many login requests for this account or IP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auth/demo-login/new-account:
+    post:
+      tags: [auth]
+      operationId: createDemoAccount
+      description: Creates a new demo account (test server only, no password) and signs it in, so every tester gets an own account. 404 elsewhere.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemoAccountRequest'
+      responses:
+        '200':
+          description: New demo account signed in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          description: Too many demo accounts created from this IP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auth/verify-token:
+    post:
+      tags: [auth]
+      operationId: verifyLoginToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyTokenRequest'
+      responses:
+        '200':
+          description: Authenticated session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/auth/session:
+    get:
+      tags: [auth]
+      operationId: getCurrentSession
+      description: Current permissions and account flags of the logged-in user, so the client can refresh them without a new login.
+      responses:
+        '200':
+          description: Current session state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionInfoResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/auth/privacy-consent:
+    post:
+      tags: [auth]
+      operationId: acceptPrivacyConsent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrivacyConsentRequest'
+      responses:
+        '200':
+          description: Privacy consent accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/auth/bezirk-info/acknowledge:
+    post:
+      tags: [auth]
+      operationId: acknowledgeBezirkInfo
+      description: The logged-in user has read the info page of their home Bezirk (second onboarding step, after the privacy consent).
+      responses:
+        '200':
+          description: Current session state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionInfoResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/user/bezirke/{bezirkSlug}/info:
+    get:
+      tags: [user]
+      operationId: getBezirkInfo
+      description: The Bezirk's info page (Markdown), shown as onboarding step and later from the help page and the menu.
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: language
+          in: query
+          description: Language code of the text (de, en, gws); falls back to German when the Bezirk has no text in this language.
+          schema:
+            type: string
+            maxLength: 10
+      responses:
+        '200':
+          description: Bezirk info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BezirkInfoResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/user/bezirke/{bezirkSlug}/bookings:
+    get:
+      tags: [user]
+      operationId: getMyBookings
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: User bookings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/user/bezirke/{bezirkSlug}/slots/{slotId}/book:
+    post:
+      tags: [user]
+      operationId: bookSlot
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - $ref: '#/components/parameters/SlotId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookSlotRequest'
+      responses:
+        '200':
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDetailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/user/bezirke/{bezirkSlug}/progress:
+    get:
+      tags: [user]
+      operationId: getMyProgress
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      responses:
+        '200':
+          description: Progress of the current user towards verification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewcomerProgressResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/user/notifications:
+    get:
+      tags: [user]
+      operationId: getMyNotificationStatus
+      summary: Whether the signed-in user receives notifications about new EinAbs
+      responses:
+        '200':
+          description: Notification status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags: [user]
+      operationId: unsubscribeMyNotifications
+      responses:
+        '204':
+          description: Notifications switched off
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/user/bezirke/{bezirkSlug}/notifications:
+    post:
+      tags: [user]
+      operationId: subscribeMyNotifications
+      summary: Get notified about new EinAbs the signed-in user could book (unverified users only)
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationSubscribeRequest'
+      responses:
+        '200':
+          description: Subscription stored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSubscriptionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/user/me:
+    get:
+      tags: [user]
+      operationId: getMyProfile
+      responses:
+        '200':
+          description: Current booking user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [user]
+      operationId: updateMyProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMyProfileRequest'
+      responses:
+        '200':
+          description: Updated current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/user/push-devices:
+    put:
+      tags: [user]
+      operationId: registerMyPushDevice
+      summary: Receive every message also as a push notification on this phone (store app only)
+      description: Called by the app on every start while signed in and push is turned on. A token registered for another user moves to the signed-in user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushDeviceRequest'
+      responses:
+        '204':
+          description: Device registered
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/user/push-devices/unregister:
+    post:
+      tags: [user]
+      operationId: unregisterMyPushDevice
+      summary: Stop push notifications on this phone (turned off in the app, or signing out)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushDeviceUnregisterRequest'
+      responses:
+        '204':
+          description: Device removed (or was not registered)
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/user/account:
+    delete:
+      tags: [account]
+      operationId: deleteMyAccount
+      summary: Delete the signed-in user's account (required by the App Store and Google Play)
+      description: Removes name, phone number, email, sessions, push phones, notification subscription and the notes of the EinAb-Gebenden about the person, and releases future bookings. Past bookings stay anonymous. Refused while the person still has future EinAbs as EinAb-Geber:in or a connected Foodsharing automation account.
+      responses:
+        '204':
+          description: Account deleted; the session is gone
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Future EinAbs or a Foodsharing connection must be handled first
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/public/account-deletion/request:
+    post:
+      tags: [account]
+      operationId: requestAccountDeletion
+      summary: Send a link to confirm deleting an account to its Foodsharing inbox (public deletion page)
+      description: Answers the same whether or not an account exists for the Foodsharing ID. Limited per IP address and account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountDeletionRequest'
+      responses:
+        '204':
+          description: Link sent if the account exists
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/public/account-deletion/confirm:
+    post:
+      tags: [account]
+      operationId: confirmAccountDeletion
+      summary: Delete the account with the link from the Foodsharing message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountDeletionConfirmRequest'
+      responses:
+        '204':
+          description: Account deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Future EinAbs or a Foodsharing connection must be handled first
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/public/support-requests:
+    post:
+      tags: [support]
+      operationId: createSupportRequest
+      summary: Send a question, problem or idea to the admins of the Bezirk
+      description: Signed-in users are recorded automatically; without sign-in (e.g. login problems) contactFoodsharingId is required. The client adds its release, platform and the page it came from so admins can reproduce problems. The Bezirk admins get a Foodsharing message. Limited per IP address.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportRequestCreateRequest'
+      responses:
+        '201':
+          description: Request stored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportRequestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          description: Too many support requests from this address
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/admin/support-requests:
+    get:
+      tags: [support]
+      operationId: listSupportRequests
+      summary: Support requests of all users, newest first
+      parameters:
+        - name: status
+          in: query
+          description: Only requests with this status; all when left out.
+          schema:
+            $ref: '#/components/schemas/SupportRequestStatus'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Support requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportRequestListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/support-requests/{supportRequestId}/status:
+    put:
+      tags: [support]
+      operationId: updateSupportRequestStatus
+      summary: Mark a support request as done, or open it again
+      parameters:
+        - name: supportRequestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportRequestStatusUpdateRequest'
+      responses:
+        '200':
+          description: Updated request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportRequestResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/public/info-notes:
+    get:
+      tags: [infoNote]
+      operationId: getActiveInfoNotes
+      summary: Info notes running right now
+      description: Notes for the whole site, plus the notes of the given Bezirk. An unknown or disabled Bezirk only gets the site-wide notes. Dismissing a note is kept in the browser, not on the server.
+      parameters:
+        - name: bezirkSlug
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Active info notes, newest start first
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfoNoteListResponse'
+  /api/admin/info-notes:
+    get:
+      tags: [infoNote]
+      operationId: listAdminInfoNotes
+      summary: All info notes, including scheduled and ended ones
+      responses:
+        '200':
+          description: Info notes, latest end first
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminInfoNoteListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [infoNote]
+      operationId: createAdminInfoNote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InfoNoteRequest'
+      responses:
+        '201':
+          description: Info note created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminInfoNoteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/info-notes/{infoNoteId}:
+    put:
+      tags: [infoNote]
+      operationId: updateAdminInfoNote
+      parameters:
+        - name: infoNoteId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InfoNoteRequest'
+      responses:
+        '200':
+          description: Info note updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminInfoNoteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [infoNote]
+      operationId: deleteAdminInfoNote
+      parameters:
+        - name: infoNoteId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Info note deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/user/bezirke/{bezirkSlug}/bookings/{slotId}:
+    delete:
+      tags: [user]
+      operationId: cancelMyBooking
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - $ref: '#/components/parameters/SlotId'
+      responses:
+        '204':
+          description: Booking cancelled
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/user/bezirke/{bezirkSlug}/pickups:
+    get:
+      tags: [user]
+      operationId: getMyPickups
+      description: Foodsharing pickups of the current user, read from the automation's store pickup cache.
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      responses:
+        '200':
+          description: Pickups of the current user grouped by store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyPickupListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/user/bezirke/{bezirkSlug}/pickups/extra-slot:
+    post:
+      tags: [user]
+      operationId: addMyPickupExtraSlot
+      description: Adds exactly one extra slot to a pickup where the current user is the first person.
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddPickupExtraSlotRequest'
+      responses:
+        '200':
+          description: Updated pickups of the current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyPickupListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/teacher/me:
+    get:
+      tags: [teacher]
+      operationId: getTeacherMe
+      responses:
+        '200':
+          description: Teacher profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherSelfResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags: [teacher]
+      operationId: updateTeacherMe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTeacherMeRequest'
+      responses:
+        '200':
+          description: Updated teacher profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherSelfResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/teacher/private-info-templates:
+    get:
+      tags: [teacher]
+      operationId: getTeacherPrivateInfoTemplates
+      responses:
+        '200':
+          description: Private info templates belonging to the current teacher
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateInfoTemplateListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/teacher/bezirke:
+    put:
+      tags: [teacher]
+      operationId: assignTeacherBezirk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignTeacherBezirkRequest'
+      responses:
+        '200':
+          description: Updated teacher profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/teacher/bezirke/{bezirkSlug}/einabs:
+    get:
+      tags: [teacher]
+      operationId: getTeacherEinAbs
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: pastOnly
+          in: query
+          description: Show only EinAbs whose start date has passed
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Teacher EinAbs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherEinAbListResponse'
+    post:
+      tags: [teacher]
+      operationId: createTeacherEinAb
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertEinAbRequest'
+      responses:
+        '201':
+          description: EinAb created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherEinAbResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/teacher/bezirke/{bezirkSlug}/historical-einabs:
+    post:
+      tags: [teacher]
+      operationId: createTeacherHistoricalEinAb
+      summary: Record a past EinAb that was organised outside the app. The signed-in teacher is always the giver.
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: bookingUserId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHistoricalEinAbRequest'
+      responses:
+        '201':
+          description: Past EinAb created and counted for the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherEinAbResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/teacher/bezirke/{bezirkSlug}/booking-users/search:
+    get:
+      tags: [teacher]
+      operationId: searchTeacherBookingUsers
+      summary: Find people of the Bezirk by name or Foodsharing ID (at most 10, only name and ID).
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+      responses:
+        '200':
+          description: Matching people
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserOptionListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/teacher/bezirke/{bezirkSlug}/einabs/{einAbId}:
+    put:
+      tags: [teacher]
+      operationId: updateTeacherEinAb
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - $ref: '#/components/parameters/EinAbId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertEinAbRequest'
+      responses:
+        '200':
+          description: EinAb updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherEinAbResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      tags: [teacher]
+      operationId: deleteTeacherEinAb
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - $ref: '#/components/parameters/EinAbId'
+      responses:
+        '204':
+          description: EinAb deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/teacher/bezirke/{bezirkSlug}/einabs/{einAbId}/teacher:
+    put:
+      tags: [teacher]
+      operationId: assignTeacherToEinAb
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - $ref: '#/components/parameters/EinAbId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignTeacherToEinAbRequest'
+      responses:
+        '200':
+          description: Teacher assigned to EinAb and all of its slots
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherEinAbResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/teacher/bezirke/{bezirkSlug}/einabs/{einAbId}/calendar.ics:
+    get:
+      tags: [teacher]
+      operationId: downloadTeacherEinAbIcal
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - $ref: '#/components/parameters/EinAbId'
+      responses:
+        '200':
+          description: iCalendar file for the EinAb
+          content:
+            text/calendar:
+              schema:
+                type: string
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/teacher/bezirke/{bezirkSlug}/teachers/assignable:
+    get:
+      tags: [teacher]
+      operationId: getTeacherAssignableTeachers
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      responses:
+        '200':
+          description: Teachers who can be assigned an EinAb
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherAssignmentOptionListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/teacher/bezirke/{bezirkSlug}/bookings:
+    get:
+      tags: [teacher]
+      operationId: getTeacherBookings
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Bookings for teacher slots
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingListResponse'
+  /api/teacher/bezirke/{bezirkSlug}/newcomer-funnel:
+    get:
+      tags: [teacher]
+      operationId: getTeacherNewcomerFunnel
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: days
+          in: query
+          description: Only users registered in the last days. All users when omitted.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 3660
+      responses:
+        '200':
+          description: Newcomer funnel with counts only (no names) and the EinAb gaps
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewcomerFunnelResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/teacher/bezirke/{bezirkSlug}/slots/{slotId}/comments:
+    get:
+      tags: [teacher]
+      operationId: getTeacherSlotComments
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: slotId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Booking comments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingCommentListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [teacher]
+      operationId: addTeacherSlotComment
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: slotId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingCommentRequest'
+      responses:
+        '201':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingCommentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/teacher/ical-candidates:
+    get:
+      tags: [teacher]
+      operationId: getTeacherIcalCandidates
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Candidate iCal events for the teacher
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IcalCandidateListResponse'
+  /api/teacher/ical/{token}.ics:
+    get:
+      tags: [teacher]
+      operationId: getTeacherIcalFeed
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: iCalendar feed with one event per EinAb with a booking
+          content:
+            text/calendar:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/teacher/bezirke/{bezirkSlug}/slots/{slotId}/booking:
+    delete:
+      tags: [teacher]
+      operationId: cancelTeacherSlotBooking
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - $ref: '#/components/parameters/SlotId'
+      responses:
+        '200':
+          description: Slot booking cancelled by teacher
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotResponse'
+    post:
+      tags: [teacher]
+      operationId: countTeacherSlotBooking
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - $ref: '#/components/parameters/SlotId'
+      responses:
+        '200':
+          description: Slot booking counted again by teacher
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/admin/bezirke/{bezirkSlug}/teachers:
+    parameters:
+      - $ref: '#/components/parameters/BezirkSlug'
+    get:
+      tags: [admin]
+      operationId: getAdminTeachers
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: All teachers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherListResponse'
+  /api/admin/teachers/{teacherId}/enable:
+    put:
+      tags: [admin]
+      operationId: enableAdminTeacher
+      parameters:
+        - $ref: '#/components/parameters/TeacherId'
+      responses:
+        '200':
+          description: Teacher enabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/teachers/{teacherId}/disable:
+    put:
+      tags: [admin]
+      operationId: disableAdminTeacher
+      parameters:
+        - $ref: '#/components/parameters/TeacherId'
+      responses:
+        '200':
+          description: Teacher disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/teachers/{teacherId}/grant-admin:
+    put:
+      tags: [admin]
+      operationId: grantAdminTeacher
+      parameters:
+        - $ref: '#/components/parameters/TeacherId'
+      responses:
+        '200':
+          description: Teacher granted admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherResponse'
+  /api/admin/teachers/{teacherId}/revoke-admin:
+    put:
+      tags: [admin]
+      operationId: revokeAdminTeacher
+      parameters:
+        - $ref: '#/components/parameters/TeacherId'
+      responses:
+        '200':
+          description: Teacher admin revoked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherResponse'
+  /api/admin/admins:
+    get:
+      tags: [admin]
+      operationId: getAdminAdmins
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: All admins
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherListResponse'
+  /api/admin/bezirke:
+    get:
+      tags: [admin]
+      operationId: getAdminBezirke
+      description: All Bezirke, including disabled ones.
+      responses:
+        '200':
+          description: All Bezirke
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminBezirkSummaryListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [admin]
+      operationId: createAdminBezirk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBezirkRequest'
+      responses:
+        '201':
+          description: Bezirk created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminBezirkSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/bezirke/{bezirkSlug}/enable:
+    put:
+      tags: [admin]
+      operationId: enableAdminBezirk
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      responses:
+        '200':
+          description: Bezirk enabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminBezirkSummary'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/bezirke/{bezirkSlug}/disable-impact:
+    get:
+      tags: [admin]
+      operationId: getAdminBezirkDisableImpact
+      description: People assigned to the Bezirk and its upcoming EinAbs with their booked people, shown before disabling it. Lists are capped at 100 entries; the counts are complete.
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      responses:
+        '200':
+          description: What disabling the Bezirk affects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BezirkDisableImpactResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/bezirke/{bezirkSlug}/disable:
+    put:
+      tags: [admin]
+      operationId: disableAdminBezirk
+      description: Hides the Bezirk from the Bezirk selection. Its EinAbs, bookings and users stay unchanged.
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      responses:
+        '200':
+          description: Bezirk disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminBezirkSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/bezirke/{bezirkSlug}:
+    get:
+      tags: [admin]
+      operationId: getAdminBezirk
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      responses:
+        '200':
+          description: Bezirk settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminBezirkResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [admin]
+      operationId: updateAdminBezirk
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBezirkRequest'
+      responses:
+        '200':
+          description: Updated Bezirk settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminBezirkResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/messaging-telegram:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingMessagingTelegram
+      description: Telegram forwarding of the Foodsharing account that sends this Bezirk's messages (Bezirk account or fallback account).
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      responses:
+        '200':
+          description: Telegram forwarding settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingMessagingTelegramStatus'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [admin]
+      operationId: updateFoodsharingMessagingTelegram
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodsharingMessagingTelegramRequest'
+      responses:
+        '200':
+          description: Updated Telegram forwarding settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingMessagingTelegramStatus'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [admin]
+      operationId: deleteFoodsharingMessagingTelegram
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      responses:
+        '204':
+          description: Telegram forwarding removed
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/messaging-telegram/chats:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingMessagingTelegramChats
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      responses:
+        '200':
+          description: Telegram chats visible to the forwarding bot
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TelegramChat'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/messaging-telegram/test-message:
+    post:
+      tags: [admin]
+      operationId: sendFoodsharingMessagingTelegramTestMessage
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      responses:
+        '204':
+          description: Telegram test message sent
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/bezirke/{bezirkSlug}/users/search:
+    get:
+      tags: [admin]
+      operationId: searchAdminBookingUsers
+      summary: Find people of the Bezirk, or without a Bezirk, by name or Foodsharing ID (at most 10, only name and ID).
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+      responses:
+        '200':
+          description: Matching people
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserOptionListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/bezirke/{bezirkSlug}/users:
+    get:
+      tags: [admin]
+      operationId: getAdminUsers
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 50
+        - name: threePickupsOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: activeOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - name: unverifiedOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - name: unassigned
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: allBezirke
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: All booking users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminBookingUserPageResponse'
+  /api/admin/bezirke/{bezirkSlug}/slots/{slotId}/booking/count:
+    put:
+      tags: [admin]
+      operationId: setAdminBookingCounted
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - $ref: '#/components/parameters/SlotId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminBookingCountRequest'
+      responses:
+        '200':
+          description: Booking count state updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/admin/bezirke/{bezirkSlug}/einabs:
+    get:
+      tags: [admin]
+      operationId: getAdminEinAbs
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Upcoming EinAbs of the Bezirk
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminEinAbListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [admin]
+      operationId: createAdminHistoricalEinAb
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: bookingUserId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHistoricalEinAbRequest'
+      responses:
+        '201':
+          description: Historical EinAb created and counted for the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherEinAbResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/bezirke/{bezirkSlug}/past-einab-import/preview:
+    post:
+      tags: [admin-import]
+      operationId: previewPastEinAbImport
+      summary: Analyse a CSV of past EinAbs without changing anything.
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PastEinAbImportRequest'
+      responses:
+        '200':
+          description: What an import of this file would do
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PastEinAbImportPreview'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/bezirke/{bezirkSlug}/past-einab-import/confirm:
+    post:
+      tags: [admin-import]
+      operationId: confirmPastEinAbImport
+      summary: Import the past EinAbs of a CSV (safe to run again, already imported rows are skipped).
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PastEinAbImportRequest'
+      responses:
+        '200':
+          description: Import finished, Foodsharing data refresh queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PastEinAbImportResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/bezirke/{bezirkSlug}/user-refresh-progress:
+    get:
+      tags: [admin-import]
+      operationId: getUserRefreshProgress
+      summary: Progress of the background refresh of user data from Foodsharing.
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+      responses:
+        '200':
+          description: Progress of the latest refresh batch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRefreshProgress'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/bezirke/{bezirkSlug}/einabs/{einAbId}:
+    delete:
+      tags: [admin]
+      operationId: deleteAdminEinAb
+      description: Deletes an upcoming EinAb. Booked people are removed and messaged on the foodsharing platform. A reason is required when the EinAb belongs to another teacher; the teacher is then messaged on the foodsharing platform.
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - $ref: '#/components/parameters/EinAbId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteAdminEinAbRequest'
+      responses:
+        '204':
+          description: EinAb deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/admin/bezirke/{bezirkSlug}/slots/{slotId}/booking:
+    delete:
+      tags: [admin]
+      operationId: removeAdminSlotBooking
+      description: Removes the booked person from an upcoming EinAb slot. The person is messaged on the foodsharing platform and the place becomes free again.
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - $ref: '#/components/parameters/SlotId'
+      responses:
+        '204':
+          description: Booking removed
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/admin/bezirke/{bezirkSlug}/slots/{slotId}/comments:
+    post:
+      tags: [admin]
+      operationId: addAdminSlotComment
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - $ref: '#/components/parameters/SlotId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingCommentRequest'
+      responses:
+        '201':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingCommentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/admin/users/{bookingUserId}/enable:
+    put:
+      tags: [admin]
+      operationId: enableAdminBookingUser
+      parameters:
+        - $ref: '#/components/parameters/BookingUserId'
+      responses:
+        '200':
+          description: Enabled booking user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/users/{bookingUserId}/disable:
+    put:
+      tags: [admin]
+      operationId: disableAdminBookingUser
+      parameters:
+        - $ref: '#/components/parameters/BookingUserId'
+      responses:
+        '200':
+          description: Disabled booking user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/users/{bookingUserId}/verify:
+    put:
+      tags: [admin]
+      operationId: verifyAdminBookingUser
+      parameters:
+        - $ref: '#/components/parameters/BookingUserId'
+      responses:
+        '200':
+          description: Manually verified booking user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/users/{bookingUserId}/unverify:
+    put:
+      tags: [admin]
+      operationId: unverifyAdminBookingUser
+      summary: Manually remove the verification of a booking user
+      parameters:
+        - $ref: '#/components/parameters/BookingUserId'
+      responses:
+        '200':
+          description: Booking user without verification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/users/{bookingUserId}/verification-message-sent:
+    put:
+      tags: [admin]
+      operationId: setAdminBookingUserVerificationMessageSent
+      summary: Mark whether an admin already sent the user a message about the verification
+      parameters:
+        - $ref: '#/components/parameters/BookingUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminVerificationMessageSentRequest'
+      responses:
+        '200':
+          description: Updated booking user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/users/{bookingUserId}/refresh:
+    put:
+      tags: [admin]
+      operationId: refreshAdminBookingUser
+      parameters:
+        - $ref: '#/components/parameters/BookingUserId'
+      responses:
+        '200':
+          description: Refreshed booking user data from Foodsharing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/users/{bookingUserId}/grant-admin:
+    put:
+      tags: [admin]
+      operationId: grantAdminBookingUser
+      parameters:
+        - $ref: '#/components/parameters/BookingUserId'
+      responses:
+        '200':
+          description: Granted admin to user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/users:
+    post:
+      tags: [admin]
+      operationId: createAdminBookingUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingUserRequest'
+      responses:
+        '201':
+          description: Created booking user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/admin/users/bulk-teachers:
+    post:
+      tags: [admin]
+      operationId: bulkAddAdminTeachers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkAddTeachersRequest'
+      responses:
+        '200':
+          description: Result per Foodsharing ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkAddTeachersResponse'
+  /api/admin/users/{userId}/bezirk:
+    put:
+      tags: [admin]
+      operationId: updateAdminUserBezirk
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserBezirkRequest'
+      responses:
+        '200':
+          description: Updated user bezirk
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/admins/{adminUserId}/enable:
+    put:
+      tags: [admin]
+      operationId: enableAdminUser
+      parameters:
+        - name: adminUserId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Enabled admin user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/admins/{adminUserId}/disable:
+    put:
+      tags: [admin]
+      operationId: disableAdminUser
+      parameters:
+        - name: adminUserId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Disabled admin user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/admins/{adminUserId}/revoke-admin:
+    put:
+      tags: [admin]
+      operationId: revokeAdminUser
+      parameters:
+        - name: adminUserId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Admin revoked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/users/{userId}/permissions:
+    put:
+      tags: [admin]
+      operationId: setAdminUserPermissions
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPermissionsRequest'
+      responses:
+        '200':
+          description: User permissions updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/foodsharing/connect:
+    post:
+      tags: [admin]
+      operationId: connectFoodsharing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodsharingConnectRequest'
+      responses:
+        '200':
+          description: Foodsharing automation connection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingConnectionStatus'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [admin]
+      operationId: disconnectFoodsharing
+      responses:
+        '204':
+          description: Foodsharing automation connection removed
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/status:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingStatus
+      responses:
+        '200':
+          description: Foodsharing automation connection status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingConnectionStatus'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+
+  /api/admin/foodsharing/request-automation-overview:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingRequestAutomationOverview
+      parameters:
+        - name: bezirkSlug
+          in: query
+          required: false
+          description: Limit the list to this Bezirk. Non-admins may only use their own Bezirk.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Request automation settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingRequestAutomationOverview'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/open-slot-advertisements-overview:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingOpenSlotAdvertisementOverview
+      parameters:
+        - name: bezirkSlug
+          in: query
+          required: false
+          description: Limit the list to this Bezirk. Non-admins may only use their own Bezirk.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Open-slot advertisement automation settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingOpenSlotAdvertisementOverview'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/extra-automation-overview:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingExtraAutomationOverview
+      deprecated: true
+      parameters:
+        - name: bezirkSlug
+          in: query
+          required: false
+          description: Limit the list to this Bezirk. Non-admins may only use their own Bezirk.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Request and advertisement automation settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingExtraAutomationOverview'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/request-automation/run:
+    post:
+      tags: [admin]
+      operationId: runFoodsharingRequestAutomationDryRun
+      responses:
+        '200':
+          description: Request automation dry-run result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRunSummary'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/open-slot-advertisements/run:
+    post:
+      tags: [admin]
+      operationId: runFoodsharingOpenSlotAdvertisementDryRun
+      responses:
+        '200':
+          description: Open-slot advertisement dry-run result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRunSummary'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/telegram/test-message:
+    post:
+      tags: [admin]
+      operationId: sendFoodsharingTelegramTestMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramTestMessageRequest'
+      responses:
+        '204':
+          description: Telegram test message sent
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/foodsharing/request-automation-audit:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingRequestAutomationAudit
+      parameters:
+        - name: bezirkSlug
+          in: query
+          required: false
+          description: Limit the list to this Bezirk. Non-admins may only use their own Bezirk.
+          schema:
+            type: string
+        - name: onlyMine
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Request automation audit entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodsharingExtraAutomationAudit'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/open-slot-advertisements-audit:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingOpenSlotAdvertisementAudit
+      deprecated: true
+      parameters:
+        - name: bezirkSlug
+          in: query
+          required: false
+          description: Limit the list to this Bezirk. Non-admins may only use their own Bezirk.
+          schema:
+            type: string
+        - name: onlyMine
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Open-slot advertisement audit entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodsharingExtraAutomationAudit'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/open-slot-advertisements/sent-audit:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingOpenSlotAdvertisementSentAudit
+      parameters:
+        - name: bezirkSlug
+          in: query
+          required: false
+          description: Limit the list to this Bezirk. Non-admins may only use their own Bezirk.
+          schema:
+            type: string
+        - name: onlyMine
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Persisted open-slot advertisement audit entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodsharingExtraAutomationAudit'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/open-slot-advertisements/planned-notifications:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingOpenSlotAdvertisementPlannedNotifications
+      parameters:
+        - name: bezirkSlug
+          in: query
+          required: false
+          description: Limit the list to this Bezirk. Non-admins may only use their own Bezirk.
+          schema:
+            type: string
+        - name: onlyMine
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Currently planned open-slot advertisement notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodsharingExtraAutomationAudit'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/extra-automation-audit:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingExtraAutomationAudit
+      deprecated: true
+      parameters:
+        - name: bezirkSlug
+          in: query
+          required: false
+          description: Limit the list to this Bezirk. Non-admins may only use their own Bezirk.
+          schema:
+            type: string
+        - name: onlyMine
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Request and advertisement automation audit entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodsharingExtraAutomationAudit'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/store-info:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingStoreInfoSettings
+      responses:
+        '200':
+          description: Bieb store info notification settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingStoreInfoSettings'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags: [admin]
+      operationId: saveFoodsharingStoreInfoSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodsharingStoreInfoSettingsRequest'
+      responses:
+        '200':
+          description: Saved Bieb store info notification settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingStoreInfoSettings'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/store-info/test-message:
+    post:
+      tags: [admin]
+      operationId: sendFoodsharingStoreInfoTestMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodsharingStoreInfoTestMessageRequest'
+      responses:
+        '204':
+          description: Test message sent to all recipients
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/store-info/cancellations:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingStoreInfoCancellations
+      responses:
+        '200':
+          description: Recently detected pickup sign-outs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodsharingStoreInfoCancellation'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/telegram/chats:
+    get:
+      tags: [admin]
+      operationId: getFoodsharingTelegramChats
+      responses:
+        '200':
+          description: Telegram chats visible to the connected admin bot
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TelegramChat'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/telegram/bot-token:
+    put:
+      tags: [admin]
+      operationId: saveFoodsharingTelegramBotToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodsharingTelegramBotTokenRequest'
+      responses:
+        '204':
+          description: Telegram bot token saved
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/foodsharing/stores/{storeId}/request-automation:
+    put:
+      tags: [admin]
+      operationId: saveFoodsharingRequestAutomation
+      parameters:
+        - name: storeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodsharingRequestAutomationRequest'
+      responses:
+        '200':
+          description: Foodsharing request automation settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingRequestAutomation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [admin]
+      operationId: deleteFoodsharingRequestAutomation
+      parameters:
+        - name: storeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Request automation deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/foodsharing/stores/{storeId}/open-slot-advertisements/{advertNumber}:
+    put:
+      tags: [admin]
+      operationId: saveFoodsharingOpenSlotAdvertisementAutomation
+      parameters:
+        - name: storeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: advertNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodsharingOpenSlotAdvertisementAutomationRequest'
+      responses:
+        '200':
+          description: Foodsharing open-slot advertisement automation settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingOpenSlotAdvertisementAutomation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [admin]
+      operationId: deleteFoodsharingOpenSlotAdvertisementAutomation
+      parameters:
+        - name: storeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: advertNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '204':
+          description: Open-slot advertisement deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/stores:
+    parameters:
+      - $ref: '#/components/parameters/BezirkSlug'
+    get:
+      tags: [admin]
+      operationId: getFoodsharingStores
+      responses:
+        '200':
+          description: Foodsharing automation overview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingStoreAutomationOverview'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/stores/{storeId}/automation:
+    parameters:
+      - $ref: '#/components/parameters/BezirkSlug'
+    put:
+      tags: [admin]
+      operationId: saveFoodsharingStoreAutomation
+      parameters:
+        - name: storeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodsharingStoreAutomationRequest'
+      responses:
+        '200':
+          description: Foodsharing store automation settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingStoreAutomation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [admin]
+      operationId: deleteFoodsharingStoreAutomation
+      parameters:
+        - name: storeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Foodsharing store automation deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/automation/run:
+    parameters:
+      - $ref: '#/components/parameters/BezirkSlug'
+    post:
+      tags: [admin]
+      operationId: runFoodsharingAutomation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodsharingRunRequest'
+      responses:
+        '200':
+          description: Foodsharing automation run result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingRunResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/cleaning-rule-exemptions:
+    parameters:
+      - $ref: '#/components/parameters/BezirkSlug'
+    get:
+      tags: [admin]
+      operationId: getFoodsharingCleaningRuleExemptions
+      responses:
+        '200':
+          description: Foodsharing IDs excluded from the cleaning rule
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodsharingCleaningRuleExemption'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags: [admin]
+      operationId: saveFoodsharingCleaningRuleExemption
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodsharingCleaningRuleExemptionRequest'
+      responses:
+        '200':
+          description: Foodsharing cleaning-rule exemption saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingCleaningRuleExemption'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/cleaning-rule-exemptions/{exemptionId}:
+    parameters:
+      - $ref: '#/components/parameters/BezirkSlug'
+    delete:
+      tags: [admin]
+      operationId: deleteFoodsharingCleaningRuleExemption
+      parameters:
+        - name: exemptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Foodsharing cleaning-rule exemption deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/automation/excluded-dates:
+    parameters:
+      - $ref: '#/components/parameters/BezirkSlug'
+    get:
+      tags: [admin]
+      operationId: getFoodsharingStoreAutomationExcludedDates
+      responses:
+        '200':
+          description: Dates excluded from automatic slot approval
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodsharingStoreAutomationExcludedDate'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags: [admin]
+      operationId: saveFoodsharingStoreAutomationExcludedDate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodsharingStoreAutomationExcludedDateRequest'
+      responses:
+        '200':
+          description: Excluded date saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingStoreAutomationExcludedDate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/automation/excluded-dates/{excludedDateId}:
+    parameters:
+      - $ref: '#/components/parameters/BezirkSlug'
+    delete:
+      tags: [admin]
+      operationId: deleteFoodsharingStoreAutomationExcludedDate
+      parameters:
+        - name: excludedDateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Excluded date deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/automation/audit:
+    parameters:
+      - $ref: '#/components/parameters/BezirkSlug'
+    get:
+      tags: [admin]
+      operationId: getFoodsharingAutomationAudit
+      parameters:
+        - name: onlyMine
+          in: query
+          schema:
+            type: boolean
+        - name: excludeConfirmed
+          in: query
+          description: Hide CONFIRMED and WOULD_CONFIRM decisions.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Recent foodsharing automation decisions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodsharingAutomationAudit'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/pickup-extra-slots/audit:
+    parameters:
+      - $ref: '#/components/parameters/BezirkSlug'
+    get:
+      tags: [admin]
+      operationId: getFoodsharingPickupExtraSlotAudit
+      responses:
+        '200':
+          description: Extra slots that users added on the pickups page, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodsharingPickupExtraSlotAudit'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/metrics:
+    parameters:
+      - $ref: '#/components/parameters/BezirkSlug'
+    get:
+      tags: [admin]
+      operationId: getFoodsharingMetrics
+      parameters:
+        - name: days
+          in: query
+          description: Length of the period in days, ending today (Europe/Zurich). Defaults to 30.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 366
+      responses:
+        '200':
+          description: Metrics of the automations, notifications and pickups of the Bezirk
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodsharingMetricsOverview'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/bezirke/{bezirkSlug}/newcomer-funnel:
+    get:
+      tags: [admin]
+      operationId: getAdminNewcomerFunnel
+      parameters:
+        - $ref: '#/components/parameters/BezirkSlug'
+        - name: days
+          in: query
+          description: Only users registered in the last days. All users when omitted.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 3660
+      responses:
+        '200':
+          description: Newcomer funnel with the users of each step and the EinAb gaps
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewcomerFunnelResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/bezirke/{bezirkSlug}/foodsharing/future-pickup-users:
+    parameters:
+      - $ref: '#/components/parameters/BezirkSlug'
+    get:
+      tags: [admin]
+      operationId: getFoodsharingFuturePickupUsers
+      parameters:
+        - name: forceRefresh
+          in: query
+          description: Bypass the cached result and reload data from Foodsharing.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Foodsharing users with future pickups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodsharingFuturePickupUser'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/surveys:
+    get:
+      tags: [survey]
+      operationId: listMySurveys
+      description: Surveys created by the current user or shared with them as co-author.
+      responses:
+        '200':
+          description: Own surveys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [survey]
+      operationId: createSurvey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurveySaveRequest'
+      responses:
+        '201':
+          description: Survey created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/surveys/coauthor-candidates:
+    get:
+      tags: [survey]
+      operationId: listSurveyCoauthorCandidates
+      description: Users that can be added as co-authors (everyone else with the survey permission).
+      responses:
+        '200':
+          description: Possible co-authors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyCoauthorCandidatesResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/surveys/{surveyId}:
+    get:
+      tags: [survey]
+      operationId: getMySurvey
+      parameters:
+        - $ref: '#/components/parameters/SurveyId'
+      responses:
+        '200':
+          description: Survey definition (creator and co-authors)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [survey]
+      operationId: updateSurvey
+      description: Questions with an id are updated in place (their answers are kept); questions that are no longer sent are deleted together with their answers. Co-authors can save too, but only the creator can change the co-authors.
+      parameters:
+        - $ref: '#/components/parameters/SurveyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurveySaveRequest'
+      responses:
+        '200':
+          description: Survey updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [survey]
+      operationId: deleteSurvey
+      description: Deletes the survey including all questions and responses. Only the creator can delete a survey.
+      parameters:
+        - $ref: '#/components/parameters/SurveyId'
+      responses:
+        '204':
+          description: Survey deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/surveys/{surveyId}/results:
+    get:
+      tags: [survey]
+      operationId: getSurveyResults
+      description: All responses of a survey. Only the creator and the co-authors can read them.
+      parameters:
+        - $ref: '#/components/parameters/SurveyId'
+      responses:
+        '200':
+          description: Survey results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyResultsResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/surveys/{surveyId}/form:
+    get:
+      tags: [survey]
+      operationId: getSurveyForm
+      description: The survey as shown to a respondent. Any signed-in user can read it.
+      parameters:
+        - $ref: '#/components/parameters/SurveyId'
+      responses:
+        '200':
+          description: Survey form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyForm'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/surveys/{surveyId}/responses:
+    post:
+      tags: [survey]
+      operationId: submitSurveyResponse
+      description: Submits the answers of the current user. Every user can answer a survey only once.
+      parameters:
+        - $ref: '#/components/parameters/SurveyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurveySubmitRequest'
+      responses:
+        '204':
+          description: Answers saved
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+components:
+  parameters:
+    BezirkSlug:
+      name: bezirkSlug
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-z0-9-]+$'
+    SlotId:
+      name: slotId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SurveyId:
+      name: surveyId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    EinAbId:
+      name: einAbId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    TeacherId:
+      name: teacherId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    BookingUserId:
+      name: bookingUserId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    AccountDeletionRequest:
+      type: object
+      required: [foodsharingId]
+      properties:
+        foodsharingId:
+          type: string
+          maxLength: 100
+    AccountDeletionConfirmRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          maxLength: 200
+    MessageResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        deliveryTarget:
+          type: string
+    ErrorResponse:
+      type: object
+      required: [message, status, code]
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        details:
+          type: array
+          items:
+            type: string
+    ErrorCode:
+      type: string
+      enum: [AUTHENTICATION_REQUIRED, ACCESS_DENIED, VALIDATION_FAILED, INVALID_FOODSHARING_CREDENTIALS, FOODSHARING_ACCOUNT_LOGIN_FAILED, RESOURCE_NOT_FOUND, UNEXPECTED_ERROR, CONFLICT, PAYLOAD_TOO_LARGE, EXTERNAL_SERVICE_UNAVAILABLE, TEACHER_EMAIL_ALREADY_EXISTS, TEACHERS_CANNOT_BOOK, BEZIRK_NOT_FOUND, CATEGORY_DISABLED, USER_BEZIRK_MISMATCH, NOTIFICATION_NOT_NEEDED_VERIFIED, INVALID_LOGIN_TOKEN, LOGIN_TOKEN_EXPIRED_OR_USED, ACCOUNT_NOT_FOUND, ACCOUNT_DISABLED, INVALID_UNSUBSCRIBE_TOKEN, TEACHER_ACCOUNT_REQUIRED, TEACHER_FOODSHARING_ID_ALREADY_EXISTS, TEACHER_NOT_FOUND, TEACHER_INACTIVE, BOOKING_USER_DISABLED, BOOKING_USER_NOT_FOUND, SLOT_NOT_FOUND, BOOKING_NOT_FOUND, SLOT_NOT_AVAILABLE, USER_ALREADY_BOOKED_IN_EINAB, USER_ALREADY_BOOKED_WITH_TEACHER, USER_ALREADY_BOOKED_IN_CATEGORY, USER_BOOKING_LIMIT_REACHED, MINIMUM_PICKUP_COUNT_NOT_REACHED, FAIRTEILER_VISIT_REQUIRED_FOR_THIRD_EINAB, ONLY_OWN_BOOKINGS_CANCELLABLE, ONLY_BOOKED_APPOINTMENTS_CANCELLABLE, PAST_BOOKING_NOT_CANCELLABLE, ONLY_BOOKED_APPOINTMENTS_ASSIGNABLE, ONLY_CANCELLED_APPOINTMENTS_COUNTABLE, ONLY_COUNTED_APPOINTMENTS_NOT_COUNTABLE, ONLY_PAST_APPOINTMENTS_COUNTABLE, ASSIGNABLE_TEACHER_NOT_FOUND, EINAB_NOT_FOUND, PAST_EINAB_NOT_EDITABLE, PAST_EINAB_NOT_DELETABLE, PAST_EINAB_NOT_REASSIGNABLE, ONLY_OWN_EINABS_MANAGEABLE, SLOT_COUNT_OUT_OF_RANGE, SLOT_COUNT_REDUCTION_NOT_SUPPORTED, BOOKED_SLOTS_PREVENT_DELETE, LOCATION_REQUIRED, PUBLIC_LOCATION_REQUIRED, DEFAULT_ADMIN_CANNOT_BE_CHANGED, SURVEY_NOT_FOUND, SURVEY_ALREADY_SUBMITTED, TOO_MANY_LOGIN_REQUESTS, HISTORICAL_EINAB_MUST_BE_PAST, HISTORICAL_EINAB_TOO_OLD, HISTORICAL_EINAB_NOT_FOR_YOURSELF, TOO_MANY_SUPPORT_REQUESTS, ACCOUNT_DELETION_FUTURE_EINABS, ACCOUNT_DELETION_FOODSHARING_CONNECTED, ACCOUNT_DELETION_LINK_INVALID, BEZIRK_SLUG_TAKEN, LAST_ACTIVE_BEZIRK, ONBOARDING_REQUIRED]
+    BezirkResponse:
+      type: object
+      required: [id, name, slug]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        disabledCategories:
+          type: array
+          description: Categories this Bezirk does not have; they are not offered for new EinAbs or as filters.
+          items:
+            $ref: '#/components/schemas/EinAbCategory'
+        pickupEinAbLeadMinutes:
+          type: integer
+          minimum: 0
+          maximum: 120
+          description: EinAbs created from a teacher's pickup start this many minutes before the pickup.
+        infoAvailable:
+          type: boolean
+          description: Whether the Bezirk has an info page (Markdown) that users can open.
+    BezirkInfoResponse:
+      type: object
+      required: [bezirkSlug, bezirkName, markdown]
+      properties:
+        bezirkSlug:
+          type: string
+        bezirkName:
+          type: string
+        markdown:
+          type: string
+          description: Empty when the Bezirk has no info page.
+    FoodsharingStatusResponse:
+      type: object
+      required: [online]
+      properties:
+        online:
+          type: boolean
+        offlineSince:
+          type: string
+          format: date-time
+    BezirkListResponse:
+      type: object
+      required: [bezirke]
+      properties:
+        bezirke:
+          type: array
+          items:
+            $ref: '#/components/schemas/BezirkResponse'
+    AdminBezirkResponse:
+      allOf:
+        - $ref: '#/components/schemas/BezirkResponse'
+        - type: object
+          required: [preventDuplicateTeacherBookings, preventDuplicateCategoryBookings, maxActiveBookingsPerUser, requireFairteilerVisitByThirdEinAb, useFoodsharingUserInfoApi, foodsharingMessagingConfigured, userInfoSourceConfigured]
+          properties:
+            cleaningStoreId:
+              type: integer
+              format: int64
+              nullable: true
+            preventDuplicateTeacherBookings:
+              type: boolean
+            preventDuplicateCategoryBookings:
+              type: boolean
+            maxActiveBookingsPerUser:
+              type: integer
+              minimum: 1
+            requireFairteilerVisitByThirdEinAb:
+              type: boolean
+            useFoodsharingUserInfoApi:
+              type: boolean
+            foodsharingMessagingEmail:
+              type: string
+              format: email
+              maxLength: 255
+              nullable: true
+            foodsharingMessagingConfigured:
+              type: boolean
+            userInfoSourceConfigured:
+              type: boolean
+              description: Whether user info (e.g. verification dates for the cleaning rule) can be fetched for this Bezirk.
+            ignoredCategories:
+              type: array
+              items:
+                $ref: '#/components/schemas/EinAbCategory'
+            infoStepEnabled:
+              type: boolean
+              description: Show the info page as second onboarding step, after the privacy consent.
+            infoStepOnlyUnverified:
+              type: boolean
+              description: Show the info step only to users who are not verified on Foodsharing yet.
+            infoMarkdown:
+              type: string
+              description: The Bezirk's info page in Markdown, German (also the fallback for the other languages).
+            infoMarkdownEn:
+              type: string
+            infoMarkdownGws:
+              type: string
+    AdminBezirkSummary:
+      type: object
+      required: [id, name, slug, active]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        active:
+          type: boolean
+    AdminBezirkSummaryListResponse:
+      type: object
+      required: [bezirke]
+      properties:
+        bezirke:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminBezirkSummary'
+    BezirkDisableImpactUser:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        foodsharingId:
+          type: string
+          nullable: true
+    BezirkDisableImpactEinAb:
+      type: object
+      required: [id, startDateTime, category, bookedUsers]
+      properties:
+        id:
+          type: string
+          format: uuid
+        startDateTime:
+          type: string
+          format: date-time
+        category:
+          $ref: '#/components/schemas/EinAbCategory'
+        businessName:
+          type: string
+          nullable: true
+        teacherName:
+          type: string
+          nullable: true
+        bookedUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BezirkDisableImpactUser'
+    BezirkDisableImpactResponse:
+      type: object
+      required: [assignedUserCount, assignedUsers, upcomingEinAbCount, upcomingEinAbs]
+      properties:
+        assignedUserCount:
+          type: integer
+        assignedUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BezirkDisableImpactUser'
+        upcomingEinAbCount:
+          type: integer
+        upcomingEinAbs:
+          type: array
+          items:
+            $ref: '#/components/schemas/BezirkDisableImpactEinAb'
+    CreateBezirkRequest:
+      type: object
+      required: [name, slug]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        slug:
+          type: string
+          minLength: 2
+          maxLength: 100
+          pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
+    UpdateBezirkRequest:
+      type: object
+      properties:
+        cleaningStoreId:
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        preventDuplicateTeacherBookings:
+          type: boolean
+        preventDuplicateCategoryBookings:
+          type: boolean
+        maxActiveBookingsPerUser:
+          type: integer
+          minimum: 1
+        pickupEinAbLeadMinutes:
+          type: integer
+          minimum: 0
+          maximum: 120
+        infoStepEnabled:
+          type: boolean
+        infoStepOnlyUnverified:
+          type: boolean
+        infoMarkdown:
+          type: string
+          maxLength: 1000000
+          nullable: true
+        infoMarkdownEn:
+          type: string
+          maxLength: 1000000
+          nullable: true
+        infoMarkdownGws:
+          type: string
+          maxLength: 1000000
+          nullable: true
+        requireFairteilerVisitByThirdEinAb:
+          type: boolean
+        useFoodsharingUserInfoApi:
+          type: boolean
+        foodsharingMessagingEmail:
+          type: string
+          format: email
+          maxLength: 255
+          nullable: true
+        foodsharingMessagingPassword:
+          type: string
+          format: password
+          maxLength: 1024
+          nullable: true
+          writeOnly: true
+        ignoredCategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/EinAbCategory'
+        disabledCategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/EinAbCategory'
+    UpdateUserBezirkRequest:
+      type: object
+      properties:
+        bezirkSlug:
+          type: string
+          nullable: true
+    CreateBookingUserRequest:
+      type: object
+      required: [foodsharingId, bezirkSlug]
+      properties:
+        foodsharingId:
+          type: string
+          minLength: 1
+        bezirkSlug:
+          type: string
+          minLength: 1
+    BulkAddTeachersRequest:
+      type: object
+      required: [foodsharingIds, bezirkSlug]
+      properties:
+        foodsharingIds:
+          type: array
+          minItems: 1
+          maxItems: 200
+          items:
+            type: string
+        bezirkSlug:
+          type: string
+          minLength: 1
+    BulkAddTeachersResponse:
+      type: object
+      required: [results, refreshQueued]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkAddTeacherResult'
+        refreshQueued:
+          type: integer
+          description: Existing users whose data is refreshed from Foodsharing in the background
+    BulkAddTeacherResult:
+      type: object
+      required: [foodsharingId, status]
+      properties:
+        foodsharingId:
+          type: string
+        status:
+          type: string
+          enum: [CREATED, GRANTED, ALREADY_TEACHER, FAILED]
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        errorCode:
+          type: string
+          nullable: true
+    AdminBookingCountRequest:
+      type: object
+      required: [counted]
+      properties:
+        counted:
+          type: boolean
+    Language:
+      type: string
+      enum: [de, en, gws]
+    EinAbCategory:
+      type: string
+      enum: [SUPERMARKET, TAKEOUT, MARKET, BAKERY, RESTAURANT, FAIRTEILER_CLEANING, MESSE, GROSSABHOLUNG, ONLINE]
+    SlotStatus:
+      type: string
+      enum: [AVAILABLE, BOOKED, DONE, CANCELLED]
+    UserPermission:
+      type: string
+      enum: [CAN_GIVE_EIN_ABS, CAN_MANAGE_USERS, CAN_USE_AUTOMATIONS, CAN_SEE_USER_PICKUP_COUNT_GROUPING, CAN_SEE_ALL_AUTOMATION_DECISIONS, CAN_MANAGE_SURVEYS]
+    BookSlotRequest:
+      type: object
+      required: [language]
+      properties:
+        language:
+          $ref: '#/components/schemas/Language'
+    NotificationChannel:
+      type: string
+      enum: [FOODSHARING, EMAIL]
+    NotificationSubscribeRequest:
+      type: object
+      required: [language, channel]
+      properties:
+        channel:
+          $ref: '#/components/schemas/NotificationChannel'
+        email:
+          type: string
+          format: email
+          description: Required when the channel is EMAIL.
+        language:
+          $ref: '#/components/schemas/Language'
+    NotificationUnsubscribeRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          minLength: 1
+    NotificationSubscriptionResponse:
+      type: object
+      required: [active, bezirk]
+      properties:
+        active:
+          type: boolean
+        bezirk:
+          $ref: '#/components/schemas/BezirkResponse'
+    SupportRequestCategory:
+      type: string
+      enum: [QUESTION, PROBLEM, IDEA]
+    SupportRequestStatus:
+      type: string
+      enum: [OPEN, DONE]
+    SupportClientPlatform:
+      type: string
+      description: Where the request was sent from. WEB is a browser tab, PWA the website installed to the home screen, ANDROID_APP / IOS_APP the store app.
+      enum: [WEB, PWA, ANDROID_APP, IOS_APP]
+    SupportRequestCreateRequest:
+      type: object
+      required: [category, message]
+      properties:
+        category:
+          $ref: '#/components/schemas/SupportRequestCategory'
+        message:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        bezirkSlug:
+          type: string
+          maxLength: 100
+          nullable: true
+        contactFoodsharingId:
+          type: string
+          maxLength: 64
+          nullable: true
+          description: Only used without sign-in; required then, so the admins can answer on Foodsharing.
+        contactName:
+          type: string
+          maxLength: 255
+          nullable: true
+        clientVersion:
+          type: string
+          maxLength: 50
+          nullable: true
+          description: Release number the page was built with (the version shown in the footer).
+        platform:
+          $ref: '#/components/schemas/SupportClientPlatform'
+        pageUrl:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Path of the page the user came from before opening the help page.
+        userAgent:
+          type: string
+          maxLength: 500
+          nullable: true
+    SupportRequestResponse:
+      type: object
+      required: [id, category, message, status, createdAt, foodsharingId]
+      properties:
+        id:
+          type: string
+          format: uuid
+        category:
+          $ref: '#/components/schemas/SupportRequestCategory'
+        message:
+          type: string
+        status:
+          $ref: '#/components/schemas/SupportRequestStatus'
+        createdAt:
+          type: string
+          format: date-time
+        doneAt:
+          type: string
+          format: date-time
+          nullable: true
+        doneByName:
+          type: string
+          nullable: true
+        foodsharingId:
+          type: string
+        signedIn:
+          type: boolean
+          description: False when sent without sign-in; the Foodsharing ID and name were then typed in by the sender.
+        userName:
+          type: string
+          nullable: true
+        phoneNumber:
+          type: string
+          nullable: true
+        bezirkName:
+          type: string
+          nullable: true
+        clientVersion:
+          type: string
+          nullable: true
+        serverVersion:
+          type: string
+          nullable: true
+          description: Release the server was running when the request came in.
+        platform:
+          $ref: '#/components/schemas/SupportClientPlatform'
+        pageUrl:
+          type: string
+          nullable: true
+        userAgent:
+          type: string
+          nullable: true
+    SupportRequestListResponse:
+      type: object
+      required: [requests, page, size, totalElements, totalPages, openCount]
+      properties:
+        requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupportRequestResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        openCount:
+          type: integer
+          format: int64
+    SupportRequestStatusUpdateRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/SupportRequestStatus'
+    PushPlatform:
+      type: string
+      enum: [ANDROID, IOS]
+    PushDeviceRequest:
+      type: object
+      required: [token, platform]
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Firebase Cloud Messaging registration token of the app installation.
+        platform:
+          $ref: '#/components/schemas/PushPlatform'
+    PushDeviceUnregisterRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 512
+    NotificationStatusResponse:
+      type: object
+      required: [active, verified]
+      properties:
+        active:
+          type: boolean
+        channel:
+          $ref: '#/components/schemas/NotificationChannel'
+        email:
+          type: string
+          description: Delivery address when the channel is EMAIL.
+        verified:
+          type: boolean
+          description: Verified users do not need notifications and cannot subscribe.
+    LoginRequest:
+      type: object
+      required: [foodsharingId]
+      properties:
+        foodsharingId:
+          type: string
+          minLength: 1
+        returnUrl:
+          type: string
+          maxLength: 500
+          description: App page (e.g. /bezirke/zuerich/pickups) to open after signing in with the link. Ignored unless it is a page of the same Bezirk.
+    DemoAccountRequest:
+      type: object
+      required: [foodsharingId, role]
+      properties:
+        foodsharingId:
+          type: string
+          description: The shared tester Foodsharing ID (see DemoLoginStatusResponse).
+        role:
+          type: string
+          enum: [NEWCOMER, TEACHER]
+    DemoLoginStatusResponse:
+      type: object
+      required: [enabled]
+      properties:
+        enabled:
+          type: boolean
+        sharedFoodsharingId:
+          type: string
+          description: Foodsharing ID that testers enter in the login field to get a new demo account (only when enabled).
+    VerifyTokenRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          minLength: 1
+    AuthResponse:
+      type: object
+      required: [authToken, expiresAt, permissions, foodsharingId]
+      properties:
+        authToken:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        email:
+          type: string
+          format: email
+        foodsharingId:
+          type: string
+        displayName:
+          type: string
+        bezirk:
+          $ref: '#/components/schemas/BezirkResponse'
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserPermission'
+        privacyConsentRequired:
+          type: boolean
+        phoneNumberRequired:
+          type: boolean
+        bezirkInfoRequired:
+          type: boolean
+          description: The home Bezirk shows its info page as onboarding step and the user has not read it yet.
+    SessionInfoResponse:
+      type: object
+      required: [foodsharingId, permissions, privacyConsentRequired, phoneNumberRequired]
+      properties:
+        foodsharingId:
+          type: string
+        displayName:
+          type: string
+        bezirk:
+          $ref: '#/components/schemas/BezirkResponse'
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserPermission'
+        privacyConsentRequired:
+          type: boolean
+        phoneNumberRequired:
+          type: boolean
+        bezirkInfoRequired:
+          type: boolean
+          description: The home Bezirk shows its info page as onboarding step and the user has not read it yet.
+    PrivacyConsentRequest:
+      type: object
+      required: [version]
+      properties:
+        version:
+          type: string
+          minLength: 1
+    UserPermissionsRequest:
+      type: object
+      required: [canGiveEinAbs, canManageUsers, canUseAutomations, canSeeUserPickupCountGrouping, canSeeAllAutomationDecisions]
+      properties:
+        canGiveEinAbs:
+          type: boolean
+        canManageUsers:
+          type: boolean
+        canUseAutomations:
+          type: boolean
+        canSeeUserPickupCountGrouping:
+          type: boolean
+        canSeeAllAutomationDecisions:
+          type: boolean
+        canManageSurveys:
+          type: boolean
+
+
+    AutomationRunSummary:
+      type: object
+      required: [evaluated, acted, skipped, dryRun, messages]
+      properties:
+        evaluated:
+          type: integer
+          format: int32
+        acted:
+          type: integer
+          format: int32
+        skipped:
+          type: integer
+          format: int32
+        dryRun:
+          type: boolean
+        messages:
+          type: array
+          items:
+            type: string
+    TelegramTestMessageRequest:
+      type: object
+      required: [chatId]
+      properties:
+        chatId:
+          type: string
+        message:
+          type: string
+    FoodsharingRequestAutomationRequest:
+      type: object
+      required: [storeName, enabled, dryRunEnabled, distanceRuleEnabled, maximumDistanceKm]
+      properties:
+        storeName:
+          type: string
+        enabled:
+          type: boolean
+        dryRunEnabled:
+          type: boolean
+        distanceRuleEnabled:
+          type: boolean
+        maximumDistanceKm:
+          type: number
+          format: double
+    FoodsharingOpenSlotAdvertisementAutomationRequest:
+      type: object
+      required: [storeName, enabled, dryRunEnabled, triggerHoursBefore, sendToStoreChat, sendToTelegram, storeMessages, telegramMessages, lateCancellationMessage, sendLateCancellationMessage, lateCancellationMessageMaximumHoursBeforePickup, sendLatestAdvertisementAfterLateCancellation]
+      properties:
+        storeName:
+          type: string
+        enabled:
+          type: boolean
+        dryRunEnabled:
+          type: boolean
+        triggerHoursBefore:
+          type: integer
+          format: int32
+        sendToStoreChat:
+          type: boolean
+        sendToTelegram:
+          type: boolean
+        telegramChatId:
+          type: string
+        storeMessages:
+          type: array
+          items:
+            type: string
+        telegramMessages:
+          type: array
+          items:
+            type: string
+        lateCancellationMessage:
+          type: string
+        sendLateCancellationMessage:
+          type: boolean
+        lateCancellationMessageMaximumHoursBeforePickup:
+          type: integer
+          format: int32
+        sendLatestAdvertisementAfterLateCancellation:
+          type: boolean
+    FoodsharingRequestAutomation:
+      type: object
+      required: [storeId, storeName, enabled, dryRunEnabled, distanceRuleEnabled, maximumDistanceKm, editable]
+      properties:
+        storeId:
+          type: integer
+          format: int64
+        storeName:
+          type: string
+        enabled:
+          type: boolean
+        dryRunEnabled:
+          type: boolean
+        distanceRuleEnabled:
+          type: boolean
+        maximumDistanceKm:
+          type: number
+          format: double
+        editable:
+          type: boolean
+        ownerName:
+          type: string
+          description: Name of the account owning this automation; set for read-only automations of other accounts.
+        ownerEmail:
+          type: string
+    FoodsharingOpenSlotAdvertisementAutomation:
+      type: object
+      required: [storeId, storeName, advertNumber, enabled, dryRunEnabled, triggerHoursBefore, sendToStoreChat, sendToTelegram, storeMessages, telegramMessages, lateCancellationMessage, sendLateCancellationMessage, lateCancellationMessageMaximumHoursBeforePickup, sendLatestAdvertisementAfterLateCancellation, editable]
+      properties:
+        storeId:
+          type: integer
+          format: int64
+        storeName:
+          type: string
+        advertNumber:
+          type: integer
+          format: int32
+        enabled:
+          type: boolean
+        dryRunEnabled:
+          type: boolean
+        triggerHoursBefore:
+          type: integer
+          format: int32
+        sendToStoreChat:
+          type: boolean
+        sendToTelegram:
+          type: boolean
+        telegramChatId:
+          type: string
+        storeMessages:
+          type: array
+          items:
+            type: string
+        telegramMessages:
+          type: array
+          items:
+            type: string
+        lateCancellationMessage:
+          type: string
+        sendLateCancellationMessage:
+          type: boolean
+        lateCancellationMessageMaximumHoursBeforePickup:
+          type: integer
+          format: int32
+        sendLatestAdvertisementAfterLateCancellation:
+          type: boolean
+        editable:
+          type: boolean
+        ownerName:
+          type: string
+          description: Name of the account owning this automation; set for read-only automations of other accounts.
+        ownerEmail:
+          type: string
+    FoodsharingExtraAutomationOverview:
+      type: object
+      required: [requestAutomations, advertisementAutomations]
+      properties:
+        requestAutomations:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodsharingRequestAutomation'
+        advertisementAutomations:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodsharingOpenSlotAdvertisementAutomation'
+    FoodsharingRequestAutomationOverview:
+      type: object
+      required: [requestAutomations]
+      properties:
+        requestAutomations:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodsharingRequestAutomation'
+    FoodsharingOpenSlotAdvertisementOverview:
+      type: object
+      required: [advertisementAutomations]
+      properties:
+        advertisementAutomations:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodsharingOpenSlotAdvertisementAutomation'
+
+    FoodsharingExtraAutomationAudit:
+      type: object
+      required: [automationType, storeId, dryRun, status, createdAt]
+      properties:
+        automationType:
+          type: string
+        storeId:
+          type: integer
+          format: int64
+        storeName:
+          type: string
+        pickupDate:
+          type: string
+          format: date-time
+        notificationDate:
+          type: string
+          format: date-time
+        foodsharingUserId:
+          type: string
+        foodsharingUserName:
+          type: string
+        dryRun:
+          type: boolean
+        status:
+          type: string
+        reason:
+          type: string
+        message:
+          type: string
+        error:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    FoodsharingMessagingTelegramStatus:
+      type: object
+      required: [fallbackAccount, telegramBotTokenConfigured, enabled]
+      properties:
+        accountEmail:
+          type: string
+          nullable: true
+        fallbackAccount:
+          type: boolean
+          description: True when the Bezirk has no own message account and the shared fallback account is used.
+        telegramBotTokenConfigured:
+          type: boolean
+        enabled:
+          type: boolean
+        telegramChatId:
+          type: string
+          nullable: true
+        telegramChatTitle:
+          type: string
+          nullable: true
+    FoodsharingMessagingTelegramRequest:
+      type: object
+      required: [enabled]
+      properties:
+        telegramBotToken:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: Leave empty to keep the stored token.
+        telegramChatId:
+          type: string
+          nullable: true
+          maxLength: 255
+        telegramChatTitle:
+          type: string
+          nullable: true
+          maxLength: 255
+        enabled:
+          type: boolean
+    TelegramChat:
+      type: object
+      required: [id, title, type]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+    FoodsharingConnectRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 1
+        telegramBotToken:
+          type: string
+    FoodsharingTelegramBotTokenRequest:
+      type: object
+      required: [telegramBotToken]
+      properties:
+        telegramBotToken:
+          type: string
+    FoodsharingConnectionStatus:
+      type: object
+      required: [connected]
+      properties:
+        connected:
+          type: boolean
+        email:
+          type: string
+          format: email
+        foodsharingUserId:
+          type: string
+        authenticatedAt:
+          type: string
+          format: date-time
+        telegramBotTokenConfigured:
+          type: boolean
+        automationEnabled:
+          type: boolean
+        automationDryRun:
+          type: boolean
+    FoodsharingStoreAutomationRequest:
+      type: object
+      required: [enabled, dryRunEnabled, gapRuleEnabled, minimumGapDays, cleaningRuleEnabled, experienceRuleEnabled, publicHolidayRuleEnabled]
+      properties:
+        storeName:
+          type: string
+        enabled:
+          type: boolean
+        dryRunEnabled:
+          type: boolean
+        gapRuleEnabled:
+          type: boolean
+        minimumGapDays:
+          type: integer
+          format: int32
+          minimum: 0
+        cleaningRuleEnabled:
+          type: boolean
+        experienceRuleEnabled:
+          type: boolean
+        publicHolidayRuleEnabled:
+          type: boolean
+        linkedStores:
+          type: array
+          description: Linked store rules (at most 2). Omit to keep the saved links unchanged; an empty list removes them.
+          items:
+            $ref: '#/components/schemas/FoodsharingStoreAutomationLinkedStore'
+        gapStores:
+          type: array
+          maxItems: 9
+          description: Other stores sharing a gap with this store. The list and gapStoresMinimumDays are shared by all these stores. An empty list takes this store out of it, so always send the current list.
+          items:
+            $ref: '#/components/schemas/FoodsharingManagedStore'
+        gapStoresMinimumDays:
+          type: integer
+          format: int32
+          nullable: true
+          description: Minimum gap between pickups in different stores of gapStores, at least 1 with a list. Pickups within one store follow minimumGapDays.
+    FoodsharingStoreAutomationLinkedStore:
+      type: object
+      description: Every pickup in this store also requires its own pickup in one of the linked stores.
+      required: [linkedStores, bidirectional, windowMode, windowDaysBefore, windowDaysAfter, graceMinutes]
+      properties:
+        linkedStores:
+          type: array
+          minItems: 1
+          maxItems: 5
+          description: Any of these stores satisfies the rule. Each pickup here needs a separate pickup in one of them.
+          items:
+            $ref: '#/components/schemas/FoodsharingManagedStore'
+        bidirectional:
+          type: boolean
+          description: The rule also applies to pickups in the linked stores (each requiring a pickup in this store).
+        windowMode:
+          type: string
+          enum: [SAME_DAY, LAST_DAYS]
+          description: SAME_DAY requires the linked pickup on the same calendar day; LAST_DAYS within windowDaysBefore days before and windowDaysAfter days after the pickup.
+        windowDaysBefore:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 120
+        windowDaysAfter:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 120
+        graceMinutes:
+          type: integer
+          format: int32
+          minimum: 20
+          description: Minutes after signing up the person has to book the linked store before being removed from the slot.
+        message:
+          type: string
+          nullable: true
+          description: Message for the removed person. Empty uses the default text. Variables are {{name}}, {{storeName}}, {{linkedStoreName}}, {{pickupDate}}, {{requirement}} and {{graceMinutes}}.
+        exemptions:
+          type: array
+          maxItems: 200
+          description: Members this link does not apply to (in both directions of a bidirectional link). Omitted or empty means nobody is exempt.
+          items:
+            $ref: '#/components/schemas/FoodsharingLinkedStoreExemption'
+    FoodsharingLinkedStoreExemption:
+      type: object
+      required: [foodsharingId, reason]
+      properties:
+        foodsharingId:
+          type: string
+          description: Foodsharing user id (digits only).
+        reason:
+          type: string
+          maxLength: 1000
+          description: Why this member is exempt.
+    FoodsharingStoreAutomationIncomingLinkedStore:
+      type: object
+      description: A link saved on another store that points at this store. Only a bidirectional one also applies to this store.
+      required: [sourceStoreId, sourceStoreName, bidirectional, windowMode, windowDaysBefore, windowDaysAfter, graceMinutes]
+      properties:
+        sourceStoreId:
+          type: integer
+          format: int64
+        sourceStoreName:
+          type: string
+        bidirectional:
+          type: boolean
+        windowMode:
+          type: string
+          enum: [SAME_DAY, LAST_DAYS]
+        windowDaysBefore:
+          type: integer
+          format: int32
+        windowDaysAfter:
+          type: integer
+          format: int32
+        graceMinutes:
+          type: integer
+          format: int32
+    FoodsharingStoreAutomation:
+      allOf:
+        - $ref: '#/components/schemas/FoodsharingStoreAutomationRequest'
+        - type: object
+          required: [storeId, storeName, editable, incomingLinkedStores]
+          properties:
+            storeId:
+              type: integer
+              format: int64
+            storeName:
+              type: string
+            editable:
+              type: boolean
+            ownerName:
+              type: string
+              nullable: true
+            ownerEmail:
+              type: string
+              nullable: true
+            incomingLinkedStores:
+              type: array
+              items:
+                $ref: '#/components/schemas/FoodsharingStoreAutomationIncomingLinkedStore'
+    FoodsharingStoreInfoSettingsRequest:
+      type: object
+      required: [enabled, cutoffEnabled, maximumHoursBeforePickup, telegramChatIds, stores]
+      properties:
+        enabled:
+          type: boolean
+        cutoffEnabled:
+          type: boolean
+        maximumHoursBeforePickup:
+          type: integer
+          format: int32
+        telegramChatIds:
+          type: array
+          items:
+            type: string
+        stores:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodsharingManagedStore'
+    FoodsharingStoreInfoSettings:
+      type: object
+      required: [enabled, cutoffEnabled, maximumHoursBeforePickup, telegramChatIds, stores, availableStores, telegramBotTokenConfigured]
+      properties:
+        enabled:
+          type: boolean
+        cutoffEnabled:
+          type: boolean
+        maximumHoursBeforePickup:
+          type: integer
+          format: int32
+        telegramChatIds:
+          type: array
+          items:
+            type: string
+        stores:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodsharingManagedStore'
+        availableStores:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodsharingManagedStore'
+        telegramBotTokenConfigured:
+          type: boolean
+        activeSince:
+          type: string
+          format: date-time
+    FoodsharingStoreInfoTestMessageRequest:
+      type: object
+      required: [telegramChatIds]
+      properties:
+        telegramChatIds:
+          type: array
+          items:
+            type: string
+    FoodsharingStoreInfoCancellation:
+      type: object
+      required: [storeId, storeName, pickupDate, foodsharingUserId, cancelledAt, hoursBeforePickup, status, dryRun]
+      properties:
+        storeId:
+          type: integer
+          format: int64
+        storeName:
+          type: string
+        pickupDate:
+          type: string
+          format: date-time
+        foodsharingUserId:
+          type: string
+        foodsharingUserName:
+          type: string
+        cancelledAt:
+          type: string
+          format: date-time
+        hoursBeforePickup:
+          type: number
+          format: double
+        totalSlots:
+          type: integer
+          format: int32
+        occupiedSlots:
+          type: integer
+          format: int32
+        status:
+          type: string
+          description: OPEN, NOT_REPLACED, REPLACED, REJOINED or UNKNOWN
+        immediateNotifiedAt:
+          type: string
+          format: date-time
+        finalNotifiedAt:
+          type: string
+          format: date-time
+        dryRun:
+          type: boolean
+        error:
+          type: string
+    FoodsharingManagedStore:
+      type: object
+      required: [storeId, storeName]
+      properties:
+        storeId:
+          type: integer
+          format: int64
+        storeName:
+          type: string
+    FoodsharingGapStoreGroup:
+      type: object
+      required: [minimumGapDays, stores]
+      properties:
+        minimumGapDays:
+          type: integer
+          format: int32
+          minimum: 1
+        stores:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodsharingManagedStore'
+    FoodsharingStoreAutomationOverview:
+      type: object
+      required: [automations, availableStores, linkedStoreDefaultMessage, gapStoreGroups]
+      properties:
+        automations:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodsharingStoreAutomation'
+        availableStores:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodsharingManagedStore'
+        linkedStoreDefaultMessage:
+          type: string
+          description: Default German message sent when someone is removed because of a linked store rule.
+        gapStoreGroups:
+          type: array
+          description: Stores whose gap rule works as one, including stores that have no automation yet.
+          items:
+            $ref: '#/components/schemas/FoodsharingGapStoreGroup'
+        managedStoreIds:
+          type: array
+          description: Stores the connected account may automate, with or without an automation.
+          items:
+            type: integer
+            format: int64
+    FoodsharingRunRequest:
+      type: object
+      required: [dryRun]
+      properties:
+        dryRun:
+          type: boolean
+    FoodsharingRunResult:
+      type: object
+      required: [evaluated, confirmed, declined, failed, dryRun, messages]
+      properties:
+        evaluated:
+          type: integer
+          format: int32
+        confirmed:
+          type: integer
+          format: int32
+        declined:
+          type: integer
+          format: int32
+        failed:
+          type: integer
+          format: int32
+        dryRun:
+          type: boolean
+        messages:
+          type: array
+          items:
+            type: string
+    FoodsharingCleaningRuleExemptionRequest:
+      type: object
+      required: [foodsharingId, reason]
+      properties:
+        foodsharingId:
+          type: string
+          minLength: 1
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+    FoodsharingCleaningRuleExemption:
+      allOf:
+        - $ref: '#/components/schemas/FoodsharingCleaningRuleExemptionRequest'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid
+    FoodsharingStoreAutomationExcludedDateRequest:
+      type: object
+      required: [storeId, excludedDate]
+      properties:
+        storeId:
+          type: integer
+          format: int64
+        excludedDate:
+          type: string
+          format: date
+    FoodsharingStoreAutomationExcludedDate:
+      allOf:
+        - $ref: '#/components/schemas/FoodsharingStoreAutomationExcludedDateRequest'
+        - type: object
+          required: [storeName, manual]
+          properties:
+            id:
+              type: string
+              format: uuid
+              nullable: true
+            storeName:
+              type: string
+            eventName:
+              type: string
+              nullable: true
+            manual:
+              type: boolean
+    FoodsharingAutomationAudit:
+      type: object
+      required: [storeId, storeName, foodsharingUserId, pickupDate, dryRun, decision, reasons, createdAt]
+      properties:
+        storeId:
+          type: integer
+          format: int64
+        storeName:
+          type: string
+        foodsharingUserId:
+          type: string
+        foodsharingUserName:
+          type: string
+          nullable: true
+        pickupDate:
+          type: string
+          format: date-time
+        dryRun:
+          type: boolean
+        decision:
+          type: string
+        reasons:
+          type: string
+        userMessage:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    FoodsharingPickupExtraSlotAudit:
+      type: object
+      required: [storeId, storeName, pickupDate, foodsharingUserId, previousTotalSlots, newTotalSlots, createdAt]
+      properties:
+        storeId:
+          type: integer
+          format: int64
+        storeName:
+          type: string
+        pickupDate:
+          type: string
+          format: date-time
+        foodsharingUserId:
+          type: string
+        foodsharingUserName:
+          type: string
+          nullable: true
+        previousTotalSlots:
+          type: integer
+          format: int32
+        newTotalSlots:
+          type: integer
+          format: int32
+        createdAt:
+          type: string
+          format: date-time
+        filled:
+          type: boolean
+          nullable: true
+          description: Whether all slots of the pickup are taken according to the cached pickups page data; null when unknown.
+    NewcomerStage:
+      type: string
+      enum: [REGISTERED, FIRST_BOOKED, IN_PROGRESS, FAIRTEILER_MISSING, COMPLETE, VERIFIED]
+    NewcomerNextStep:
+      type: string
+      enum: [BOOK_EINAB, BOOK_FAIRTEILER_EINAB, ATTEND_BOOKED, WAIT_FOR_VERIFICATION, DONE]
+    NewcomerGapSeverity:
+      type: string
+      enum: [MISSING, LOW, OK]
+    NewcomerProgressResponse:
+      type: object
+      required: [targetEinAbs, countedEinAbs, upcomingEinAbs, fairteilerRequired, fairteilerDone, fairteilerBooked, verified, stage, nextStep, doneCategories, bookableCategories]
+      properties:
+        targetEinAbs:
+          type: integer
+          format: int32
+          description: EinAbs needed for verification in this Bezirk.
+        countedEinAbs:
+          type: integer
+          format: int32
+          description: Past EinAbs that count (not cancelled, not in an ignored category).
+        upcomingEinAbs:
+          type: integer
+          format: int32
+        fairteilerRequired:
+          type: boolean
+        fairteilerDone:
+          type: boolean
+        fairteilerBooked:
+          type: boolean
+        verified:
+          type: boolean
+        stage:
+          $ref: '#/components/schemas/NewcomerStage'
+        nextStep:
+          $ref: '#/components/schemas/NewcomerNextStep'
+        doneCategories:
+          type: array
+          description: Categories of counted and upcoming EinAbs.
+          items:
+            $ref: '#/components/schemas/EinAbCategory'
+        bookableCategories:
+          type: array
+          description: Categories the user may still book.
+          items:
+            $ref: '#/components/schemas/EinAbCategory'
+    NewcomerFunnelUser:
+      type: object
+      required: [id, name, foodsharingId, registeredAt, countedEinAbs, upcomingEinAbs, fairteilerDone, lastActivityAt, stalled]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        foodsharingId:
+          type: string
+        registeredAt:
+          type: string
+          format: date-time
+        countedEinAbs:
+          type: integer
+          format: int32
+        upcomingEinAbs:
+          type: integer
+          format: int32
+        fairteilerDone:
+          type: boolean
+        lastActivityAt:
+          type: string
+          format: date-time
+        stalled:
+          type: boolean
+    NewcomerFunnelStep:
+      type: object
+      required: [stage, userCount, reachedCount, stalledCount, users]
+      properties:
+        stage:
+          $ref: '#/components/schemas/NewcomerStage'
+        einAbCount:
+          type: integer
+          format: int32
+          nullable: true
+          description: Counted EinAbs, set for IN_PROGRESS steps.
+        userCount:
+          type: integer
+          format: int32
+          description: Users currently at this step.
+        reachedCount:
+          type: integer
+          format: int32
+          description: Users at this step or further.
+        stalledCount:
+          type: integer
+          format: int32
+        medianDaysInStep:
+          type: integer
+          format: int32
+          nullable: true
+          description: Median days since the last progress of the users at this step.
+        users:
+          type: array
+          description: Users at this step. Always empty for EinAb givers.
+          items:
+            $ref: '#/components/schemas/NewcomerFunnelUser'
+    NewcomerGap:
+      type: object
+      required: [category, withFairteiler, students, openSlots, severity]
+      properties:
+        category:
+          $ref: '#/components/schemas/EinAbCategory'
+        withFairteiler:
+          type: boolean
+        students:
+          type: integer
+          format: int32
+          description: Newcomers in training who still need EinAbs (or a Fairteiler visit) and may book this category.
+        openSlots:
+          type: integer
+          format: int32
+          description: Free places in the gap horizon.
+        severity:
+          $ref: '#/components/schemas/NewcomerGapSeverity'
+    NewcomerNeedKind:
+      type: string
+      enum: [CATEGORY, FAIRTEILER]
+    NewcomerNeed:
+      type: object
+      description: What one more EinAb would do for the newcomers in training. category is set for CATEGORY needs only.
+      required: [kind, newcomers, withoutPlace, waitingLong, openSlots, severity]
+      properties:
+        kind:
+          $ref: '#/components/schemas/NewcomerNeedKind'
+        category:
+          $ref: '#/components/schemas/EinAbCategory'
+        newcomers:
+          type: integer
+          format: int32
+          description: Newcomers who still need EinAbs and could book such an EinAb by the requesting EinAb giver.
+        withoutPlace:
+          type: integer
+          format: int32
+          description: Of those, newcomers who cannot book any open place at the moment.
+        waitingLong:
+          type: integer
+          format: int32
+          description: Of those, newcomers without progress for waitingLongDays.
+        openSlots:
+          type: integer
+          format: int32
+          description: Free places of this kind in the gap horizon.
+        severity:
+          $ref: '#/components/schemas/NewcomerGapSeverity'
+    NewcomerFunnelResponse:
+      type: object
+      required: [targetEinAbs, fairteilerRequired, totalUsers, inTrainingUsers, stalledUsers, einAbsStillNeeded, openSlots, fairteilerVisitsStillNeeded, openFairteilerSlots, gapHorizonDays, newcomersNeedingEinAbs, newcomersWithoutPlace, waitingLongDays, steps, gaps, needs, viewerCategories]
+      properties:
+        targetEinAbs:
+          type: integer
+          format: int32
+        fairteilerRequired:
+          type: boolean
+        days:
+          type: integer
+          format: int32
+          nullable: true
+        totalUsers:
+          type: integer
+          format: int32
+        inTrainingUsers:
+          type: integer
+          format: int32
+        stalledUsers:
+          type: integer
+          format: int32
+        einAbsStillNeeded:
+          type: integer
+          format: int32
+          description: EinAbs newcomers in training still have to book.
+        openSlots:
+          type: integer
+          format: int32
+          description: Free EinAb places in the gap horizon.
+        fairteilerVisitsStillNeeded:
+          type: integer
+          format: int32
+        openFairteilerSlots:
+          type: integer
+          format: int32
+        gapHorizonDays:
+          type: integer
+          format: int32
+        newcomersNeedingEinAbs:
+          type: integer
+          format: int32
+          description: Newcomers in training who still have to book EinAbs, each counted once.
+        newcomersWithoutPlace:
+          type: integer
+          format: int32
+          description: Of those, newcomers who cannot book any open place in the gap horizon, each counted once.
+        waitingLongDays:
+          type: integer
+          format: int32
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewcomerFunnelStep'
+        gaps:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewcomerGap'
+        needs:
+          type: array
+          description: Ranked, most urgent first.
+          items:
+            $ref: '#/components/schemas/NewcomerNeed'
+        viewerCategories:
+          type: array
+          description: Categories the requesting EinAb giver has given EinAbs in, in this Bezirk.
+          items:
+            $ref: '#/components/schemas/EinAbCategory'
+    FoodsharingMetricsOverview:
+      type: object
+      required: [periodDays, fromDay, toDay, counts, daily, advertsWaiting, coverage]
+      properties:
+        periodDays:
+          type: integer
+          format: int32
+        fromDay:
+          type: string
+          format: date
+        toDay:
+          type: string
+          format: date
+        counts:
+          type: array
+          description: Totals of the period per metric key, e.g. NOTIFICATION.SENT, ADVERT.FILLED, LATE_CANCEL.REPLACED, SLOT_APPROVAL.CONFIRMED.
+          items:
+            $ref: '#/components/schemas/FoodsharingMetricCount'
+        daily:
+          type: array
+          description: Daily values of the notification, fill and late-cancellation metrics.
+          items:
+            $ref: '#/components/schemas/FoodsharingMetricDailyValue'
+        advertsWaiting:
+          type: integer
+          format: int32
+          description: Sent advertisements whose pickup is still ahead and not filled yet.
+        coverage:
+          $ref: '#/components/schemas/FoodsharingPickupCoverage'
+    FoodsharingMetricCount:
+      type: object
+      required: [key, value]
+      properties:
+        key:
+          type: string
+        value:
+          type: integer
+          format: int64
+    FoodsharingMetricDailyValue:
+      type: object
+      required: [day, key, value]
+      properties:
+        day:
+          type: string
+          format: date
+        key:
+          type: string
+        value:
+          type: integer
+          format: int64
+    FoodsharingPickupCoverage:
+      type: object
+      required: [from, to, pickups, pickupsWithOpenSlots, totalSlots, occupiedSlots, stores]
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        pickups:
+          type: integer
+          format: int32
+        pickupsWithOpenSlots:
+          type: integer
+          format: int32
+        totalSlots:
+          type: integer
+          format: int32
+        occupiedSlots:
+          type: integer
+          format: int32
+        oldestRefreshAt:
+          type: string
+          format: date-time
+          nullable: true
+        stores:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodsharingStoreCoverage'
+    FoodsharingStoreCoverage:
+      type: object
+      required: [storeId, storeName, pickups, pickupsWithOpenSlots, totalSlots, occupiedSlots]
+      properties:
+        storeId:
+          type: integer
+          format: int64
+        storeName:
+          type: string
+        pickups:
+          type: integer
+          format: int32
+        pickupsWithOpenSlots:
+          type: integer
+          format: int32
+        totalSlots:
+          type: integer
+          format: int32
+        occupiedSlots:
+          type: integer
+          format: int32
+        refreshedAt:
+          type: string
+          format: date-time
+          nullable: true
+    FoodsharingFuturePickup:
+      type: object
+      required: [storeId, storeName, pickupDate, confirmed, validationErrors]
+      properties:
+        storeId:
+          type: integer
+          format: int64
+        storeName:
+          type: string
+        pickupDate:
+          type: string
+          format: date-time
+        confirmed:
+          type: boolean
+        validationErrors:
+          type: array
+          items:
+            type: string
+    FoodsharingFuturePickupUser:
+      type: object
+      required: [foodsharingUserId, name, futurePickupCount, futurePickups]
+      properties:
+        foodsharingUserId:
+          type: string
+        name:
+          type: string
+        futurePickupCount:
+          type: integer
+          format: int32
+        futurePickups:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodsharingFuturePickup'
+    TeacherResponse:
+      type: object
+      required: [id, foodsharingId, name, active, language, createdAt, updatedAt, canGiveEinAbs, canManageUsers, canUseAutomations, canSeeUserPickupCountGrouping, canSeeAllAutomationDecisions, canManageSurveys]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        foodsharingId:
+          type: string
+        name:
+          type: string
+        phoneNumber:
+          type: string
+        icalLink:
+          type: string
+        active:
+          type: boolean
+        canGiveEinAbs:
+          type: boolean
+        canManageUsers:
+          type: boolean
+        canUseAutomations:
+          type: boolean
+        canSeeUserPickupCountGrouping:
+          type: boolean
+        canSeeAllAutomationDecisions:
+          type: boolean
+        canManageSurveys:
+          type: boolean
+        language:
+          $ref: '#/components/schemas/Language'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        bezirk:
+          $ref: '#/components/schemas/BezirkResponse'
+    AssignTeacherToEinAbRequest:
+      type: object
+      required: [teacherId]
+      properties:
+        teacherId:
+          type: string
+          format: uuid
+    TeacherAssignmentOption:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        phoneNumber:
+          type: string
+    TeacherAssignmentOptionListResponse:
+      type: object
+      required: [teachers]
+      properties:
+        teachers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeacherAssignmentOption'
+    TeacherListResponse:
+      type: object
+      required: [teachers, page, size, totalElements, totalPages]
+      properties:
+        teachers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeacherResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+    TeacherSelfResponse:
+      allOf:
+        - $ref: '#/components/schemas/TeacherResponse'
+        - type: object
+          required: [icalCandidates, icalFeedLink]
+          properties:
+            icalCandidates:
+              type: array
+              items:
+                $ref: '#/components/schemas/IcalCandidate'
+            icalFeedLink:
+              type: string
+              format: uri
+    UpdateTeacherMeRequest:
+      type: object
+      required: [language]
+      properties:
+        icalLink:
+          type: string
+          maxLength: 2000
+        language:
+          $ref: '#/components/schemas/Language'
+    UpdateMyProfileRequest:
+      type: object
+      required: [phoneNumber]
+      properties:
+        phoneNumber:
+          type: string
+          minLength: 1
+          maxLength: 50
+    AssignTeacherBezirkRequest:
+      type: object
+      required: [bezirkSlug]
+      properties:
+        bezirkSlug:
+          type: string
+    BookingUserResponse:
+      type: object
+      required: [id, name, foodsharingId, language, active, verified, createdAt, updatedAt, canGiveEinAbs, canManageUsers, canUseAutomations, canSeeUserPickupCountGrouping, canSeeAllAutomationDecisions, canManageSurveys]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        foodsharingId:
+          type: string
+        phoneNumber:
+          type: string
+        language:
+          $ref: '#/components/schemas/Language'
+        active:
+          type: boolean
+        verified:
+          type: boolean
+        lastVerifiedAt:
+          type: string
+          format: date-time
+        lastLoginAt:
+          type: string
+          format: date-time
+        verificationMessageSentAt:
+          type: string
+          format: date-time
+          description: When an admin marked that the user was sent a message about the verification; absent if not.
+        canGiveEinAbs:
+          type: boolean
+        canManageUsers:
+          type: boolean
+        canUseAutomations:
+          type: boolean
+        canSeeUserPickupCountGrouping:
+          type: boolean
+        canSeeAllAutomationDecisions:
+          type: boolean
+        canManageSurveys:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        bezirk:
+          $ref: '#/components/schemas/BezirkResponse'
+    AdminVerificationMessageSentRequest:
+      type: object
+      required: [sent]
+      properties:
+        sent:
+          type: boolean
+    BookingUserListResponse:
+      type: object
+      required: [users]
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingUserResponse'
+    AdminBookingUserResponse:
+      type: object
+      required: [user, bookings, comments, pickupCount, readyToVerify]
+      properties:
+        user:
+          $ref: '#/components/schemas/BookingUserResponse'
+        bookings:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingDetailResponse'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingCommentResponse'
+        pickupCount:
+          type: integer
+        readyToVerify:
+          type: boolean
+          description: Matches the "Bereit zum Verifizieren" filter (threePickupsOnly).
+    AdminBookingUserPageResponse:
+      type: object
+      required: [users, page, size, totalElements, totalPages]
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminBookingUserResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+    EinAbResponse:
+      type: object
+      required: [id, bezirk, category, startDateTime, teacher, visitFairteiler, slotCount, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        bezirk:
+          $ref: '#/components/schemas/BezirkResponse'
+        category:
+          $ref: '#/components/schemas/EinAbCategory'
+        startDateTime:
+          type: string
+          format: date-time
+        location:
+          type: string
+          deprecated: true
+        businessName:
+          type: string
+          maxLength: 500
+        privateAddress:
+          type: string
+          maxLength: 500
+        publicLocation:
+          type: string
+          deprecated: true
+        publicGeneralLocation:
+          type: string
+          maxLength: 500
+        onlineCallLink:
+          type: string
+          format: uri
+        privateInfo:
+          type: string
+        publicInfo:
+          type: string
+        teacher:
+          $ref: '#/components/schemas/TeacherResponse'
+        visitFairteiler:
+          type: boolean
+        slotCount:
+          type: integer
+        minimumPickupCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SlotResponse:
+      type: object
+      required: [id, einAbId, teacherId, teacherName, teacherPhoneNumber, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        einAbId:
+          type: string
+          format: uuid
+        teacherId:
+          type: string
+          format: uuid
+        teacherName:
+          type: string
+        teacherPhoneNumber:
+          type: string
+        status:
+          $ref: '#/components/schemas/SlotStatus'
+        bookedAt:
+          type: string
+          format: date-time
+        doneAt:
+          type: string
+          format: date-time
+        bookingUser:
+          $ref: '#/components/schemas/BookingUserResponse'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    AvailableSlotResponse:
+      type: object
+      required: [slotId, bezirk, category, startDateTime, teacherName, visitFairteiler, status]
+      properties:
+        slotId:
+          type: string
+          format: uuid
+        bezirk:
+          $ref: '#/components/schemas/BezirkResponse'
+        category:
+          $ref: '#/components/schemas/EinAbCategory'
+        startDateTime:
+          type: string
+          format: date-time
+        location:
+          type: string
+        publicLocation:
+          type: string
+        publicInfo:
+          type: string
+        teacherName:
+          type: string
+        teacherId:
+          type: string
+          format: uuid
+        minimumPickupCount:
+          type: integer
+        visitFairteiler:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/SlotStatus'
+        teacherDetails:
+          $ref: '#/components/schemas/AvailableSlotTeacherDetails'
+    AvailableSlotTeacherDetails:
+      type: object
+      description: Internal EinAb details, only returned to signed-in users with the CAN_GIVE_EIN_ABS permission.
+      required: [einAbId, slotCount]
+      properties:
+        einAbId:
+          type: string
+          format: uuid
+        location:
+          type: string
+        businessName:
+          type: string
+        privateAddress:
+          type: string
+        publicGeneralLocation:
+          type: string
+        onlineCallLink:
+          type: string
+          format: uri
+        privateInfo:
+          type: string
+        teacherPhoneNumber:
+          type: string
+        slotCount:
+          type: integer
+    AvailableSlotListResponse:
+      type: object
+      required: [slots, page, size, totalElements, totalPages]
+      properties:
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailableSlotResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+    BookingDetailResponse:
+      type: object
+      required: [slotId, einAbId, bezirk, category, startDateTime, teacherName, teacherPhoneNumber, status, bookingUser]
+      properties:
+        slotId:
+          type: string
+          format: uuid
+        einAbId:
+          type: string
+          format: uuid
+        bezirk:
+          $ref: '#/components/schemas/BezirkResponse'
+        category:
+          $ref: '#/components/schemas/EinAbCategory'
+        startDateTime:
+          type: string
+          format: date-time
+        location:
+          type: string
+        publicLocation:
+          type: string
+        onlineCallLink:
+          type: string
+          format: uri
+        privateInfo:
+          type: string
+        publicInfo:
+          type: string
+        teacherName:
+          type: string
+        teacherPhoneNumber:
+          type: string
+        businessName:
+          type: string
+          description: Store of the EinAb, shown to the booked newcomer.
+        visitFairteiler:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/SlotStatus'
+        bookingUser:
+          $ref: '#/components/schemas/BookingUserResponse'
+    BookingListResponse:
+      type: object
+      required: [bookings, page, size, totalElements, totalPages]
+      properties:
+        bookings:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingDetailResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+    AddPickupExtraSlotRequest:
+      type: object
+      required: [storeId, pickupDate]
+      properties:
+        storeId:
+          type: integer
+          format: int64
+        pickupDate:
+          type: string
+          format: date-time
+    MyPickupListResponse:
+      type: object
+      required: [stores]
+      properties:
+        stores:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyPickupStoreResponse'
+    MyPickupStoreResponse:
+      type: object
+      required: [storeId, storeName, refreshedAt, pickups]
+      properties:
+        storeId:
+          type: integer
+          format: int64
+        storeName:
+          type: string
+        refreshedAt:
+          type: string
+          format: date-time
+        pickups:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyPickupResponse'
+    MyPickupResponse:
+      type: object
+      required: [pickupDate, totalSlots, occupiedSlots, confirmed, firstInSlot, canAddExtraSlot, extraSlotAdded, participantNames]
+      properties:
+        pickupDate:
+          type: string
+          format: date-time
+        totalSlots:
+          type: integer
+        occupiedSlots:
+          type: integer
+        confirmed:
+          type: boolean
+        firstInSlot:
+          type: boolean
+        canAddExtraSlot:
+          type: boolean
+        extraSlotAdded:
+          type: boolean
+        extraSlotAddedBy:
+          type: string
+        participantNames:
+          type: array
+          items:
+            type: string
+    TeacherEinAbResponse:
+      allOf:
+        - $ref: '#/components/schemas/EinAbResponse'
+        - type: object
+          required: [slots]
+          properties:
+            slots:
+              type: array
+              items:
+                $ref: '#/components/schemas/SlotResponse'
+    TeacherEinAbListResponse:
+      type: object
+      required: [einAbs, page, size, totalElements, totalPages]
+      properties:
+        einAbs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeacherEinAbResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+    DeleteAdminEinAbRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          maxLength: 1000
+          description: Reason sent to the EinAb giver. Required when the EinAb belongs to another teacher.
+    AdminEinAbResponse:
+      allOf:
+        - $ref: '#/components/schemas/EinAbResponse'
+        - type: object
+          required: [hasBookings, bookings]
+          properties:
+            hasBookings:
+              type: boolean
+              description: True when a slot is booked or done.
+            bookings:
+              type: array
+              description: People who booked a place in this EinAb.
+              items:
+                $ref: '#/components/schemas/AdminEinAbBooking'
+    AdminEinAbBooking:
+      type: object
+      required: [slotId, name, foodsharingId]
+      properties:
+        slotId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        foodsharingId:
+          type: string
+    AdminEinAbListResponse:
+      type: object
+      required: [einAbs, page, size, totalElements, totalPages]
+      properties:
+        einAbs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminEinAbResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+    UpsertEinAbRequest:
+      type: object
+      required: [category, startDateTime, visitFairteiler, slotCount]
+      properties:
+        category:
+          $ref: '#/components/schemas/EinAbCategory'
+        startDateTime:
+          type: string
+          format: date-time
+        location:
+          type: string
+          maxLength: 500
+          deprecated: true
+        businessName:
+          type: string
+          maxLength: 500
+        privateAddress:
+          type: string
+          maxLength: 500
+        publicLocation:
+          type: string
+          maxLength: 500
+          deprecated: true
+        publicGeneralLocation:
+          type: string
+          maxLength: 500
+        onlineCallLink:
+          type: string
+          format: uri
+        privateInfo:
+          type: string
+          maxLength: 4000
+        savePrivateInfoAsTemplate:
+          type: boolean
+        publicInfo:
+          type: string
+          maxLength: 4000
+        visitFairteiler:
+          type: boolean
+        slotCount:
+          type: integer
+          minimum: 1
+        minimumPickupCount:
+          type: integer
+          minimum: 0
+    CreateHistoricalEinAbRequest:
+      type: object
+      required: [category, startDateTime, businessName, visitFairteiler, comment]
+      properties:
+        category:
+          $ref: '#/components/schemas/EinAbCategory'
+        startDateTime:
+          type: string
+          format: date-time
+        businessName:
+          type: string
+          maxLength: 500
+        visitFairteiler:
+          type: boolean
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 4000
+    BookingUserOption:
+      type: object
+      required: [id, name, foodsharingId]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        foodsharingId:
+          type: string
+    BookingUserOptionListResponse:
+      type: object
+      required: [users]
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingUserOption'
+    PastEinAbImportRequest:
+      type: object
+      description: Exactly one of csv (a CSV export of the EinAbs sheet) or xlsx (the whole workbook) is used; xlsx wins.
+      properties:
+        csv:
+          type: string
+          maxLength: 2000000
+        xlsx:
+          type: string
+          description: The .xlsx workbook, Base64 encoded.
+          maxLength: 14000000
+    PastEinAbImportRowStatus:
+      type: string
+      enum: [CREATE, SKIP_DUPLICATE, NEEDS_ATTENTION]
+    PastEinAbImportReason:
+      type: string
+      enum: [MISSING_ID, INVALID_ID, INVALID_DATE, FUTURE_DATE, MISSING_STORE, UNKNOWN_CATEGORY, NOT_COUNTED, ALREADY_IMPORTED, DUPLICATE_IN_FILE, USER_OTHER_BEZIRK, STORE_NAME_CORRECTED, CATEGORY_MAPPED, NO_FEEDBACK, FAIRTEILER_UNKNOWN, TEACHER_UNKNOWN, TEACHER_UPDATED]
+    PastEinAbImportRow:
+      type: object
+      required: [line, status, reasons, hasComment, visitFairteiler, newUser, newTeacher, rawDate, rawStore, rawCategory]
+      properties:
+        line:
+          type: integer
+          description: Row number in the spreadsheet (the header is row 1).
+        foodsharingId:
+          type: string
+        date:
+          type: string
+          format: date
+        rawDate:
+          type: string
+        store:
+          type: string
+        rawStore:
+          type: string
+        category:
+          $ref: '#/components/schemas/EinAbCategory'
+        rawCategory:
+          type: string
+        visitFairteiler:
+          type: boolean
+        hasComment:
+          type: boolean
+        newUser:
+          type: boolean
+        teacherName:
+          type: string
+          description: The EinAb-Geber*in cell as written in the file.
+        teacherFoodsharingId:
+          type: string
+          description: Foodsharing ID of the teacher; empty when the importing admin becomes the teacher.
+        newTeacher:
+          type: boolean
+          description: No user with the teacher's Foodsharing ID exists yet; one is created on import.
+        status:
+          $ref: '#/components/schemas/PastEinAbImportRowStatus'
+        reasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/PastEinAbImportReason'
+    PastEinAbImportCounts:
+      type: object
+      required: [totalRows, willCreate, willSkip, needsAttention, newUsers, existingUsers, newTeachers, teacherUpdates]
+      properties:
+        newTeachers:
+          type: integer
+          description: Teachers without a user yet (created on import).
+        teacherUpdates:
+          type: integer
+          description: Already imported rows whose teacher is set from the file.
+        totalRows:
+          type: integer
+        willCreate:
+          type: integer
+        willSkip:
+          type: integer
+        needsAttention:
+          type: integer
+        newUsers:
+          type: integer
+        existingUsers:
+          type: integer
+    PastEinAbImportNameMapping:
+      type: object
+      required: [from, to, count]
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+        count:
+          type: integer
+    PastEinAbImportPreview:
+      type: object
+      required: [counts, rows, storeMappings, categoryMappings]
+      properties:
+        counts:
+          $ref: '#/components/schemas/PastEinAbImportCounts'
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/PastEinAbImportRow'
+        storeMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/PastEinAbImportNameMapping'
+        categoryMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/PastEinAbImportNameMapping'
+    PastEinAbImportResult:
+      type: object
+      required: [created, skipped, needsAttention, usersCreated, refreshQueued, teachersUpdated]
+      properties:
+        teachersUpdated:
+          type: integer
+        created:
+          type: integer
+        skipped:
+          type: integer
+        needsAttention:
+          type: integer
+        usersCreated:
+          type: integer
+        refreshQueued:
+          type: integer
+          description: Users queued for a slow data refresh from Foodsharing.
+    UserRefreshProgress:
+      type: object
+      required: [total, done, failed, pending, active]
+      properties:
+        total:
+          type: integer
+        done:
+          type: integer
+        failed:
+          type: integer
+        pending:
+          type: integer
+        active:
+          type: boolean
+        intervalSeconds:
+          type: number
+          description: Pause between two user refreshes.
+    PrivateInfoTemplateResponse:
+      type: object
+      description: >-
+        A saved private info template. Store templates carry the store name; a template without store name
+        is the category template, used for online EinAbs and as fallback for stores without their own template.
+      required: [category, storeKey, content, updatedAt]
+      properties:
+        category:
+          $ref: '#/components/schemas/EinAbCategory'
+        storeName:
+          type: string
+          nullable: true
+          maxLength: 500
+        storeKey:
+          type: string
+          description: Normalized store name (lower case letters and digits), or "category:CATEGORY" for a category template.
+          maxLength: 500
+        content:
+          type: string
+          maxLength: 4000
+        updatedAt:
+          type: string
+          format: date-time
+    PrivateInfoTemplateListResponse:
+      type: object
+      required: [templates]
+      properties:
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrivateInfoTemplateResponse'
+    CreateBookingCommentRequest:
+      type: object
+      required: [comment]
+      properties:
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 4000
+    BookingCommentResponse:
+      type: object
+      required: [id, bookingUserId, teacherId, teacherName, comment, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingUserId:
+          type: string
+          format: uuid
+        slotId:
+          type: string
+          format: uuid
+        teacherId:
+          type: string
+          format: uuid
+        teacherName:
+          type: string
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    BookingCommentListResponse:
+      type: object
+      required: [comments]
+      properties:
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingCommentResponse'
+    IcalCandidate:
+      type: object
+      required: [startDateTime, summary]
+      properties:
+        startDateTime:
+          type: string
+          format: date-time
+        summary:
+          type: string
+        location:
+          type: string
+    IcalCandidateListResponse:
+      type: object
+      required: [candidates, page, size, totalElements, totalPages]
+      properties:
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/IcalCandidate'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+    SurveyQuestionType:
+      type: string
+      enum: [TEXT, MULTIPLE_CHOICE, SINGLE_CHOICE, BOOLEAN, STORE]
+    SurveyQuestion:
+      type: object
+      required: [type, label, required, options]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Empty for a new question.
+        type:
+          $ref: '#/components/schemas/SurveyQuestionType'
+        label:
+          type: string
+          minLength: 1
+          maxLength: 500
+        required:
+          type: boolean
+        options:
+          type: array
+          description: Choices of MULTIPLE_CHOICE and SINGLE_CHOICE questions; empty for the other types.
+          items:
+            type: string
+            maxLength: 200
+    SurveySaveRequest:
+      type: object
+      required: [title, description, questions]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 4000
+        questions:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/SurveyQuestion'
+        coauthorFoodsharingIds:
+          type: array
+          description: Foodsharing IDs of the co-authors. Only applied when the creator saves; omit to keep the current co-authors.
+          maxItems: 20
+          items:
+            type: string
+            maxLength: 100
+    SurveyPerson:
+      type: object
+      required: [foodsharingId, name]
+      properties:
+        foodsharingId:
+          type: string
+        name:
+          type: string
+    SurveyCoauthorCandidatesResponse:
+      type: object
+      required: [users]
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyPerson'
+    SurveySummary:
+      type: object
+      required: [id, title, description, responseCount, createdAt, updatedAt, owner, ownerName, coauthorCount]
+      properties:
+        owner:
+          type: boolean
+          description: True if the current user created the survey; false for surveys shared with them as co-author.
+        ownerName:
+          type: string
+        coauthorCount:
+          type: integer
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        responseCount:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SurveyListResponse:
+      type: object
+      required: [surveys]
+      properties:
+        surveys:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveySummary'
+    SurveyDetail:
+      type: object
+      required: [id, title, description, questions, responseCount, createdAt, updatedAt, owner, ownerFoodsharingId, ownerName, coauthors]
+      properties:
+        owner:
+          type: boolean
+          description: True if the current user created the survey and may change its co-authors or delete it.
+        ownerFoodsharingId:
+          type: string
+        ownerName:
+          type: string
+        coauthors:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyPerson'
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyQuestion'
+        responseCount:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SurveyForm:
+      type: object
+      required: [id, title, description, questions, alreadySubmitted]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyQuestion'
+        alreadySubmitted:
+          type: boolean
+          description: True if the current user already answered this survey.
+    SurveyAnswerValue:
+      type: object
+      required: [questionId, values]
+      properties:
+        questionId:
+          type: string
+          format: uuid
+        values:
+          type: array
+          description: Text, the chosen option(s), "true"/"false" for BOOLEAN or the store for STORE questions.
+          items:
+            type: string
+            maxLength: 5000
+    SurveySubmitRequest:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyAnswerValue'
+    SurveyResultRow:
+      type: object
+      required: [foodsharingId, name, submittedAt, answers]
+      properties:
+        foodsharingId:
+          type: string
+        name:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyAnswerValue'
+    SurveyResultsResponse:
+      type: object
+      required: [surveyId, title, questions, responses]
+      properties:
+        surveyId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyQuestion'
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyResultRow'
+    InfoNoteSeverity:
+      type: string
+      enum: [INFO, WARNING]
+    InfoNoteResponse:
+      type: object
+      required: [id, message, severity, siteWide, startsAt, endsAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          nullable: true
+        message:
+          type: string
+        severity:
+          $ref: '#/components/schemas/InfoNoteSeverity'
+        siteWide:
+          type: boolean
+          description: True for a note on the whole site, false for a note of the selected Bezirk.
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+    InfoNoteListResponse:
+      type: object
+      required: [notes]
+      properties:
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/InfoNoteResponse'
+    AdminInfoNoteResponse:
+      type: object
+      required: [id, message, severity, startsAt, endsAt, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          nullable: true
+        message:
+          type: string
+        severity:
+          $ref: '#/components/schemas/InfoNoteSeverity'
+        bezirkSlug:
+          type: string
+          nullable: true
+          description: Null for a note on the whole site.
+        bezirkName:
+          type: string
+          nullable: true
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        createdByName:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    AdminInfoNoteListResponse:
+      type: object
+      required: [notes]
+      properties:
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminInfoNoteResponse'
+    InfoNoteRequest:
+      type: object
+      required: [message, severity, startsAt, endsAt]
+      properties:
+        bezirkSlug:
+          type: string
+          nullable: true
+          description: Leave out (or null) for a note on the whole site.
+        title:
+          type: string
+          nullable: true
+          maxLength: 200
+        message:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        severity:
+          $ref: '#/components/schemas/InfoNoteSeverity'
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time

@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 027-drop-wants-to-be-teacher
+      author: claude
+      preConditions:
+        - onFail: MARK_RAN
+        - columnExists:
+            tableName: users
+            columnName: wants_to_be_teacher
+      changes:
+        # Self-service EinAb giver applications were removed.
+        - dropColumn:
+            tableName: users
+            columnName: wants_to_be_teacher

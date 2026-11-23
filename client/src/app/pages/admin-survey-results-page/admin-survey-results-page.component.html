@@ -1,0 +1,209 @@
+<section class="page-shell">
+  <p-card class="page-card--flat">
+    <ng-template pTemplate="title">
+      <div class="survey-page-header">
+        <span class="survey-results-title">
+          <a pButton severity="secondary" [text]="true" [rounded]="true" icon="pi pi-arrow-left" [attr.aria-label]="i18n.t('surveys.back')" [routerLink]="bezirkContext.route('admin', 'surveys')"></a>
+          <span>{{ results()?.title ?? i18n.t('surveys.resultsTitle') }}</span>
+        </span>
+        @if (results() && results()!.responses.length > 0) {
+          <button pButton type="button" size="small" icon="pi pi-download" severity="secondary" [outlined]="true" [label]="i18n.t('surveys.exportCsv')" (click)="exportCsv()"></button>
+        }
+      </div>
+    </ng-template>
+    @if (results(); as results) {
+      @if (results.responses.length === 0) {
+        <div class="survey-empty">
+          <i class="pi pi-inbox" aria-hidden="true"></i>
+          <p>{{ i18n.t('surveys.noResponses') }}</p>
+        </div>
+      } @else {
+        <div class="survey-stats">
+          <div class="survey-stat">
+            <span class="survey-stat-value">{{ results.responses.length }}</span>
+            <span class="survey-stat-label">{{ i18n.t('surveys.responses') }}</span>
+          </div>
+          <div class="survey-stat">
+            <span class="survey-stat-value">{{ results.questions.length }}</span>
+            <span class="survey-stat-label">{{ i18n.t('surveys.questions') }}</span>
+          </div>
+          <div class="survey-stat">
+            <span class="survey-stat-value survey-stat-value--small">{{ results.responses[results.responses.length - 1].submittedAt | zurichDateTime: 'date' }}</span>
+            <span class="survey-stat-label">{{ i18n.t('surveys.lastResponse') }}</span>
+          </div>
+        </div>
+
+        <p-tabs [value]="activeTab()" (valueChange)="onTabChange($event)">
+          <p-tablist>
+            <p-tab value="questions"><i class="pi pi-chart-bar" aria-hidden="true"></i> {{ i18n.t('surveys.tabQuestions') }}</p-tab>
+            <p-tab value="replies"><i class="pi pi-id-card" aria-hidden="true"></i> {{ i18n.t('surveys.tabReplies') }}</p-tab>
+            <p-tab value="table"><i class="pi pi-table" aria-hidden="true"></i> {{ i18n.t('surveys.tabTable') }}</p-tab>
+          </p-tablist>
+        </p-tabs>
+
+        @switch (activeTab()) {
+          @case ('questions') {
+            <div class="survey-summary-list">
+              @for (summary of summaries(); track summary.question.id) {
+                <article class="survey-summary-card">
+                  <header class="survey-summary-header">
+                    <span class="survey-summary-number">{{ summary.index + 1 }}</span>
+                    <div class="survey-summary-heading">
+                      <h3>{{ summary.question.label }}</h3>
+                      <span class="survey-hint">
+                        <i [class]="questionIcon(summary.question.type)" aria-hidden="true"></i>
+                        {{ i18n.t('surveys.type.' + summary.question.type) }} · {{ summary.answered }} / {{ results.responses.length }} {{ i18n.t('surveys.answered') }}
+                      </span>
+                    </div>
+                  </header>
+
+                  @if (summary.answered === 0) {
+                    <p class="survey-hint">{{ i18n.t('surveys.noAnswersForQuestion') }}</p>
+                  } @else if (summary.question.type === SurveyQuestionType.Text) {
+                    <ul class="survey-text-replies">
+                      @for (reply of summary.texts; track $index) {
+                        @if ($index < textPreviewCount || isExpanded(summary.question.id)) {
+                          <li>
+                            <p>{{ reply.text }}</p>
+                            <span class="survey-hint">{{ reply.name }} · {{ reply.submittedAt | zurichDateTime }}</span>
+                          </li>
+                        }
+                      }
+                    </ul>
+                    @if (summary.texts.length > textPreviewCount) {
+                      <div>
+                        <button
+                          pButton
+                          type="button"
+                          size="small"
+                          severity="secondary"
+                          [text]="true"
+                          [icon]="isExpanded(summary.question.id) ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+                          [label]="isExpanded(summary.question.id) ? i18n.t('surveys.showLess') : i18n.t('surveys.showAll') + ' (' + summary.texts.length + ')'"
+                          (click)="toggleTexts(summary.question.id)"></button>
+                      </div>
+                    }
+                  } @else {
+                    <ul class="survey-bars">
+                      @for (bar of summary.bars; track bar.label) {
+                        <li class="survey-bar" [class.survey-bar--yes]="bar.tone === 'yes'" [class.survey-bar--no]="bar.tone === 'no'">
+                          <div class="survey-bar-label">
+                            <span>{{ bar.label }}</span>
+                            <span class="survey-bar-count">{{ bar.count }} · {{ bar.percent }}%</span>
+                          </div>
+                          <div class="survey-bar-track" aria-hidden="true">
+                            <div class="survey-bar-fill" [style.width.%]="bar.percent"></div>
+                          </div>
+                        </li>
+                      }
+                    </ul>
+                    @if (summary.question.type === SurveyQuestionType.MultipleChoice) {
+                      <p class="survey-hint">{{ i18n.t('surveys.multipleChoiceHint') }}</p>
+                    }
+                  }
+                </article>
+              }
+            </div>
+          }
+
+          @case ('replies') {
+            <div class="survey-reply-toolbar">
+              <input
+                pInputText
+                class="survey-reply-search"
+                type="search"
+                [placeholder]="i18n.t('surveys.searchReplies')"
+                [attr.aria-label]="i18n.t('surveys.searchReplies')"
+                [ngModel]="replySearch()"
+                (ngModelChange)="replySearch.set($event)" />
+              <span class="survey-hint">{{ filteredReplies().length }} / {{ results.responses.length }}</span>
+            </div>
+            @if (filteredReplies().length === 0) {
+              <p class="survey-hint">{{ i18n.t('surveys.noMatchingReplies') }}</p>
+            }
+            <div class="survey-reply-grid">
+              @for (reply of filteredReplies(); track reply.row.foodsharingId) {
+                <article class="survey-reply-card">
+                  <header class="survey-reply-header">
+                    <span class="survey-avatar" aria-hidden="true">{{ initials(reply.row.name, reply.row.foodsharingId) }}</span>
+                    <div class="survey-reply-person">
+                      <strong>{{ reply.row.name || reply.row.foodsharingId }}</strong>
+                      <span class="survey-hint">{{ reply.row.foodsharingId }} · {{ reply.row.submittedAt | zurichDateTime }}</span>
+                    </div>
+                    <span class="survey-reply-number">#{{ reply.number }}</span>
+                  </header>
+                  <dl class="survey-reply-answers">
+                    @for (question of results.questions; track question.id) {
+                      <div class="survey-reply-answer">
+                        <dt>{{ question.label }}</dt>
+                        <dd>
+                          @let values = answerValues(reply.row, question.id);
+                          @if (values.length === 0) {
+                            <span class="survey-hint">{{ i18n.t('surveys.notAnswered') }}</span>
+                          } @else {
+                            @switch (question.type) {
+                              @case (SurveyQuestionType.Boolean) {
+                                <p-tag [value]="cell(reply.row, question.id, question.type)" [severity]="isYes(reply.row, question.id) ? 'success' : 'danger'"></p-tag>
+                              }
+                              @case (SurveyQuestionType.MultipleChoice) {
+                                <span class="survey-chip-list">
+                                  @for (value of values; track value) {
+                                    <span class="survey-chip">{{ value }}</span>
+                                  }
+                                </span>
+                              }
+                              @case (SurveyQuestionType.SingleChoice) {
+                                <span class="survey-chip">{{ values[0] }}</span>
+                              }
+                              @case (SurveyQuestionType.Store) {
+                                <span class="survey-chip"><i class="pi pi-shop" aria-hidden="true"></i> {{ values[0] }}</span>
+                              }
+                              @default {
+                                <span class="survey-reply-text">{{ values[0] }}</span>
+                              }
+                            }
+                          }
+                        </dd>
+                      </div>
+                    }
+                  </dl>
+                </article>
+              }
+            </div>
+          }
+
+          @case ('table') {
+            <p-table class="automation-responsive-table" [value]="results.responses" [scrollable]="true" [rowHover]="true">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>{{ i18n.t('surveys.submittedAt') }}</th>
+                  <th>{{ i18n.t('surveys.respondent') }}</th>
+                  @for (question of results.questions; track question.id) {
+                    <th>{{ question.label }}</th>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-row>
+                <tr>
+                  <td class="survey-nowrap" [attr.data-label]="i18n.t('surveys.submittedAt')">{{ row.submittedAt | zurichDateTime }}</td>
+                  <td class="survey-nowrap" [attr.data-label]="i18n.t('surveys.respondent')"><strong>{{ row.name }}</strong><div class="survey-hint">{{ row.foodsharingId }}</div></td>
+                  @for (question of results.questions; track question.id) {
+                    <td class="survey-answer-cell" [attr.data-label]="question.label">
+                      @if (question.type === SurveyQuestionType.Boolean && cell(row, question.id, question.type) !== '-') {
+                        <p-tag [value]="cell(row, question.id, question.type)" [severity]="isYes(row, question.id) ? 'success' : 'danger'"></p-tag>
+                      } @else {
+                        {{ cell(row, question.id, question.type) }}
+                      }
+                    </td>
+                  }
+                </tr>
+              </ng-template>
+            </p-table>
+          }
+        }
+      }
+    } @else if (loading()) {
+      <app-loading-indicator />
+    }
+  </p-card>
+</section>

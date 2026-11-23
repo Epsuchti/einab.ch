@@ -1,0 +1,77 @@
+<section class="admin-support" [class.page-shell]="!embedded()" [class.page-shell--narrow]="!embedded()" [class.admin-support--embedded]="embedded()">
+  @if (!embedded()) {
+  <header class="admin-support__header">
+    <span class="admin-support__icon" aria-hidden="true"><i class="pi pi-inbox"></i></span>
+    <div>
+      <h1><i class="pi pi-inbox title-icon--phone title-icon" aria-hidden="true"></i>{{ i18n.t('adminSupport.title') }}</h1>
+      <p>{{ i18n.t('adminSupport.intro') }}</p>
+    </div>
+  </header>
+  } @else {
+    <p class="admin-support__intro">{{ i18n.t('adminSupport.intro') }}</p>
+  }
+
+  <div class="segmented admin-support__filters" role="tablist">
+    @for (option of filters; track option.value) {
+      <button type="button" role="tab" class="segmented__item" [class.is-active]="filter() === option.value" [attr.aria-selected]="filter() === option.value" (click)="setFilter(option.value)">
+        {{ i18n.t(option.label) }}
+        @if (option.value === 'OPEN' && openCount() > 0) { <span class="admin-support__count">{{ openCount() }}</span> }
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <app-loading-indicator />
+  } @else if (!requests().length) {
+    <div class="empty-state">
+      <i class="pi pi-inbox" aria-hidden="true"></i>
+      <p>{{ i18n.t(filter() === 'OPEN' ? 'adminSupport.emptyOpen' : 'adminSupport.empty') }}</p>
+    </div>
+  } @else {
+    <ul class="admin-support__list">
+      @for (request of requests(); track request.id) {
+        <li class="support-item" [class.support-item--done]="request.status === Status.Done">
+          <div class="support-item__head">
+            <p-tag [severity]="categorySeverity(request.category)" [value]="categoryLabel(request.category)"></p-tag>
+            <small>{{ request.createdAt | zurichDateTime: 'short' }}</small>
+            @if (request.status === Status.Done) {
+              <p-tag severity="success" icon="pi pi-check" [value]="i18n.t('adminSupport.done')"></p-tag>
+            }
+          </div>
+          <div class="support-item__who">
+            <strong>{{ request.userName || i18n.t('adminSupport.unknownName') }}</strong>
+            <small>
+              ID {{ request.foodsharingId }}@if (request.bezirkName) { · {{ request.bezirkName }}}
+              @if (!request.signedIn) { · <span class="support-item__unverified">{{ i18n.t('adminSupport.notSignedIn') }}</span> }
+            </small>
+          </div>
+          <p class="support-item__message">{{ request.message }}</p>
+          <dl class="support-item__meta">
+            <div><dt>{{ i18n.t('adminSupport.version') }}</dt><dd>{{ request.clientVersion || '-' }}@if (request.serverVersion && request.serverVersion !== request.clientVersion) { <span class="support-item__server"> ({{ i18n.t('adminSupport.serverVersion').replace('{0}', request.serverVersion) }})</span> }</dd></div>
+            <div><dt>{{ i18n.t('adminSupport.platform') }}</dt><dd>{{ platformLabel(request.platform) }}</dd></div>
+            @if (request.pageUrl) { <div><dt>{{ i18n.t('adminSupport.page') }}</dt><dd class="support-item__url">{{ request.pageUrl }}</dd></div> }
+          </dl>
+          @if (request.userAgent) {
+            <details class="support-item__agent"><summary>{{ i18n.t('adminSupport.browser') }}</summary><small>{{ request.userAgent }}</small></details>
+          }
+          @if (request.status === Status.Done && request.doneByName) {
+            <small class="support-item__done-by">{{ i18n.t('adminSupport.doneBy').replace('{0}', request.doneByName) }}@if (request.doneAt) { · {{ request.doneAt | zurichDateTime: 'short' }}}</small>
+          }
+          <div class="support-item__actions">
+            <a pButton size="small" icon="pi pi-comments" [href]="profileUrl(request)" target="_blank" rel="noopener" [label]="i18n.t('adminSupport.answer')"></a>
+            @if (request.phoneNumber) {
+              <a pButton size="small" severity="secondary" [outlined]="true" icon="pi pi-phone" [href]="'tel:' + request.phoneNumber" [label]="request.phoneNumber"></a>
+            }
+            <span class="support-item__spacer"></span>
+            @if (request.status === Status.Open) {
+              <button pButton type="button" size="small" severity="success" [outlined]="true" icon="pi pi-check" [label]="i18n.t('adminSupport.markDone')" [loading]="updatingId() === request.id" (click)="setStatus(request, Status.Done)"></button>
+            } @else {
+              <button pButton type="button" size="small" severity="secondary" [text]="true" icon="pi pi-replay" [label]="i18n.t('adminSupport.reopen')" [loading]="updatingId() === request.id" (click)="setStatus(request, Status.Open)"></button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+    <p-paginator [alwaysShow]="false" [rows]="pageSize" [totalRecords]="totalElements()" [first]="page() * pageSize" (onPageChange)="onPageChange($event)"></p-paginator>
+  }
+</section>

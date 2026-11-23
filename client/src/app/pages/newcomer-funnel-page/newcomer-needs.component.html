@@ -1,0 +1,82 @@
+<section class="needs" [attr.aria-label]="i18n.t('needs.title')">
+  <span class="needs__label">{{ i18n.t('needs.title') }}</span>
+
+  @switch (state()) {
+    @case ('nobody') {
+      <div class="needs__ok">
+        <i class="pi pi-check-circle" aria-hidden="true"></i>
+        <span><strong>{{ i18n.t('needs.nobody') }}</strong></span>
+      </div>
+    }
+    @case ('covered') {
+      <div class="needs__ok">
+        <i class="pi pi-check-circle" aria-hidden="true"></i>
+        <span><strong>{{ i18n.t('needs.covered') }}</strong><br />{{ coveredText() }}</span>
+      </div>
+    }
+    @default {
+      @if (state() === 'withoutPlace') {
+        <p class="needs__headline"><b class="needs__who">{{ headlineWho() }}</b> {{ headlineRest() }}</p>
+      } @else {
+        <p class="needs__headline">{{ i18n.t('needs.headlineShort') }}</p>
+      }
+      <p class="needs__sub">
+        @if (missingPlaces() > 0) {
+          {{ i18n.t(missingPlaces() === 1 ? 'needs.missingPlacesOne' : 'needs.missingPlacesMany').replace('{count}', '' + missingPlaces()).replace('{days}', '' + funnel().gapHorizonDays) }}
+        } @else {
+          {{ i18n.t('needs.placesButWrongKind') }}
+        }
+      </p>
+      <div class="needs__bar" role="img" [attr.aria-label]="i18n.t('needs.barLabel').replace('{free}', '' + funnel().openSlots).replace('{needed}', '' + funnel().einAbsStillNeeded)">
+        <i [style.width.%]="coverage()"></i>
+      </div>
+      <div class="needs__legend">
+        <span><b>{{ funnel().openSlots }}</b> {{ i18n.t(funnel().openSlots === 1 ? 'needs.freeOne' : 'needs.freeMany') }}</span>
+        <span><b>{{ funnel().einAbsStillNeeded }}</b> {{ i18n.t('needs.needed') }}</span>
+      </div>
+
+      @if (actions().length) {
+        <span class="needs__label">{{ i18n.t('needs.howToHelp') }}</span>
+        @if (funnel().fairteilerRequired) {
+          <p class="needs__tip">
+            <i class="pi pi-heart" aria-hidden="true"></i>
+            <span>{{ i18n.t('needs.fairteilerTip') }}</span>
+          </p>
+        }
+        <ol class="needs__actions">
+          @for (need of actions(); track track(need); let index = $index) {
+            <li class="need" [class.need--top]="index === 0" [class.need--low]="need.withoutPlace === 0">
+              <div class="need__head">
+                <span class="need__rank" aria-hidden="true">{{ index + 1 }}</span>
+                <strong>{{ title(need) }}</strong>
+                @if (givesAlready(need)) {
+                  <p-tag severity="success" [value]="i18n.t('needs.givesAlready')"></p-tag>
+                }
+              </div>
+              <p class="need__main">
+                {{ helpsText(need) }}@if (need.withoutPlace > 0) {<span>, {{ withoutPlaceText(need) }}</span>}
+              </p>
+              <p class="need__facts">{{ factsText(need) }}</p>
+              @if (need.kind === NewcomerNeedKind.Fairteiler) {
+                <p class="need__facts">{{ i18n.t('needs.fairteilerHint') }}</p>
+              }
+              @if (canCreate()) {
+                <a
+                  pButton
+                  size="small"
+                  icon="pi pi-plus"
+                  class="need__cta"
+                  [outlined]="index !== 0"
+                  [routerLink]="bezirkContext.route('teacher')"
+                  [queryParams]="createQuery(need)"
+                  [label]="createLabel(need)"
+                ></a>
+              }
+            </li>
+          }
+        </ol>
+        <p class="needs__foot">{{ i18n.t('needs.footnote') }}</p>
+      }
+    }
+  }
+</section>

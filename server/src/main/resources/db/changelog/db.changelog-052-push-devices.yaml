@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: 052-push-devices
+      author: claude
+      changes:
+        # Phones with the store app that receive every user message also as a push notification (Firebase Cloud Messaging).
+        - createTable:
+            tableName: push_devices
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: foodsharing_id, type: VARCHAR(64), constraints: {nullable: false}}
+              - column: {name: token, type: VARCHAR(512), constraints: {nullable: false}}
+              - column: {name: platform, type: VARCHAR(20), constraints: {nullable: false}}
+              - column: {name: last_seen_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+        - addUniqueConstraint:
+            tableName: push_devices
+            columnNames: token
+            constraintName: uk_push_devices_token
+        - createIndex:
+            tableName: push_devices
+            indexName: idx_push_devices_foodsharing_id
+            columns:
+              - column: {name: foodsharing_id}

@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: 026-store-info-daily-check
+      author: claude
+      changes:
+        # Bieb store info now runs once a day and only reports unreplaced sign-outs after the pickup.
+        - dropColumn:
+            tableName: foodsharing_store_info_settings
+            columnName: notify_immediately
+        - dropColumn:
+            tableName: foodsharing_store_info_settings
+            columnName: notify_after_pickup
+        - addColumn:
+            tableName: foodsharing_store_info_settings
+            columns:
+              - column: {name: last_checked_at, type: TIMESTAMP WITH TIME ZONE}

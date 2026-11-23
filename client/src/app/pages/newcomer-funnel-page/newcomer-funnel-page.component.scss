@@ -1,0 +1,352 @@
+.funnel-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.funnel-header__period {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.funnel-hint {
+  margin: 0 0 1rem;
+  color: var(--app-text-muted);
+}
+
+.funnel-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.funnel-tile {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-surface-muted);
+}
+
+.funnel-tile span,
+.funnel-section-title {
+  color: var(--app-text-muted);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.funnel-tile strong {
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.funnel-tile small {
+  color: var(--app-text-muted);
+}
+
+.funnel-tile--warn {
+  border-color: color-mix(in srgb, var(--app-warning) 40%, var(--app-border));
+  background: color-mix(in srgb, var(--app-warning) 8%, var(--app-surface));
+}
+
+.funnel-tile--warn strong {
+  color: var(--app-warning);
+}
+
+.funnel-section-title {
+  margin: 0 0 0.75rem;
+}
+
+.funnel-people,
+.funnel-gaps {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.funnel-step__meta {
+  display: flex;
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+}
+
+.funnel-step__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.funnel-step__stalled {
+  color: var(--app-warning);
+}
+
+.funnel-people {
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.funnel-person {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.funnel-person--stalled {
+  background: color-mix(in srgb, var(--app-warning) 7%, var(--app-surface));
+}
+
+.funnel-person__name {
+  display: grid;
+  min-width: 0;
+}
+
+.funnel-person__name a {
+  overflow-wrap: anywhere;
+  font-weight: 650;
+}
+
+.funnel-person__name small {
+  color: var(--app-text-muted);
+}
+
+.funnel-person__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+
+.funnel-gaps {
+  gap: 0.6rem;
+}
+
+.funnel-gap {
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--app-border);
+  border-left-width: 4px;
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface);
+}
+
+.funnel-gap--missing {
+  border-left-color: var(--app-danger);
+}
+
+.funnel-gap--low {
+  border-left-color: var(--app-warning);
+}
+
+.funnel-gap--ok {
+  border-left-color: var(--app-primary);
+}
+
+.funnel-gap__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.funnel-gap__title .pi-heart {
+  color: var(--app-danger);
+}
+
+.funnel-gap p {
+  margin: 0.3rem 0 0;
+  color: var(--app-text-muted);
+}
+
+.funnel-ok-gaps {
+  margin-top: 1rem;
+}
+
+.funnel-ok-gaps summary {
+  color: var(--app-text-muted);
+}
+
+@media (max-width: 640px) {
+  /* Two by two on phone: four tiles in 3 + 1 left one alone and squeezed the labels against the tile edge. */
+  .funnel-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .funnel-tile span {
+    overflow-wrap: anywhere;
+  }
+
+  .funnel-tile {
+    padding: 0.7rem;
+  }
+
+  .funnel-tile small {
+    display: none;
+  }
+
+  .funnel-tile strong {
+    font-size: 1.3rem;
+  }
+
+  .funnel-person {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.35rem 0.5rem;
+  }
+
+  .funnel-person__facts {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    gap: 0.15rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .funnel-person__name small {
+    white-space: nowrap;
+  }
+
+  /* The message link becomes a round envelope button next to the name. */
+  .funnel-person__message {
+    width: 2.5rem;
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+  }
+
+  .funnel-person__message ::ng-deep .p-button-label {
+    display: none;
+  }
+
+  /* An odd last tile spans the row instead of sitting alone in half of it. */
+  .funnel-tile:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .funnel-header__period {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .funnel-header__period > :last-child {
+    flex: 1 1 12rem;
+  }
+}
+
+.funnel-header__title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.funnel-detail {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-surface-muted);
+}
+
+.funnel-detail__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.funnel-detail__head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.funnel-detail__count {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.funnel-detail__count strong {
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.funnel-detail__count small {
+  color: var(--app-text-muted);
+}
+
+.funnel-detail .funnel-people {
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+}
+
+.funnel-detail .funnel-person {
+  background: var(--app-surface);
+}
+
+.funnel-all-gaps {
+  margin-top: 1.25rem;
+}
+
+.gap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.gap-table th {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--app-border);
+  color: var(--app-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.gap-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.gap-table td .pi {
+  margin-right: 0.35rem;
+  color: var(--app-primary);
+}
+
+.gap-table__num {
+  width: 4rem;
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.gap-row--ok td {
+  color: var(--app-text-muted);
+}
+
+.funnel-person__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}

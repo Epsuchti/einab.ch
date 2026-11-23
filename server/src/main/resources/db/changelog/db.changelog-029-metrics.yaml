@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: 029-metrics
+      author: claude
+      changes:
+        # When an advertisement was actually sent (late-cancellation adverts reuse an older audit row) and when the
+        # advertised pickup was seen as filled afterwards.
+        - addColumn:
+            tableName: foodsharing_open_slot_advertisement_audits
+            columns:
+              - column: {name: sent_at, type: TIMESTAMP WITH TIME ZONE}
+              - column: {name: filled_at, type: TIMESTAMP WITH TIME ZONE}
+        # Anonymous daily totals per Bezirk. Audits are written here right before they are deleted, so the metrics
+        # survive the audit retention without keeping any personal data.
+        - createTable:
+            tableName: foodsharing_metric_daily_counts
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: bezirk_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: metric_day, type: DATE, constraints: {nullable: false}}
+              - column: {name: metric_key, type: VARCHAR(100), constraints: {nullable: false}}
+              - column: {name: metric_value, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+        - addUniqueConstraint:
+            tableName: foodsharing_metric_daily_counts
+            columnNames: bezirk_id, metric_day, metric_key
+            constraintName: uk_foodsharing_metric_daily_counts
+        - addForeignKeyConstraint:
+            baseTableName: foodsharing_metric_daily_counts
+            baseColumnNames: bezirk_id
+            referencedTableName: bezirke
+            referencedColumnNames: id
+            constraintName: fk_foodsharing_metric_daily_counts_bezirk
+            onDelete: CASCADE

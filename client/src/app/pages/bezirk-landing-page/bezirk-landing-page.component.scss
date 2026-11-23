@@ -1,0 +1,135 @@
+.bezirk-error {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 42rem;
+  padding: 1rem;
+  border: 1px solid #efc7c4;
+  border-radius: var(--app-radius-sm);
+  background: #fff3f2;
+  color: #8d302b;
+}
+
+.bezirk-error p {
+  margin: 0;
+}
+
+.bezirk-picker {
+  gap: 1.5rem;
+  padding-top: 1rem;
+}
+
+.bezirk-picker__intro {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.bezirk-picker__intro h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+}
+
+.bezirk-picker__intro p {
+  margin: 0;
+  color: var(--p-text-muted-color, #5b6b61);
+}
+
+.bezirk-picker__mark {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  background: #e3f1e7;
+  color: #3f7f4f;
+  font-size: 1.4rem;
+}
+
+.bezirk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.75rem;
+}
+
+.bezirk-tile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #d9e6dd;
+  border-radius: var(--app-radius-sm, 0.75rem);
+  background: #fff;
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(20, 50, 30, 0.06);
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.bezirk-tile > .pi-map-marker {
+  color: #3f7f4f;
+}
+
+.bezirk-tile__name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.bezirk-tile__arrow {
+  color: #9bb5a2;
+  transition: transform 0.15s;
+}
+
+.bezirk-tile:hover,
+.bezirk-tile:focus-visible {
+  border-color: #3f7f4f;
+  box-shadow: 0 4px 12px rgba(20, 50, 30, 0.12);
+  transform: translateY(-1px);
+}
+
+.bezirk-tile:hover .bezirk-tile__arrow,
+.bezirk-tile:focus-visible .bezirk-tile__arrow {
+  color: #3f7f4f;
+  transform: translateX(2px);
+}
+
+.bezirk-picker__intro .bezirk-picker__what {
+  max-width: 34rem;
+  font-size: 0.92rem;
+}
+
+.bezirk-continue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--app-radius-sm);
+  background: #2f7a45;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.bezirk-continue:hover,
+.bezirk-continue:focus-visible {
+  background: #276a3b;
+}
+
+.bezirk-picker__other {
+  margin: 0.25rem 0 -0.75rem;
+  color: var(--p-text-muted-color, #5b6b61);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Phones: the hint repeats the title ("Wähle deinen Bezirk"); the EinAb explanation below is enough. */
+@media (max-width: 480px) {
+  .bezirk-picker__hint {
+    display: none;
+  }
+}

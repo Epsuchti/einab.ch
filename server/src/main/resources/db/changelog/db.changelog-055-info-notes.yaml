@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 055-info-notes
+      author: claude
+      changes:
+        # Banners for the whole site (bezirk_id null) or one Bezirk, shown between starts_at and ends_at.
+        - createTable:
+            tableName: info_notes
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: bezirk_id, type: UUID}
+              - column: {name: title, type: VARCHAR(200)}
+              - column: {name: message, type: VARCHAR(2000), constraints: {nullable: false}}
+              - column: {name: severity, type: VARCHAR(20), constraints: {nullable: false}}
+              - column: {name: starts_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: ends_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: created_by_name, type: VARCHAR(255)}
+        # A Bezirk's notes go with it; Bezirke are normally only disabled, not deleted.
+        - addForeignKeyConstraint:
+            baseTableName: info_notes
+            baseColumnNames: bezirk_id
+            constraintName: fk_info_notes_bezirk
+            referencedTableName: bezirke
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - createIndex:
+            tableName: info_notes
+            indexName: idx_info_notes_ends_at
+            columns:
+              - column: {name: ends_at}

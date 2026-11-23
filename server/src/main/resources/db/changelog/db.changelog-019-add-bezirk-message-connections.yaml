@@ -1,0 +1,62 @@
+databaseChangeLog:
+  - changeSet:
+      id: 019-add-bezirk-message-connections
+      author: codex
+      changes:
+        - createTable:
+            tableName: foodsharing_bezirk_message_connections
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: bezirk_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: foodsharing_email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: foodsharing_password_ciphertext
+                  type: VARCHAR(32600)
+              - column:
+                  name: session_cookie_ciphertext
+                  type: VARCHAR(32600)
+              - column:
+                  name: csrf_token_ciphertext
+                  type: VARCHAR(32600)
+              - column:
+                  name: authenticated_at
+                  type: TIMESTAMP WITH TIME ZONE
+        - addUniqueConstraint:
+            tableName: foodsharing_bezirk_message_connections
+            columnNames: bezirk_id
+            constraintName: uk_foodsharing_bezirk_message_connections_bezirk
+        - addForeignKeyConstraint:
+            baseTableName: foodsharing_bezirk_message_connections
+            baseColumnNames: bezirk_id
+            referencedTableName: bezirke
+            referencedColumnNames: id
+            constraintName: fk_foodsharing_bezirk_message_connections_bezirk

@@ -1,0 +1,93 @@
+<section class="page-shell page-shell--narrow profile-page">
+  <h1 class="profile-page__title"><i class="pi pi-user title-icon" aria-hidden="true"></i>{{ i18n.t('profile.title') }}</h1>
+
+  @if (loading()) {
+    <app-loading-indicator />
+  } @else {
+    <p-card styleClass="profile-section">
+      <h2 class="profile-section__title">{{ i18n.t('profile.account') }}</h2>
+      <dl class="kv-list profile-account">
+        @if (sessionService.session()?.displayName; as name) {
+          <div><dt>{{ i18n.t('profile.name') }}</dt><dd>{{ name }}</dd></div>
+        }
+        <div><dt>{{ i18n.t('profile.foodsharingId') }}</dt><dd>{{ sessionService.foodsharingId() }}</dd></div>
+        @if (sessionService.session()?.bezirk?.name; as bezirk) {
+          <div><dt>{{ i18n.t('bezirk.label') }}</dt><dd>{{ bezirk }}</dd></div>
+        }
+      </dl>
+    </p-card>
+
+    <p-card styleClass="profile-section">
+      <h2 class="profile-section__title">{{ i18n.t('common.phoneNumber') }}</h2>
+      <p class="form-inline-note">{{ i18n.t('profile.phoneNumberHint') }}</p>
+      <form class="stack-form" [formGroup]="form" (ngSubmit)="submit()">
+        <label>
+          <input pInputText [attr.aria-label]="i18n.t('common.phoneNumber')" type="tel" inputmode="tel" formControlName="phoneNumber" autocomplete="tel" placeholder="+41 79 123 45 67" [attr.aria-invalid]="form.controls.phoneNumber.errors?.['phoneNumber'] ? 'true' : null" />
+          @if (form.controls.phoneNumber.errors?.['phoneNumber']) { <small class="field-error" role="alert">{{ i18n.t('common.phoneNumberInvalid') }}</small> }
+        </label>
+        <button pButton type="submit" [label]="i18n.t('common.save')" [loading]="saving()" [disabled]="form.invalid || form.pristine"></button>
+      </form>
+    </p-card>
+
+    <p-card styleClass="profile-section">
+      <h2 class="profile-section__title">{{ i18n.t('profile.language') }}</h2>
+      <div class="segmented" role="group" [attr.aria-label]="i18n.t('profile.language')">
+        @for (lang of languages; track lang) {
+          <button type="button" class="segmented__item" [class.is-active]="i18n.language() === lang" [attr.aria-pressed]="i18n.language() === lang" (click)="setLanguage(lang)">{{ i18n.t('lang.' + lang + 'Long') }}</button>
+        }
+      </div>
+    </p-card>
+
+    @if (push.available) {
+      <p-card styleClass="profile-section">
+        <h2 class="profile-section__title">{{ i18n.t('profile.push') }}</h2>
+        @switch (push.state()) {
+          @case ('on') {
+            <p class="form-inline-note">{{ i18n.t('profile.pushOn') }}</p>
+            <button pButton type="button" severity="secondary" [outlined]="true" icon="pi pi-bell-slash" [label]="i18n.t('profile.pushTurnOff')" [loading]="push.busy()" (click)="push.disable()"></button>
+          }
+          @case ('denied') {
+            <p class="form-inline-note">{{ i18n.t('profile.pushDenied') }}</p>
+            <button pButton type="button" [outlined]="true" icon="pi pi-refresh" [label]="i18n.t('profile.pushTurnOn')" [loading]="push.busy()" (click)="push.enable()"></button>
+          }
+          @default {
+            <p class="form-inline-note">{{ i18n.t('profile.pushOff') }}</p>
+            <button pButton type="button" icon="pi pi-bell" [label]="i18n.t('profile.pushTurnOn')" [loading]="push.busy()" (click)="push.enable()"></button>
+          }
+        }
+      </p-card>
+    }
+
+    @if (notificationStatus(); as status) {
+      @if (!status.verified) {
+        <p-card styleClass="profile-section">
+          <h2 class="profile-section__title">{{ i18n.t('profile.notifications') }}</h2>
+          @if (status.active) {
+            <p class="form-inline-note">{{ status.channel === 'EMAIL' ? i18n.t('slots.subscribeViaEmail').replace('{0}', status.email ?? '') : i18n.t('slots.subscribeViaFoodsharing') }}</p>
+            <button pButton type="button" severity="secondary" [outlined]="true" icon="pi pi-bell-slash" [label]="i18n.t('slots.unsubscribeButton')" [loading]="notificationLoading()" (click)="unsubscribe()"></button>
+          } @else {
+            <p class="form-inline-note">{{ i18n.t('profile.notificationsOff') }}</p>
+            <a pButton [outlined]="true" icon="pi pi-bell" [label]="i18n.t('profile.notificationsSetup')" [routerLink]="bezirkContext.route()"></a>
+          }
+        </p-card>
+      }
+    }
+
+    <button pButton type="button" severity="secondary" [outlined]="true" icon="pi pi-sign-out" class="profile-logout" [label]="i18n.t('nav.logout')" (click)="logout()"></button>
+
+    <p-card styleClass="profile-section profile-section--danger">
+      <h2 class="profile-section__title profile-danger__title">
+        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i> {{ i18n.t('profile.deleteAccount') }}
+      </h2>
+      <p class="profile-danger__intro">{{ i18n.t('profile.deleteAccountIntro') }}</p>
+      <ul class="profile-danger__list">
+        <li><i class="pi pi-trash" aria-hidden="true"></i><span>{{ i18n.t('profile.deleteAccountRemoved') }}</span></li>
+        <li><i class="pi pi-calendar-times" aria-hidden="true"></i><span>{{ i18n.t('profile.deleteAccountBookings') }}</span></li>
+        <li><i class="pi pi-chart-bar" aria-hidden="true"></i><span>{{ i18n.t('profile.deleteAccountKept') }}</span></li>
+        <li><i class="pi pi-refresh" aria-hidden="true"></i><span>{{ i18n.t('profile.deleteAccountAgain') }}</span></li>
+      </ul>
+      <button pButton type="button" severity="danger" [outlined]="true" icon="pi pi-trash" class="profile-danger__button" [label]="i18n.t('profile.deleteAccountButton')" [loading]="deleting()" (click)="confirmDeleteAccount()"></button>
+    </p-card>
+
+  }
+</section>

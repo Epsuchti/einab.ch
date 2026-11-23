@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 048-slot-comment-reminder
+      author: claude
+      changes:
+        # When the teacher was reminded to comment on a booking after the EinAb; null means not reminded yet.
+        - addColumn:
+            tableName: slots
+            columns:
+              - column: {name: comment_reminder_sent_at, type: TIMESTAMP WITH TIME ZONE}

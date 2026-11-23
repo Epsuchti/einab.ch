@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 035-user-last-login
+      author: claude
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column: {name: last_login_at, type: TIMESTAMP WITH TIME ZONE}

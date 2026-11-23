@@ -1,0 +1,1478 @@
+.page-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.page-heading__icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 2.8rem;
+  height: 2.8rem;
+  place-items: center;
+  border-radius: 0.85rem;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  font-size: 1.2rem;
+}
+
+.page-heading__icon--people {
+  background: #e6f4f8;
+  color: var(--app-info);
+}
+
+.page-heading h1,
+.page-heading h2 {
+  margin: 0;
+  color: var(--app-text);
+  font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+  line-height: 1.15;
+}
+
+.page-heading h2 {
+  font-size: 1.3rem;
+}
+
+.page-heading p {
+  margin: 0.25rem 0 0;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}
+
+.einabs-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.einabs-card__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.875rem;
+  flex-wrap: wrap;
+}
+
+.einabs-card__toolbar .filter-toggle {
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.einabs-card {
+  margin: 0;
+}
+
+.einabs-card ::ng-deep .p-card-title {
+  margin-bottom: 1.25rem;
+}
+
+.calendar-settings {
+  overflow: hidden;
+  margin-bottom: 0;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  background: var(--app-nest-bg);
+  box-shadow: var(--app-shadow);
+}
+
+.calendar-settings__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  list-style: none;
+  color: var(--app-text);
+  font-weight: 750;
+}
+
+.calendar-settings__summary::-webkit-details-marker {
+  display: none;
+}
+
+.calendar-settings__summary span {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.calendar-settings__chevron {
+  transition: transform 150ms ease;
+}
+
+.calendar-settings[open] .calendar-settings__chevron {
+  transform: rotate(180deg);
+}
+
+.calendar-settings__content {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.25rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.calendar-settings__description {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+}
+
+.desktop-table ::ng-deep .p-datatable-thead > tr > th {
+  background: var(--app-surface-strong);
+  border-color: var(--app-border);
+  color: var(--app-text-muted);
+}
+
+.desktop-table ::ng-deep .p-datatable-tbody > tr > td {
+  border-color: #eaf0eb;
+  color: var(--app-text);
+}
+
+.desktop-table ::ng-deep .einab-expandable-row {
+  cursor: pointer;
+}
+
+.einab-slots-row > td {
+  padding: 0;
+  background: var(--app-surface-muted);
+}
+
+.einab-slots {
+  padding: 0.85rem 1rem;
+}
+
+.einab-detail-label {
+  color: var(--app-text-muted);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.einab-slots {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0.25rem 0;
+}
+
+.einab-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.einab-toolbar > :last-child:not(:only-child) {
+  margin-left: auto;
+}
+
+.einab-slot-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: #fff;
+  box-shadow: 0 3px 8px rgb(23 49 38 / 0.04);
+}
+
+.einab-slot-card__header,
+.einab-slot-card__status {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.einab-slot-card__header {
+  justify-content: space-between;
+}
+
+.einab-slot-card__details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--app-radius-sm);
+  background: #f6faf6;
+}
+
+.einab-slot-card__details > div {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+  color: var(--app-text);
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.einab-card__slots {
+  display: none;
+}
+
+.einab-cards,
+.slot-cards,
+.candidate-cards {
+  display: none;
+}
+
+.comment-item small {
+  color: var(--app-text-muted);
+}
+
+.slot-comments {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.slot-comments .toolbar-row {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.slot-comments .empty-state {
+  margin: 0;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.slot-comments h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.comment-item {
+  margin-top: 0.6rem;
+  border-color: #cce3d0;
+  background: #f1f9f2;
+}
+
+.comment-item small {
+  display: block;
+  margin-top: 0.15rem;
+}
+
+.comment-item p {
+  margin: 0.4rem 0 0;
+  white-space: pre-wrap;
+}
+
+.planning-tools {
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  background: var(--app-nest-bg);
+  box-shadow: var(--app-shadow);
+}
+
+.planning-tools__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  list-style: none;
+  color: var(--app-text);
+  font-weight: 750;
+}
+
+.planning-tools__summary::-webkit-details-marker {
+  display: none;
+}
+
+.planning-tools__summary span {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.teacher-settings__chevron {
+  transition: transform 150ms ease;
+}
+
+.planning-tools[open] .teacher-settings__chevron {
+  transform: rotate(180deg);
+}
+
+.planning-tools__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  border-top: 1px solid var(--app-border);
+}
+
+.planning-tools__section {
+  min-width: 0;
+  padding: 1.25rem;
+}
+
+.planning-tools__section--settings {
+  border-left: 1px solid var(--app-border);
+  background: var(--app-surface-muted);
+}
+
+.planning-tools__heading h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.planning-tools__heading p {
+  margin: 0.2rem 0 1rem;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+}
+
+.teacher-settings-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.teacher-settings-form__field {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--app-text-muted);
+  font-size: 0.76rem;
+  font-weight: 750;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.teacher-settings-form__field ::ng-deep .p-inputtext {
+  width: 100%;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.teacher-settings-form__hint,
+.teacher-settings-inactive {
+  margin: 0;
+  padding: 0.85rem 0.9rem;
+  border-radius: var(--app-radius-sm);
+}
+
+.teacher-settings-form__hint {
+  border: 1px solid var(--app-border);
+  background: #fff;
+  color: var(--app-text-muted);
+}
+
+.teacher-settings-inactive {
+  border: 1px solid #edd9ad;
+  background: #fff9eb;
+  color: #815114;
+}
+
+.teacher-settings-form__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.teacher-settings-assignment {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .einabs-card__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .einabs-card__toolbar {
+    justify-content: space-between;
+  }
+
+  .einabs-card__toolbar > button {
+    flex: 1;
+  }
+
+  .desktop-table {
+    display: none;
+  }
+
+  .einab-cards,
+  .slot-cards,
+  .candidate-cards {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .einab-card,
+  .slot-card,
+  .candidate-cards article {
+    display: grid;
+    gap: 0.65rem;
+    padding: 0.9rem;
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-sm);
+    background: #fff;
+  }
+
+  .einab-card--selected {
+    border-color: #78bb86;
+    box-shadow: 0 0 0 3px var(--app-primary-soft);
+  }
+
+  .einab-card__topline,
+  .einab-card__date,
+  .einab-card__location,
+  .slot-card > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .einab-card__topline p-tag:last-child {
+    margin-left: auto;
+  }
+
+  .einab-card__date,
+  .einab-card__location,
+  .slot-card > span,
+  .candidate-cards span,
+  .candidate-cards small {
+    color: var(--app-text-muted);
+    overflow-wrap: anywhere;
+  }
+
+  .einab-card__date i,
+  .einab-card__location i {
+    color: var(--app-primary);
+  }
+
+  .einab-card__actions,
+  .slot-card__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .einab-card__slots {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .einab-card__slots summary {
+    color: var(--app-primary-strong);
+    font-weight: 700;
+  }
+
+  .einab-slot-card__details {
+    grid-template-columns: 1fr;
+  }
+
+  .planning-tools__content {
+    grid-template-columns: 1fr;
+  }
+
+  .planning-tools__section--settings {
+    border-top: 1px solid var(--app-border);
+    border-left: 0;
+  }
+
+  .candidate-cards button {
+    justify-self: start;
+    margin-top: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-heading {
+    align-items: flex-start;
+  }
+
+  .einabs-card__toolbar,
+  .einab-card__actions,
+  .einab-toolbar {
+    flex-direction: column;
+  }
+
+  .einab-toolbar > :last-child:not(:only-child) {
+    margin-left: 0;
+  }
+
+  .einab-toolbar > * {
+    width: 100%;
+  }
+
+  .slot-card__actions,
+  .einab-slot-card__header,
+  .toolbar-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .einabs-card__toolbar > button,
+  .einab-card__actions > button,
+  .slot-card__actions > button,
+  .einab-slot-card__header > button,
+  .candidate-cards button,
+  .teacher-settings-form__actions .p-button {
+    width: 100%;
+  }
+
+  .planning-tools__summary,
+  .planning-tools__section {
+    padding: 0.9rem;
+  }
+}
+
+.quick-create--highlight {
+  animation: planning-tools-highlight 2.5s ease-out;
+}
+
+@keyframes planning-tools-highlight {
+  0%,
+  40% {
+    box-shadow: 0 0 0 3px var(--app-primary-strong);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-create--highlight {
+    animation: none;
+  }
+}
+
+.calendar-settings__status {
+  margin-left: auto;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--app-surface-muted);
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.calendar-settings__status--connected {
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+}
+
+.ical-connection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: #fff;
+}
+
+.ical-connection__icon {
+  color: var(--app-primary-strong);
+  font-size: 1.4rem;
+}
+
+.ical-connection__text {
+  display: grid;
+  flex: 1 1 14rem;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.ical-connection__text span {
+  color: var(--app-text-muted);
+}
+
+.ical-connection__link {
+  overflow: hidden;
+  color: var(--app-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ical-connection__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .ical-connection__actions,
+  .ical-connection__actions .p-button {
+    width: 100%;
+  }
+}
+
+.ical-feed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.ical-feed__icon {
+  color: var(--app-primary-strong);
+  font-size: 1.4rem;
+}
+
+.ical-feed__text {
+  display: grid;
+  flex: 1 1 16rem;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.ical-feed__text span {
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}
+
+.ical-feed__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .ical-feed__actions,
+  .ical-feed__actions .p-button {
+    width: 100%;
+  }
+}
+
+.einabs-card__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.einabs-card__title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.teacher-section-title {
+  margin: 1.5rem 0 0.5rem;
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.einab-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.slot-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slot-entry {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.8rem 0.9rem 0.6rem;
+  border: 1px solid var(--app-border);
+  border-left: 4px solid var(--app-primary);
+  border-radius: var(--app-radius-sm);
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+}
+
+.slot-entry--done {
+  border-left-color: var(--app-primary-strong);
+}
+
+.slot-entry--cancelled {
+  border-left-color: var(--p-red-400, #f87171);
+  background: var(--app-surface-muted);
+}
+
+.slot-entry__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.slot-entry__head p-tag {
+  margin-left: auto;
+}
+
+.slot-entry__avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  font-size: 0.9rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+}
+
+.slot-entry--cancelled .slot-entry__avatar {
+  background: var(--app-border);
+  color: var(--app-text-muted);
+}
+
+.slot-entry__who {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.slot-entry__who strong {
+  font-size: 1rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.slot-entry__who small {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+}
+
+.slot-entry__who small .pi {
+  font-size: 0.75rem;
+}
+
+.slot-entry__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.slot-entry__actions .p-button {
+  width: auto;
+}
+
+.slot-entry__spacer {
+  flex: 1 1 auto;
+}
+
+.slot-entry__phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid #b9dbbf;
+  border-radius: 999px;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.slot-entry__phone:hover {
+  border-color: var(--app-primary);
+}
+
+.slot-entry--free {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0.5rem;
+  border-style: dashed;
+  border-left-width: 1px;
+  border-left-color: var(--app-border);
+  box-shadow: none;
+  background: transparent;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}
+
+.slot-entry__comments {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slot-entry__comments li {
+  display: flex;
+  gap: 0.55rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.slot-entry__comments li > .pi {
+  margin-top: 0.2rem;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+}
+
+.slot-entry__comments p {
+  margin: 0 0 0.2rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.slot-entry__comments small {
+  color: var(--app-text-muted);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 600px) {
+  .slot-entry__phone {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .slot-entry__spacer {
+    display: none;
+  }
+
+  .slot-entry__actions .p-button {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+}
+
+.einab-card__topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.einab-card__title {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.einab-card__title span {
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}
+
+.einab-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+  color: var(--app-text-muted);
+  font-size: 0.88rem;
+}
+
+.einab-card__meta .einab-badge {
+  margin-left: 0;
+}
+
+.calendar-settings__block-title {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 1rem;
+}
+
+.teacher-settings-form__steps {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding-left: 1.4rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.teacher-settings-form__steps li::marker {
+  font-weight: 750;
+}
+
+.teacher-settings-form__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 650;
+}
+
+.teacher-settings-form__link .pi {
+  font-size: 0.75rem;
+}
+
+.teacher-settings-form__guide {
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.teacher-settings-form__guide img {
+  display: block;
+  width: min(100%, 560px);
+  height: auto;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+}
+
+/* Quick create chips in the Meine EinAbs header */
+.quick-create {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px dashed var(--app-border-strong);
+  border-radius: var(--app-radius);
+  background: var(--app-surface-muted);
+  scroll-margin-top: 5rem;
+}
+
+.quick-create__label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--app-text-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.quick-create__empty {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}
+
+.quick-create__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quick-create ::ng-deep .p-paginator {
+  padding: 0;
+  background: transparent;
+}
+
+.quick-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 2.5rem;
+  padding: 0.3rem 0.85rem 0.3rem 0.35rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: 999px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.quick-chip:hover,
+.quick-chip:focus-visible {
+  border-color: var(--app-primary);
+  background: var(--app-primary-soft);
+}
+
+.quick-chip:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
+}
+
+.quick-chip__icon {
+  display: grid;
+  flex: none;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  font-size: 0.8rem;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.quick-chip__icon .pi {
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.quick-chip:hover .quick-chip__icon,
+.quick-chip:focus-visible .quick-chip__icon {
+  background: var(--app-primary);
+  color: #fff;
+}
+
+.quick-chip__store {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quick-chip__date {
+  flex: none;
+  color: var(--app-text-muted);
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+
+.quick-chip--covered {
+  background: transparent;
+  opacity: 0.65;
+}
+
+.quick-chip--covered .quick-chip__icon {
+  background: var(--app-border);
+  color: var(--app-text-muted);
+}
+
+.quick-chip--ghost {
+  padding: 0.3rem 0.95rem;
+  gap: 0.4rem;
+  /* A plain link-style row: no dashed pill inside the dashed box. */
+  border-color: transparent;
+  background: transparent;
+  color: var(--app-primary-strong);
+  font-weight: 650;
+}
+
+@media (max-width: 640px) {
+  .quick-create {
+    padding: 0.625rem;
+  }
+
+  .quick-chip:not(.quick-chip--ghost) {
+    width: 100%;
+  }
+
+  .quick-chip__date {
+    margin-left: auto;
+  }
+}
+
+/* "Vergangene anzeigen" filter above the EinAbs list */
+.einabs-filter {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 0.5rem;
+}
+
+.einabs-filter .filter-toggle {
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.25rem;
+  padding: 0.3rem 0.85rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: 999px;
+  background: var(--app-surface);
+  color: var(--app-text-muted);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.filter-chip:hover {
+  border-color: var(--app-primary);
+  color: var(--app-text);
+}
+
+.filter-chip:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
+}
+
+.filter-chip--active {
+  border-color: var(--app-primary);
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+}
+
+.filter-chip .pi {
+  font-size: 0.85rem;
+}
+
+/* "Spontanen EinAb nachtragen": second collapsible under Werkzeuge. */
+.guide-link + .calendar-settings,
+.calendar-settings + .calendar-settings,
+.past-einab-tool {
+  margin-top: 0.75rem;
+}
+
+.past-einab-tool__info {
+  display: grid;
+  grid-template-columns: 1.1rem minmax(0, 1fr);
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid #c5dfe9;
+  border-radius: var(--app-radius-sm);
+  background: #eef7fa;
+  color: #174f66;
+  font-size: 0.88rem;
+}
+
+.past-einab-tool__info .pi {
+  margin-top: 0.2rem;
+}
+
+@media (max-width: 640px) {
+  /* Needs the summary in the selector: `.calendar-settings__summary span { display: flex }` would win otherwise. */
+  .calendar-settings__summary .past-einab-tool__badge {
+    display: none;
+  }
+
+  /* Title and chevron on the first row, status pill below: side by side they do not fit at phone width. */
+  .calendar-settings__summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem 0.75rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .calendar-settings__chevron {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .calendar-settings__summary .calendar-settings__status {
+    grid-column: 1;
+    justify-self: start;
+    margin-left: 0;
+  }
+}
+
+/* EinAb form: Fairteiler visit as an explained switch tile. */
+.fairteiler-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.fairteiler-option.is-on {
+  border-color: #b9dbbf;
+  background: var(--app-primary-soft);
+}
+
+.fairteiler-option__icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--app-primary-strong);
+}
+
+.fairteiler-option__text {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.fairteiler-option__text strong {
+  color: var(--app-text);
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.fairteiler-option__text small {
+  color: var(--app-text-muted);
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+/* Phone: Meine EinAbs header reads top to bottom, left aligned: title, full-width "Neue EinAb", quick create, filter. */
+@media (max-width: 640px) {
+  .einabs-card__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    text-align: left;
+  }
+
+  .einabs-card__title {
+    text-align: left;
+  }
+
+  .einabs-card__header > button {
+    width: 100%;
+  }
+
+  .einabs-card ::ng-deep .p-card-title {
+    text-align: left;
+  }
+}
+
+/* Phone: chips never overflow; the date goes under the store name, a long store name gets an ellipsis. */
+@media (max-width: 640px) {
+  .quick-create,
+  .quick-create__chips {
+    min-width: 0;
+  }
+
+  .quick-chip:not(.quick-chip--ghost) {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: 0.6rem;
+    row-gap: 0.05rem;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0.4rem 0.85rem 0.4rem 0.4rem;
+    border-radius: var(--app-radius);
+    text-align: left;
+  }
+
+  .quick-chip:not(.quick-chip--ghost) .quick-chip__icon {
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  .quick-chip:not(.quick-chip--ghost) .quick-chip__store {
+    display: block;
+  }
+
+  .quick-chip:not(.quick-chip--ghost) .quick-chip__date {
+    margin-left: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .quick-chip--ghost {
+    box-sizing: border-box;
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
+  }
+}
+
+/* Quiet note that a published EinAb is bookable right away, with nothing to confirm. */
+.publish-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0.25rem 0 0;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.publish-hint .pi {
+  margin-top: 0.15rem;
+  color: var(--app-primary);
+  font-size: 0.85rem;
+}
+
+.publish-hint--center {
+  justify-content: center;
+  text-align: center;
+}
+
+/* Missing comments: an attention panel at the top of Meine EinAbs, open by default. */
+.comment-todo {
+  margin-bottom: 1rem;
+  overflow: hidden;
+  border: 1px solid #f2c27a;
+  border-left: 4px solid #e08a00;
+  border-radius: var(--app-radius);
+  background: #fff8ec;
+  box-shadow: 0 6px 18px rgb(122 74 0 / 0.08);
+}
+
+.comment-todo__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  background: transparent;
+  list-style: none;
+  cursor: pointer;
+}
+
+.comment-todo__header::-webkit-details-marker {
+  display: none;
+}
+
+.comment-todo__icon {
+  display: grid;
+  flex: 0 0 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #fde7c8;
+  color: #b25e00;
+  font-size: 1.1rem;
+}
+
+.comment-todo__heading {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.comment-todo__heading strong {
+  color: #6b3f00;
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.comment-todo__heading small {
+  color: #7a5a2a;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.comment-todo__chevron {
+  margin-left: auto;
+  color: #a06a1c;
+  transition: transform 150ms ease;
+}
+
+.comment-todo[open] .comment-todo__chevron {
+  transform: rotate(180deg);
+}
+
+.comment-todo__list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0 1rem 1rem;
+  list-style: none;
+}
+
+.comment-todo__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #f4dcb4;
+  border-radius: var(--app-radius-sm);
+  background: #fff;
+}
+
+.comment-todo__who {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.comment-todo__who strong {
+  overflow-wrap: anywhere;
+}
+
+.comment-todo__who small {
+  color: var(--app-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.comment-todo__action {
+  flex: 0 0 auto;
+}
+
+/* Phone: the button goes full width under the name, so both stay readable. */
+@media (max-width: 480px) {
+  .comment-todo__item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .comment-todo__action {
+    width: 100%;
+  }
+}
+
+.guide-link {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.9rem 1.25rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  background: var(--app-nest-bg);
+  box-shadow: var(--app-shadow);
+  color: var(--app-text);
+  text-decoration: none;
+}
+
+.guide-link:hover,
+.guide-link:focus-visible {
+  border-color: var(--app-primary);
+}
+
+.guide-link__icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 0.7rem;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+}
+
+.guide-link__text {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.guide-link__text strong {
+  font-weight: 750;
+}
+
+.guide-link__text small {
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+}
+
+.guide-link__chevron {
+  color: var(--app-text-muted);
+}

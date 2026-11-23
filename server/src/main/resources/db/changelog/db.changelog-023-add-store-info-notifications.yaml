@@ -1,0 +1,62 @@
+databaseChangeLog:
+  - changeSet:
+      id: 023-add-store-info-notifications
+      author: claude
+      changes:
+        - createTable:
+            tableName: foodsharing_store_info_settings
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: admin_connection_id, type: UUID, constraints: {nullable: false, unique: true, uniqueConstraintName: uk_foodsharing_store_info_settings_connection}}
+              - column: {name: enabled, type: BOOLEAN, defaultValueBoolean: false, constraints: {nullable: false}}
+              - column: {name: notify_immediately, type: BOOLEAN, defaultValueBoolean: true, constraints: {nullable: false}}
+              - column: {name: notify_after_pickup, type: BOOLEAN, defaultValueBoolean: true, constraints: {nullable: false}}
+              - column: {name: cutoff_enabled, type: BOOLEAN, defaultValueBoolean: true, constraints: {nullable: false}}
+              - column: {name: maximum_hours_before_pickup, type: INT, defaultValueNumeric: 72, constraints: {nullable: false}}
+              - column: {name: telegram_chat_ids_json, type: VARCHAR(32600), defaultValue: '[]', constraints: {nullable: false}}
+              - column: {name: stores_json, type: VARCHAR(32600), defaultValue: '[]', constraints: {nullable: false}}
+              - column: {name: active_since, type: TIMESTAMP WITH TIME ZONE}
+        - addForeignKeyConstraint:
+            baseTableName: foodsharing_store_info_settings
+            baseColumnNames: admin_connection_id
+            referencedTableName: foodsharing_admin_connections
+            referencedColumnNames: id
+            constraintName: fk_foodsharing_store_info_settings_connection
+        - createTable:
+            tableName: foodsharing_store_info_cancellations
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: admin_connection_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: store_id, type: BIGINT, constraints: {nullable: false}}
+              - column: {name: store_name, type: VARCHAR(255), defaultValue: '', constraints: {nullable: false}}
+              - column: {name: pickup_date, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: foodsharing_user_id, type: VARCHAR(100), constraints: {nullable: false}}
+              - column: {name: foodsharing_user_name, type: VARCHAR(255)}
+              - column: {name: cancelled_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: total_slots, type: INT}
+              - column: {name: occupied_slots, type: INT}
+              - column: {name: canceller_rejoined, type: BOOLEAN, defaultValueBoolean: false, constraints: {nullable: false}}
+              - column: {name: snapshot_at, type: TIMESTAMP WITH TIME ZONE}
+              - column: {name: immediate_notified_at, type: TIMESTAMP WITH TIME ZONE}
+              - column: {name: status, type: VARCHAR(50), defaultValue: OPEN, constraints: {nullable: false}}
+              - column: {name: final_checked_at, type: TIMESTAMP WITH TIME ZONE}
+              - column: {name: final_notified_at, type: TIMESTAMP WITH TIME ZONE}
+              - column: {name: dry_run, type: BOOLEAN, defaultValueBoolean: false, constraints: {nullable: false}}
+              - column: {name: message, type: VARCHAR(32600)}
+              - column: {name: error, type: VARCHAR(32600)}
+        - addUniqueConstraint:
+            tableName: foodsharing_store_info_cancellations
+            columnNames: admin_connection_id, store_id, pickup_date, foodsharing_user_id
+            constraintName: uk_foodsharing_store_info_cancellations_pickup_user
+        - addForeignKeyConstraint:
+            baseTableName: foodsharing_store_info_cancellations
+            baseColumnNames: admin_connection_id
+            referencedTableName: foodsharing_admin_connections
+            referencedColumnNames: id
+            constraintName: fk_foodsharing_store_info_cancellations_connection

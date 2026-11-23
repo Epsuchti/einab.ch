@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 021-expand-advertisement-audit-status
+      author: codex
+      changes:
+        - modifyDataType:
+            tableName: foodsharing_open_slot_advertisement_audits
+            columnName: status
+            newDataType: VARCHAR(64)

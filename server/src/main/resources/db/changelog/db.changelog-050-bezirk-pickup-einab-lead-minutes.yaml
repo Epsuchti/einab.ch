@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 050-bezirk-pickup-einab-lead-minutes
+      author: claude
+      changes:
+        # EinAbs created from a teacher's pickup start this many minutes before the pickup.
+        - addColumn:
+            tableName: bezirke
+            columns:
+              - column:
+                  name: pickup_einab_lead_minutes
+                  type: INTEGER
+                  defaultValueNumeric: 10
+                  constraints:
+                    nullable: false

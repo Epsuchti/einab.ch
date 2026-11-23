@@ -1,0 +1,58 @@
+<section class="page-shell page-shell--narrow">
+<p-card class="page-card--flat">
+  <ng-template pTemplate="title"><i class="pi pi-sign-in title-icon" aria-hidden="true"></i>{{ i18n.t('login.title') }}</ng-template>
+  @if (chooseDemoRole()) {
+    <section class="demo-login" aria-labelledby="demo-login-title">
+      <h2 id="demo-login-title">{{ i18n.t('login.demoTitle') }}</h2>
+      <p>{{ i18n.t('login.demoIntro') }}</p>
+      <div class="demo-login__buttons">
+        <button pButton type="button" icon="pi pi-user-plus" [label]="i18n.t('login.demoNewNewcomer')" [disabled]="demoLoading()" (click)="createDemoAccount(DemoRole.Newcomer)"></button>
+        <button pButton type="button" severity="secondary" icon="pi pi-user-plus" [label]="i18n.t('login.demoNewTeacher')" [disabled]="demoLoading()" (click)="createDemoAccount(DemoRole.Teacher)"></button>
+        <button pButton type="button" severity="secondary" [text]="true" [label]="i18n.t('login.otherId')" (click)="chooseDemoRole.set(false)"></button>
+      </div>
+    </section>
+  } @else if (sentTo(); as id) {
+    <div class="login-sent" role="status">
+      <i class="pi pi-envelope login-sent__icon" aria-hidden="true"></i>
+      <h2>{{ i18n.t('login.sentTitle') }}</h2>
+      <p>{{ i18n.t('login.sentHint').replace('{0}', id) }}</p>
+      <a pButton icon="pi pi-external-link" [label]="i18n.t('login.openMessages')" href="https://foodsharing.network/msg" target="_blank" rel="noopener"></a>
+      <button pButton type="button" severity="secondary" [text]="true" [label]="i18n.t('login.otherId')" (click)="sentTo.set(null)"></button>
+    </div>
+  } @else {
+    <p>{{ i18n.t('login.intro') }}</p>
+    <form class="stack-form" [formGroup]="form" (ngSubmit)="submit()">
+      <label class="login-field">
+        <span>{{ i18n.t('common.foodsharingId') }}</span>
+        <input #idInput pInputText formControlName="foodsharingId" inputmode="numeric" pattern="[0-9]*" autocomplete="username" autofocus [placeholder]="i18n.t('login.idPlaceholder')" />
+      </label>
+      @if (suggestedIds().length > 0) {
+        <div class="recent-ids">
+          <span class="recent-ids__label" id="recent-ids-label">{{ i18n.t('login.recentIds') }}</span>
+          <ul class="recent-ids__list" aria-labelledby="recent-ids-label">
+            @for (id of suggestedIds(); track id) {
+              <li class="recent-ids__chip">
+                <button type="button" class="recent-ids__use" (click)="useSuggestion(id); idInput.focus()">
+                  <i class="pi pi-history" aria-hidden="true"></i>{{ id }}
+                </button>
+                <button
+                  type="button"
+                  class="recent-ids__remove"
+                  [attr.aria-label]="i18n.t('login.forgetRecentId').replace('{0}', id)"
+                  [title]="i18n.t('login.forgetRecentId').replace('{0}', id)"
+                  (click)="forgetSuggestion(id); idInput.focus()">
+                  <i class="pi pi-times" aria-hidden="true"></i>
+                </button>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+      <a class="foodsharing-id-help-link" [routerLink]="bezirkContext.route('foodsharing-id')">
+        <i class="pi pi-question-circle" aria-hidden="true"></i> {{ i18n.t('common.foodsharingIdHelpLink') }}
+      </a>
+      <button pButton type="submit" icon="pi pi-send" [label]="i18n.t('login.submit')" [disabled]="form.invalid || loading()" [loading]="loading()"></button>
+    </form>
+  }
+</p-card>
+</section>

@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 020-add-bezirk-user-info-api-setting
+      author: codex
+      changes:
+        - addColumn:
+            tableName: bezirke
+            columns:
+              - column:
+                  name: use_foodsharing_user_info_api
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false

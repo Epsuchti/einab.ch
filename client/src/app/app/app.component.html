@@ -1,0 +1,319 @@
+@if (httpActivity.busy()) {
+  <div class="request-bar" role="progressbar" [attr.aria-label]="i18n.t('common.loading')"></div>
+}
+<p-toast [life]="isMobile() ? 6000 : 8000" [position]="isMobile() ? 'bottom-center' : 'top-right'" [breakpoints]="{ '640px': { width: 'calc(100vw - 1.5rem)', left: '0.75rem', right: '0.75rem' } }"></p-toast>
+<p-confirmdialog></p-confirmdialog>
+
+<p-dialog
+  [visible]="phoneNumberPromptVisible()"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="sheet-dialog"
+  [style]="{ width: 'min(28rem, 96vw)' }"
+  [header]="i18n.t('profile.phoneNumberPromptTitle')">
+  <p>{{ i18n.t('profile.phoneNumberHint') }}</p>
+  <form class="stack-form" (ngSubmit)="savePhoneNumber()">
+    <label>
+      <span>{{ i18n.t('common.phoneNumber') }}</span>
+      <input pInputText type="tel" name="phoneNumber" [ngModel]="phoneNumber()" (ngModelChange)="phoneNumber.set($event)" autocomplete="tel" inputmode="tel" placeholder="+41 79 123 45 67" maxlength="50" required [attr.aria-invalid]="phoneNumber().trim() && !isValidPhoneNumber(phoneNumber()) ? 'true' : null" />
+      @if (phoneNumber().trim() && !isValidPhoneNumber(phoneNumber())) { <small class="field-error" role="alert">{{ i18n.t('common.phoneNumberInvalid') }}</small> }
+    </label>
+    <div class="dialog-actions">
+      <button pButton type="button" severity="secondary" [text]="true" [label]="i18n.t('common.later')" (click)="postponePhoneNumber()"></button>
+      <button pButton type="submit" [label]="i18n.t('common.save')" [loading]="phoneNumberSaving()" [disabled]="!isValidPhoneNumber(phoneNumber())"></button>
+    </div>
+  </form>
+</p-dialog>
+
+@if (surveyMode()) {
+  <header class="app-header app-header--survey">
+    <div class="app-header__content">
+      <span class="brand">
+        <span class="brand__mark" aria-hidden="true"><i class="pi pi-heart-fill"></i></span>
+        <span>{{ i18n.t('app.title') }}</span>
+      </span>
+      <div class="language-switch">
+        <button pButton type="button" size="small" severity="secondary" [label]="i18n.t('lang.gws')" [class.is-active]="i18n.language() === 'gws'" [attr.aria-pressed]="i18n.language() === 'gws'" (click)="setLanguage('gws')"></button>
+        <button pButton type="button" size="small" severity="secondary" [label]="i18n.t('lang.de')" [class.is-active]="i18n.language() === 'de'" [attr.aria-pressed]="i18n.language() === 'de'" (click)="setLanguage('de')"></button>
+        <button pButton type="button" size="small" severity="secondary" [label]="i18n.t('lang.en')" [class.is-active]="i18n.language() === 'en'" [attr.aria-pressed]="i18n.language() === 'en'" (click)="setLanguage('en')"></button>
+      </div>
+    </div>
+  </header>
+} @else {
+<header class="app-header">
+  <div class="app-header__content">
+    <div class="app-header__topline">
+      <a [routerLink]="homeLink()" class="brand" (click)="closeMobileMenu()">
+        <span class="brand__mark" aria-hidden="true"><i class="pi pi-heart-fill"></i></span>
+        <span class="brand__long">{{ i18n.t('app.title') }}</span>
+        <span class="brand__short">{{ i18n.t('app.shortTitle') }}@if (bezirkContext.selectedBezirk(); as bezirk) {<span class="brand__bezirk"> · {{ bezirk.name }}</span>}</span>
+      </a>
+      <button
+        pButton
+        type="button"
+        class="mobile-menu-toggle"
+        [class.mobile-menu-toggle--has-tabbar]="bottomNav().length > 0"
+        [icon]="mobileMenuOpen() ? 'pi pi-times' : 'pi pi-bars'"
+        severity="secondary"
+        [text]="true"
+        [rounded]="true"
+        [attr.aria-label]="i18n.t('common.menu')"
+        [attr.aria-expanded]="mobileMenuOpen()"
+        (click)="toggleMobileMenu()"></button>
+    </div>
+    <nav class="nav-links nav-links--desktop">
+      @if (bezirkContext.selectedBezirk() && !onboarding()) {
+        <a [routerLink]="bezirkContext.route()" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ i18n.t('nav.slots') }}</a>
+        @if (sessionService.isAuthenticated() && !sessionService.hasPermission(UserPermission.CanGiveEinAbs)) {
+          <a [routerLink]="bezirkContext.route('my-bookings')" routerLinkActive="active">{{ i18n.t('nav.bookings') }}</a>
+        }
+        @if (sessionService.hasPermission(UserPermission.CanGiveEinAbs)) {
+          <a [routerLink]="bezirkContext.route('teacher')" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ i18n.t('nav.teacher') }}</a>
+        }
+        @if (sessionService.isAuthenticated() && onPickupsPage()) {
+          <a [routerLink]="bezirkContext.route('pickups')" routerLinkActive="active">{{ i18n.t('nav.pickups') }}</a>
+        }
+        @if (sessionService.hasPermission(UserPermission.CanManageUsers)) {
+          <a [routerLink]="bezirkContext.route('admin')" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ i18n.t('nav.admin') }}@if (supportBadge.openCount() > 0) {<span class="nav-badge" [attr.aria-label]="i18n.t('admin.supportOpenBadge').replace('{0}', '' + supportBadge.openCount())">{{ supportBadge.openCount() }}</span>}</a>
+        }
+        @if (sessionService.hasPermission(UserPermission.CanManageSurveys)) {
+          <a [routerLink]="bezirkContext.route('admin', 'surveys')" routerLinkActive="active">{{ i18n.t('nav.adminSurveys') }}</a>
+        }
+        @if (sessionService.hasPermission(UserPermission.CanUseAutomations) || sessionService.hasPermission(UserPermission.CanSeeUserPickupCountGrouping) || sessionService.hasPermission(UserPermission.CanSeeAllAutomationDecisions)) {
+          <a [routerLink]="bezirkContext.route('admin', 'foodsharing-automation')" routerLinkActive="active">{{ i18n.t('nav.adminAutomation') }}</a>
+        }
+      }
+    </nav>
+    <div class="header-actions header-actions--desktop">
+      @if (sessionService.isAuthenticated()) {
+        <div class="user-menu">
+          <button
+            pButton
+            type="button"
+            class="user-menu__toggle"
+            severity="secondary"
+            [outlined]="true"
+            [attr.aria-label]="i18n.t('nav.userMenu')"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="userMenuOpen()"
+            (click)="toggleUserMenu($event)">
+            <span class="user-menu__avatar" aria-hidden="true"><i class="pi pi-user"></i></span>
+            @if (userMenuLabel(); as label) {
+              <span class="user-menu__name">{{ label }}</span>
+            }
+            <i class="pi pi-chevron-down user-menu__chevron" aria-hidden="true"></i>
+          </button>
+          @if (userMenuOpen()) {
+            <div class="user-menu__panel" role="menu" (click)="$event.stopPropagation()">
+              @if (sessionService.isAuthenticated() && bezirkContext.selectedBezirk() && !onboarding()) {
+                <a class="user-menu__item" role="menuitem" [routerLink]="bezirkContext.route('profile')" routerLinkActive="active" (click)="closeUserMenu()">
+                  <i class="pi pi-user" aria-hidden="true"></i>
+                  <span>{{ i18n.t('nav.profile') }}</span>
+                </a>
+                @if (bezirkInfoAvailable()) {
+                  <a class="user-menu__item" role="menuitem" [routerLink]="bezirkContext.route('bezirk-info')" routerLinkActive="active" (click)="closeUserMenu()">
+                    <i class="pi pi-map-marker" aria-hidden="true"></i>
+                    <span>{{ i18n.t('nav.bezirkInfo') }}</span>
+                  </a>
+                }
+              }
+              <div class="language-switch user-menu__languages">
+                <button pButton type="button" size="small" severity="secondary" [label]="i18n.t('lang.gws')" [class.is-active]="i18n.language() === 'gws'" [attr.aria-pressed]="i18n.language() === 'gws'" (click)="setLanguage('gws')"></button>
+                <button pButton type="button" size="small" severity="secondary" [label]="i18n.t('lang.de')" [class.is-active]="i18n.language() === 'de'" [attr.aria-pressed]="i18n.language() === 'de'" (click)="setLanguage('de')"></button>
+                <button pButton type="button" size="small" severity="secondary" [label]="i18n.t('lang.en')" [class.is-active]="i18n.language() === 'en'" [attr.aria-pressed]="i18n.language() === 'en'" (click)="setLanguage('en')"></button>
+              </div>
+              @if (menuBezirke().length && !onboarding()) {
+                <div class="user-menu__bezirke" role="group" [attr.aria-label]="i18n.t('nav.switchBezirk')">
+                  <span class="user-menu__heading">{{ i18n.t('nav.switchBezirk') }}</span>
+                  @for (bezirk of menuBezirke(); track bezirk.id) {
+                    <a class="user-menu__item" role="menuitem" [class.active]="isCurrentBezirk(bezirk.slug)" [attr.aria-current]="isCurrentBezirk(bezirk.slug) ? 'true' : null" [routerLink]="['/bezirke', bezirk.slug]" (click)="closeUserMenu()">
+                      <i class="pi pi-map-marker" aria-hidden="true"></i>
+                      <span>{{ bezirk.name }}</span>
+                      @if (isCurrentBezirk(bezirk.slug)) {
+                        <i class="pi pi-check user-menu__check" aria-hidden="true"></i>
+                      }
+                    </a>
+                  }
+                </div>
+              }
+              @if (sessionService.isAuthenticated()) {
+                <button type="button" class="user-menu__item user-menu__item--danger" role="menuitem" (click)="logout()">
+                  <i class="pi pi-sign-out" aria-hidden="true"></i>
+                  <span>{{ i18n.t('nav.logout') }}</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="language-switch">
+          <button pButton type="button" size="small" severity="secondary" [label]="i18n.t('lang.gws')" [class.is-active]="i18n.language() === 'gws'" [attr.aria-pressed]="i18n.language() === 'gws'" (click)="setLanguage('gws')"></button>
+          <button pButton type="button" size="small" severity="secondary" [label]="i18n.t('lang.de')" [class.is-active]="i18n.language() === 'de'" [attr.aria-pressed]="i18n.language() === 'de'" (click)="setLanguage('de')"></button>
+          <button pButton type="button" size="small" severity="secondary" [label]="i18n.t('lang.en')" [class.is-active]="i18n.language() === 'en'" [attr.aria-pressed]="i18n.language() === 'en'" (click)="setLanguage('en')"></button>
+        </div>
+        @if (bezirkContext.selectedBezirk()) {
+          <button pButton type="button" severity="secondary" [outlined]="true" icon="pi pi-map-marker" [label]="i18n.t('nav.switchBezirk')" (click)="switchBezirk()"></button>
+          <a pButton class="login-button" icon="pi pi-sign-in" [routerLink]="bezirkContext.route('login')" [label]="i18n.t('nav.login')"></a>
+        }
+      }
+    </div>
+  </div>
+  @if (mobileMenuOpen()) {
+    <div class="mobile-menu">
+      @if (userMenuLabel(); as label) {
+        <div class="mobile-menu__who">
+          <span class="user-menu__avatar" aria-hidden="true"><i class="pi pi-user"></i></span>
+          <span><small>{{ i18n.t('nav.loggedInAs') }}</small><strong>{{ label }}</strong></span>
+        </div>
+      }
+      <nav class="nav-links nav-links--mobile">
+        @if (bezirkContext.selectedBezirk() && !onboarding()) {
+          <a [routerLink]="bezirkContext.route()" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileMenu()"><i class="pi pi-search" aria-hidden="true"></i>{{ i18n.t('nav.slots') }}</a>
+          @if (sessionService.isAuthenticated() && !sessionService.hasPermission(UserPermission.CanGiveEinAbs)) {
+            <a [routerLink]="bezirkContext.route('my-bookings')" routerLinkActive="active" (click)="closeMobileMenu()"><i class="pi pi-bookmark" aria-hidden="true"></i>{{ i18n.t('nav.bookings') }}</a>
+          }
+          @if (sessionService.hasPermission(UserPermission.CanGiveEinAbs)) {
+            <a [routerLink]="bezirkContext.route('teacher')" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileMenu()"><i class="pi pi-calendar" aria-hidden="true"></i>{{ i18n.t('nav.teacher') }}</a>
+          }
+          @if (sessionService.isAuthenticated() && onPickupsPage()) {
+            <a [routerLink]="bezirkContext.route('pickups')" routerLinkActive="active" (click)="closeMobileMenu()"><i class="pi pi-shopping-bag" aria-hidden="true"></i>{{ i18n.t('nav.pickups') }}</a>
+          }
+          @if (sessionService.hasPermission(UserPermission.CanManageUsers)) {
+            <a [routerLink]="bezirkContext.route('admin')" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileMenu()"><i class="pi pi-users" aria-hidden="true"></i>{{ i18n.t('nav.admin') }}@if (supportBadge.openCount() > 0) {<span class="nav-badge" [attr.aria-label]="i18n.t('admin.supportOpenBadge').replace('{0}', '' + supportBadge.openCount())">{{ supportBadge.openCount() }}</span>}</a>
+          }
+          @if (sessionService.hasPermission(UserPermission.CanManageSurveys)) {
+            <a [routerLink]="bezirkContext.route('admin', 'surveys')" routerLinkActive="active" (click)="closeMobileMenu()"><i class="pi pi-chart-bar" aria-hidden="true"></i>{{ i18n.t('nav.adminSurveys') }}</a>
+          }
+          @if (sessionService.hasPermission(UserPermission.CanUseAutomations) || sessionService.hasPermission(UserPermission.CanSeeUserPickupCountGrouping) || sessionService.hasPermission(UserPermission.CanSeeAllAutomationDecisions)) {
+            <a [routerLink]="bezirkContext.route('admin', 'foodsharing-automation')" routerLinkActive="active" (click)="closeMobileMenu()"><i class="pi pi-bolt" aria-hidden="true"></i>{{ i18n.t('nav.adminAutomation') }}</a>
+          }
+          @if (sessionService.isAuthenticated()) {
+            <a [routerLink]="bezirkContext.route('profile')" routerLinkActive="active" (click)="closeMobileMenu()"><i class="pi pi-user" aria-hidden="true"></i>{{ i18n.t('nav.profile') }}</a>
+          }
+          @if (bezirkInfoAvailable()) {
+            <a [routerLink]="bezirkContext.route('bezirk-info')" routerLinkActive="active" (click)="closeMobileMenu()"><i class="pi pi-map-marker" aria-hidden="true"></i>{{ i18n.t('nav.bezirkInfo') }}</a>
+          }
+        }
+      </nav>
+      <div class="header-actions header-actions--mobile">
+        @if (!sessionService.isAuthenticated() && bezirkContext.selectedBezirk()) {
+          <a pButton class="login-button" icon="pi pi-sign-in" [routerLink]="bezirkContext.route('login')" [label]="i18n.t('nav.login')" (click)="closeMobileMenu()"></a>
+        }
+        <div class="language-switch">
+          <button pButton type="button" size="small" severity="secondary" class="mobile-menu-chip" [class.is-active]="i18n.language() === 'gws'" [attr.aria-pressed]="i18n.language() === 'gws'" [label]="i18n.t('lang.gwsLong')" (click)="setLanguage('gws')"></button>
+          <button pButton type="button" size="small" severity="secondary" class="mobile-menu-chip" [class.is-active]="i18n.language() === 'de'" [attr.aria-pressed]="i18n.language() === 'de'" [label]="i18n.t('lang.deLong')" (click)="setLanguage('de')"></button>
+          <button pButton type="button" size="small" severity="secondary" class="mobile-menu-chip" [class.is-active]="i18n.language() === 'en'" [attr.aria-pressed]="i18n.language() === 'en'" [label]="i18n.t('lang.enLong')" (click)="setLanguage('en')"></button>
+        </div>
+        @if (sessionService.isAuthenticated() && menuBezirke().length && !onboarding()) {
+          <label class="mobile-bezirke">
+            <span class="user-menu__heading">{{ i18n.t('nav.switchBezirk') }}</span>
+            <select class="native-select" [value]="bezirkContext.selectedBezirk()?.slug ?? ''" (change)="goToBezirk($any($event.target).value)">
+              @for (bezirk of menuBezirke(); track bezirk.id) {
+                <option [value]="bezirk.slug" [selected]="isCurrentBezirk(bezirk.slug)">{{ bezirk.name }}</option>
+              }
+            </select>
+          </label>
+        } @else if (bezirkContext.selectedBezirk() && !sessionService.isAuthenticated()) {
+          <button pButton type="button" severity="secondary" class="mobile-switch-bezirk" icon="pi pi-map-marker" [label]="i18n.t('nav.switchBezirk')" (click)="switchBezirk()"></button>
+        }
+        @if (sessionService.isAuthenticated()) {
+          <button type="button" class="mobile-logout" (click)="logout()"><i class="pi pi-sign-out" aria-hidden="true"></i> {{ i18n.t('nav.logout') }}</button>
+        }
+      </div>
+    </div>
+  }
+</header>
+@if (mobileMenuOpen()) {
+  <div class="mobile-menu-backdrop" aria-hidden="true" (click)="closeMobileMenu()"></div>
+}
+}
+
+@switch (connection.state()) {
+  @case ('offline') {
+    <div class="connection-banner connection-banner--offline" role="alert">
+      <i class="pi pi-wifi" aria-hidden="true"></i>
+      <span>{{ i18n.t('connection.offline') }}</span>
+    </div>
+  }
+  @case ('server-unreachable') {
+    <div class="connection-banner connection-banner--server" role="alert">
+      <i class="pi pi-server" aria-hidden="true"></i>
+      <span>{{ i18n.t('connection.serverUnreachable') }}</span>
+      <button pButton type="button" size="small" severity="secondary" icon="pi pi-refresh" [label]="i18n.t('connection.retry')" (click)="reloadPage()"></button>
+    </div>
+  }
+  @default {
+    @if (connection.recovered()) {
+      <div class="connection-banner connection-banner--back" role="status">
+        <i class="pi pi-check-circle" aria-hidden="true"></i>
+        <span>{{ i18n.t('connection.backOnline') }}</span>
+      </div>
+    }
+  }
+}
+
+@if (!foodsharingOnline()) {
+  <div class="foodsharing-offline" role="alert">
+    <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+    <span>{{ i18n.t('app.foodsharingOffline') }}</span>
+  </div>
+}
+
+@if (infoNotes.visible().length) {
+  <div class="info-notes">
+    @for (note of infoNotes.visible(); track note.id) {
+      <section class="info-note" [class.info-note--warning]="note.severity === InfoNoteSeverity.Warning" [attr.role]="note.severity === InfoNoteSeverity.Warning ? 'alert' : 'status'" [attr.aria-label]="note.title || i18n.t('infoNotes.label')">
+        <i class="pi info-note__icon" [class.pi-exclamation-triangle]="note.severity === InfoNoteSeverity.Warning" [class.pi-info-circle]="note.severity !== InfoNoteSeverity.Warning" aria-hidden="true"></i>
+        <div class="info-note__body">
+          @if (note.title) { <strong class="info-note__title">{{ note.title }}</strong> }
+          <p class="info-note__message">{{ note.message }}</p>
+        </div>
+        <button type="button" class="info-note__close" [attr.aria-label]="i18n.t('infoNotes.dismiss')" [title]="i18n.t('infoNotes.dismiss')" (click)="infoNotes.dismiss(note.id)"><i class="pi pi-times" aria-hidden="true"></i></button>
+      </section>
+    }
+  </div>
+}
+
+<main class="app-main" [class.app-main--with-tabbar]="bottomNav().length">
+  @if (pageError.current(); as failedPage) {
+    <app-page-error [error]="failedPage.error" (retry)="pageError.retry()"></app-page-error>
+  }
+  <div class="app-main__outlet" [class.app-main__outlet--hidden]="!!pageError.current()">
+    <router-outlet></router-outlet>
+  </div>
+</main>
+
+@if (bottomNav().length) {
+  <nav class="tabbar" [class.tabbar--menu-open]="mobileMenuOpen()" [attr.aria-label]="i18n.t('nav.main')">
+    @for (item of bottomNav(); track item.label) {
+      <a class="tabbar__item" [routerLink]="item.route" routerLinkActive="is-active" [routerLinkActiveOptions]="item.exact ? tabExact : tabSubset" (click)="closeMobileMenu()">
+        <i [class]="item.icon" aria-hidden="true"></i>
+        @if (item.label === 'nav.admin' && supportBadge.openCount() > 0) {<span class="nav-badge nav-badge--tabbar" [attr.aria-label]="i18n.t('admin.supportOpenBadge').replace('{0}', '' + supportBadge.openCount())">{{ supportBadge.openCount() }}</span>}
+        <span>{{ i18n.t(item.label) }}</span>
+      </a>
+    }
+    <button type="button" class="tabbar__item" [class.is-active]="mobileMenuOpen() || onMenuPage()" [attr.aria-expanded]="mobileMenuOpen()" (click)="toggleMobileMenu(); scrollToTop()">
+      <i class="pi pi-bars" aria-hidden="true"></i>
+      <span>{{ i18n.t('common.menu') }}</span>
+    </button>
+  </nav>
+}
+
+@if (!surveyMode()) {
+<footer class="app-footer" [class.app-footer--with-tabbar]="bottomNav().length">
+  <div class="app-footer__content">
+    <span>{{ i18n.t('footer.madeWith') }} <i class="pi pi-heart-fill app-footer__heart" aria-hidden="true"></i> {{ i18n.t('footer.by') }} <a class="app-footer__author" href="https://www.linkedin.com/in/eric-z%C3%BCrcher/" target="_blank" rel="noopener">Eric</a></span>
+    <span class="app-footer__links">
+      <a routerLink="/privacy">{{ i18n.t('footer.privacy') }}</a>
+      @if (!onboarding()) {
+        <span aria-hidden="true">·</span>
+        <a [routerLink]="bezirkContext.selectedBezirk() ? bezirkContext.route('help') : '/help'">{{ i18n.t('footer.help') }}</a>
+      }
+      <span aria-hidden="true">·</span>
+      <span class="app-footer__version" [title]="i18n.t('footer.versionHint')">{{ i18n.t('footer.version').replace('{0}', release) }}</span>
+    </span>
+  </div>
+</footer>
+}

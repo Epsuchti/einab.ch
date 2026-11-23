@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: 031-linked-store-rule
+      author: claude
+      changes:
+        # Slot approval rule "linked stores": a pickup in the automation's store also requires a pickup in the
+        # linked store (same day or within N days before or after). Bidirectional links also apply in the other direction.
+        - createTable:
+            tableName: foodsharing_store_automation_linked_stores
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: automation_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: linked_store_id, type: BIGINT, constraints: {nullable: false}}
+              - column: {name: linked_store_name, type: VARCHAR(255), defaultValue: '', constraints: {nullable: false}}
+              - column: {name: bidirectional, type: BOOLEAN, defaultValueBoolean: false, constraints: {nullable: false}}
+              - column: {name: window_mode, type: VARCHAR(32), defaultValue: 'SAME_DAY', constraints: {nullable: false}}
+              - column: {name: window_days, type: INT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: grace_minutes, type: INT, defaultValueNumeric: 20, constraints: {nullable: false}}
+              - column: {name: message, type: VARCHAR(32600)}
+        - addForeignKeyConstraint:
+            baseTableName: foodsharing_store_automation_linked_stores
+            baseColumnNames: automation_id
+            referencedTableName: foodsharing_store_automations
+            referencedColumnNames: id
+            constraintName: fk_foodsharing_store_automation_linked_stores_automation
+        - addUniqueConstraint:
+            tableName: foodsharing_store_automation_linked_stores
+            columnNames: automation_id, linked_store_id
+            constraintName: uk_foodsharing_store_automation_linked_stores

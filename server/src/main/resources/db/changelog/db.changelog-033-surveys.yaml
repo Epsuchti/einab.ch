@@ -1,0 +1,94 @@
+databaseChangeLog:
+  - changeSet:
+      id: 033-surveys
+      author: claude
+      changes:
+        - createTable:
+            tableName: surveys
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: owner_foodsharing_id, type: VARCHAR(100), constraints: {nullable: false}}
+              - column: {name: title, type: VARCHAR(200), constraints: {nullable: false}}
+              - column: {name: description, type: VARCHAR(4000), defaultValue: '', constraints: {nullable: false}}
+        - createIndex:
+            tableName: surveys
+            indexName: idx_surveys_owner
+            columns:
+              - column: {name: owner_foodsharing_id}
+        - createTable:
+            tableName: survey_questions
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: survey_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: sort_order, type: INT, constraints: {nullable: false}}
+              - column: {name: question_type, type: VARCHAR(20), constraints: {nullable: false}}
+              - column: {name: label, type: VARCHAR(500), constraints: {nullable: false}}
+              - column: {name: required, type: BOOLEAN, defaultValueBoolean: false, constraints: {nullable: false}}
+              # JSON array of option texts (choice questions only)
+              - column: {name: options_json, type: VARCHAR(32600), defaultValue: '[]', constraints: {nullable: false}}
+        - addForeignKeyConstraint:
+            baseTableName: survey_questions
+            baseColumnNames: survey_id
+            referencedTableName: surveys
+            referencedColumnNames: id
+            constraintName: fk_survey_questions_survey
+        - createIndex:
+            tableName: survey_questions
+            indexName: idx_survey_questions_survey
+            columns:
+              - column: {name: survey_id}
+        - createTable:
+            tableName: survey_responses
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: survey_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: foodsharing_id, type: VARCHAR(100), constraints: {nullable: false}}
+              - column: {name: respondent_name, type: VARCHAR(200), defaultValue: '', constraints: {nullable: false}}
+        - addForeignKeyConstraint:
+            baseTableName: survey_responses
+            baseColumnNames: survey_id
+            referencedTableName: surveys
+            referencedColumnNames: id
+            constraintName: fk_survey_responses_survey
+        # One response per respondent and survey
+        - addUniqueConstraint:
+            tableName: survey_responses
+            columnNames: survey_id, foodsharing_id
+            constraintName: uk_survey_responses_survey_user
+        - createTable:
+            tableName: survey_answers
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: version, type: BIGINT, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: created_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: updated_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: response_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: question_id, type: UUID, constraints: {nullable: false}}
+              # JSON array of the given values (one entry for text/single choice/boolean/store)
+              - column: {name: value_json, type: VARCHAR(32600), defaultValue: '[]', constraints: {nullable: false}}
+        - addForeignKeyConstraint:
+            baseTableName: survey_answers
+            baseColumnNames: response_id
+            referencedTableName: survey_responses
+            referencedColumnNames: id
+            constraintName: fk_survey_answers_response
+        - addForeignKeyConstraint:
+            baseTableName: survey_answers
+            baseColumnNames: question_id
+            referencedTableName: survey_questions
+            referencedColumnNames: id
+            constraintName: fk_survey_answers_question
+        - createIndex:
+            tableName: survey_answers
+            indexName: idx_survey_answers_response
+            columns:
+              - column: {name: response_id}

@@ -1,0 +1,117 @@
+.profile-page {
+  gap: 1rem;
+}
+
+.profile-page__title {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+:host ::ng-deep .profile-section .p-card-body {
+  gap: 0.6rem;
+}
+
+.profile-section__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+}
+
+.profile-page .segmented {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.profile-page .segmented__item {
+  flex: 1 1 auto;
+}
+
+.profile-page .form-inline-note {
+  margin-top: 0;
+}
+
+/* Logout is an ordinary action (a button, like in the menu), placed above the danger zone. */
+.profile-logout {
+  justify-self: start;
+}
+
+/* Account facts: label left, value right, one line each. */
+.profile-account {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.profile-account > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.15rem 1rem;
+  padding: 0.45rem 0;
+}
+
+.profile-account > div + div {
+  border-top: 1px solid var(--app-border);
+}
+
+.profile-account dd {
+  font-weight: 600;
+  text-align: right;
+}
+
+:host ::ng-deep .profile-section--danger.p-card {
+  border: 1px solid color-mix(in srgb, var(--app-danger) 35%, var(--app-border));
+  background: color-mix(in srgb, var(--app-danger) 4%, var(--app-surface));
+}
+
+.profile-danger__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--app-danger);
+}
+
+.profile-danger__intro {
+  margin: 0 0 0.35rem;
+  color: var(--app-text-muted);
+}
+
+.profile-danger__list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-danger__list li {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr;
+  gap: 0.6rem;
+  align-items: start;
+  line-height: 1.45;
+}
+
+.profile-danger__list .pi {
+  margin-top: 0.2rem;
+  color: var(--app-danger);
+  font-size: 0.95rem;
+}
+
+.profile-danger__button {
+  align-self: flex-start;
+  justify-self: start;
+  margin-top: 0.35rem;
+}
+
+/* Phones: every section's single action spans the card, like "Speichern". */
+@media (max-width: 540px) {
+  .profile-danger__button,
+  .profile-logout,
+  :host ::ng-deep .profile-section .p-card-content > .p-button {
+    width: 100%;
+    align-self: stretch;
+    justify-self: stretch;
+    justify-content: center;
+  }
+}

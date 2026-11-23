@@ -1,0 +1,138 @@
+<div class="past-einab past-einab--with-aside">
+  <form #pastEinAbFormElement class="past-einab__form" (ngSubmit)="submit()">
+    <h3 class="past-einab__section">{{ i18n.t('pastEinAb.sectionWho') }}</h3>
+    @if (person(); as selected) {
+      <div class="past-einab__field">
+        <span class="past-einab__label">{{ i18n.t(mode() === 'admin' ? 'pastEinAb.personAdmin' : 'pastEinAb.personTeacher') }} *</span>
+        <div class="past-einab__person">
+          <span class="past-einab__avatar" aria-hidden="true">{{ initials(selected.name) }}</span>
+          <div class="past-einab__person-text">
+            <strong>{{ selected.name }}</strong>
+            <small>ID {{ selected.foodsharingId }}</small>
+          </div>
+          <button type="button" class="link-button" (click)="changePerson()">{{ i18n.t('pastEinAb.change') }}</button>
+        </div>
+      </div>
+    } @else {
+      <label class="past-einab__field" [attr.data-invalid]="invalid().person || null">
+        <span class="past-einab__label">{{ i18n.t(mode() === 'admin' ? 'pastEinAb.personAdmin' : 'pastEinAb.personTeacher') }} *</span>
+        <small>{{ i18n.t('pastEinAb.searchHint') }}</small>
+        <span class="past-einab__search">
+          <i class="pi" [class.pi-search]="!searching()" [class.pi-spinner]="searching()" [class.pi-spin]="searching()" aria-hidden="true"></i>
+          <input
+            pInputText
+            type="search"
+            name="pastEinAbPerson"
+            autocomplete="off"
+            enterkeyhint="search"
+            [placeholder]="i18n.t('pastEinAb.searchPlaceholder')"
+            [invalid]="invalid().person"
+            [disabled]="usersLoading()"
+            [ngModel]="query()"
+            (ngModelChange)="onQueryChange($event)"
+            (keydown.enter)="pickFirstResult($event)"
+          />
+        </span>
+      </label>
+      @if (usersLoading()) {
+        <p class="past-einab__note">{{ i18n.t('pastEinAb.usersLoading') }}</p>
+      } @else if (results(); as found) {
+        @if (found.length) {
+          <ul class="past-einab__results">
+            @for (entry of found; track entry.id) {
+              <li>
+                <button type="button" class="past-einab__result" (click)="pick(entry)">
+                  <span class="past-einab__avatar past-einab__avatar--soft" aria-hidden="true">{{ initials(entry.name) }}</span>
+                  <strong>{{ entry.name }}</strong>
+                  <small>ID {{ entry.foodsharingId }}</small>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="past-einab__note">{{ i18n.t('pastEinAb.noResults') }}</p>
+        }
+      }
+    }
+    <p class="past-einab__giver">
+      {{ i18n.t('pastEinAb.giver') }}
+      <strong>{{ giverName() ? i18n.t('pastEinAb.giverYou').replace('{name}', giverName()) : i18n.t('pastEinAb.giverYouPlain') }}</strong>
+    </p>
+
+    <h3 class="past-einab__section">{{ i18n.t('pastEinAb.sectionWhen') }}</h3>
+    <div class="past-einab__chips" role="group" [attr.aria-label]="i18n.t('common.date')">
+      @for (day of quickDays; track day.value) {
+        <button type="button" class="past-einab__chip" [class.is-active]="date() === day.value" [attr.aria-pressed]="date() === day.value" (click)="date.set(day.value)">{{ i18n.t(day.key) }}</button>
+      }
+    </div>
+    <div class="past-einab__row past-einab__row--when">
+      <label class="past-einab__field" [attr.data-invalid]="invalid().date || null">
+        <span class="past-einab__label">{{ i18n.t('common.date') }} *</span>
+        <p-datepicker
+          class="einab-date-control"
+          name="pastEinAbDate"
+          dateFormat="dd.mm.yy"
+          appendTo="body"
+          [showIcon]="true"
+          [maxDate]="maxDateValue"
+          [minDate]="minDateValue()"
+          [invalid]="invalid().date"
+          [ngModel]="dateValue()"
+          (ngModelChange)="setDate($event)"
+        ></p-datepicker>
+      </label>
+      <label class="past-einab__field">
+        <span class="past-einab__label">{{ i18n.t('common.time') }}</span>
+        <input pInputText type="time" name="pastEinAbTime" [ngModel]="time()" (ngModelChange)="time.set($event)" />
+      </label>
+    </div>
+    @if (inFuture()) {
+      <p class="past-einab__warning" role="alert"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i>{{ i18n.t('pastEinAb.futureHint') }}</p>
+    } @else if (tooOld()) {
+      <p class="past-einab__warning" role="alert"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i>{{ i18n.t('pastEinAb.tooOldHint') }}</p>
+    }
+
+    <h3 class="past-einab__section">{{ i18n.t('pastEinAb.sectionWhere') }}</h3>
+    <div class="past-einab__row">
+      <label class="past-einab__field" [attr.data-invalid]="invalid().category || null">
+        <span class="past-einab__label">{{ i18n.t('slots.category') }} *</span>
+        <p-select appendTo="body" [invalid]="invalid().category" name="pastEinAbCategory" [options]="categories()" optionLabel="label" optionValue="value" [placeholder]="i18n.t('teacher.chooseCategory')" [ngModel]="category()" (ngModelChange)="category.set($event)"></p-select>
+      </label>
+      <label class="past-einab__field" [attr.data-invalid]="invalid().businessName || null">
+        <span class="past-einab__label">{{ i18n.t('common.businessName') }} *</span>
+        <input pInputText [invalid]="invalid().businessName" type="text" name="pastEinAbBusiness" maxlength="500" [ngModel]="businessName()" (ngModelChange)="businessName.set($event)" />
+      </label>
+    </div>
+    @if (!isOnline()) {
+      <label class="past-einab__check">
+        <p-checkbox name="pastEinAbFairteiler" [binary]="true" [ngModel]="visitFairteiler()" (ngModelChange)="visitFairteiler.set($event)"></p-checkbox>
+        <span>{{ i18n.t('pastEinAb.visitFairteiler') }}</span>
+      </label>
+    }
+    <label class="past-einab__field" [attr.data-invalid]="invalid().comment || null">
+      <span class="past-einab__label">{{ i18n.t('common.comment') }} *</span>
+      <textarea pTextarea [invalid]="invalid().comment" rows="3" maxlength="4000" required name="pastEinAbComment" [placeholder]="i18n.t(mode() === 'admin' ? 'pastEinAb.commentPlaceholderAdmin' : 'pastEinAb.commentPlaceholderTeacher')" [ngModel]="comment()" (ngModelChange)="comment.set($event)"></textarea>
+    </label>
+
+    <div class="past-einab__footer">
+      <div class="past-einab__summary">
+        <small>{{ i18n.t('pastEinAb.summaryLabel') }}</small>
+        <span>{{ summary() }}</span>
+      </div>
+      <button pButton type="submit" icon="pi pi-history" [label]="i18n.t('pastEinAb.submit')" [loading]="saving()"></button>
+    </div>
+  </form>
+  <aside class="past-einab__aside">
+    <h4>{{ i18n.t('pastEinAb.effectsTitle') }}</h4>
+    <ul>
+      <li><i class="pi pi-check" aria-hidden="true"></i><span>{{ i18n.t('pastEinAb.effectCounts') }}</span></li>
+      <li><i class="pi pi-check" aria-hidden="true"></i><span>{{ i18n.t('pastEinAb.effectNoNotification') }}</span></li>
+      @if (mode() === 'admin') {
+        <li><i class="pi pi-check" aria-hidden="true"></i><span>{{ i18n.t('pastEinAb.effectPastOnly') }}</span></li>
+      } @else {
+        <li><i class="pi pi-check" aria-hidden="true"></i><span>{{ i18n.t('pastEinAb.effectPastOnlyTeacher') }}</span></li>
+        <li><i class="pi pi-check" aria-hidden="true"></i><span>{{ i18n.t('pastEinAb.effectOwnBezirk') }}</span></li>
+      }
+    </ul>
+  </aside>
+</div>

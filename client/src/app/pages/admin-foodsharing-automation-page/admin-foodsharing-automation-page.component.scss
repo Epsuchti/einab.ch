@@ -1,0 +1,2015 @@
+.automation-tabs {
+  display: block;
+  margin-top: 1.75rem;
+}
+
+.automation-page--audit-expanded {
+  padding-bottom: 0;
+}
+
+.automation-tabs ::ng-deep .p-tabpanels {
+  padding: 0;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.automation-tabs ::ng-deep .p-tablist,
+.advert-message-tabs ::ng-deep .p-tablist {
+  padding: 0.35rem 0.5rem 0;
+  border-bottom: 1px solid #dbe4e8;
+  background: #f8fbfb;
+}
+
+.automation-tabs ::ng-deep .p-tab,
+.advert-message-tabs ::ng-deep .p-tab {
+  padding: 0.8rem 1rem;
+  border-radius: 8px 8px 0 0;
+}
+
+.automation-tabs ::ng-deep .p-tabpanel {
+  padding: 0;
+  background: #ffffff;
+}
+
+.automation-tabpanel {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem 0 8rem;
+}
+
+.automation-group {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #dbe4e8;
+  border-radius: 14px;
+  background: #fbfdfd;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.automation-group__label,
+.automation-audit-console__eyebrow {
+  color: #0f766e;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.automation-group__label {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.automation-group__label::after {
+  height: 1px;
+  flex: 1;
+  background: #dbe4e8;
+  content: '';
+}
+
+.automation-mode-banner {
+  margin: 0.75rem 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.automation-mode-banner--dry-run {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  color: #9a3412;
+}
+
+.automation-mode-banner--active {
+  background: #ecfdf5;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.automation-mode-banner--disabled {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+.automation-form-grid,
+.automation-section-title,
+.automation-table {
+  display: block;
+  margin-top: 1rem;
+}
+
+.automation-section-title {
+  margin-bottom: 0.25rem;
+}
+
+.automation-table ::ng-deep .p-datatable,
+.automation-table ::ng-deep .p-datatable-wrapper,
+.automation-table ::ng-deep .p-datatable-table {
+  border-radius: 0;
+}
+
+.automation-table ::ng-deep .p-datatable-thead > tr > th.p-datatable-column-sorted {
+  background: #dff3ee;
+  color: #0f172a;
+}
+
+.automation-table
+  ::ng-deep
+  .p-datatable-thead
+  > tr
+  > th.p-datatable-column-sorted
+  .p-datatable-sortable-column-icon,
+.automation-table
+  ::ng-deep
+  .p-datatable-thead
+  > tr
+  > th.p-datatable-column-sorted
+  .p-sortable-column-icon,
+.automation-table ::ng-deep .p-datatable-thead > tr > th.p-datatable-column-sorted .p-column-title {
+  color: #0f172a;
+}
+
+.automation-table ::ng-deep .p-datatable-thead > tr > th.p-sortable-column:focus-visible,
+.automation-table ::ng-deep .p-datatable-thead > tr > th.p-sortable-column:hover {
+  background: #edf7f4;
+}
+
+.automation-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.automation-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.automation-toolbar__add {
+  display: flex;
+  flex: 1 1 24rem;
+  min-width: 0;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.automation-toolbar__add p-select {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.automation-toolbar__add ::ng-deep .p-select {
+  min-width: 0;
+  width: 100%;
+}
+
+.automation-help {
+  margin-top: 0;
+  padding: 1rem;
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #1f2937;
+}
+
+.automation-group ::ng-deep .p-datatable {
+  overflow: hidden;
+  border: 1px solid #dbe4e8;
+  border-radius: 10px;
+}
+
+.automation-group ::ng-deep .p-datatable-thead > tr > th {
+  background: #f1f7f6;
+  color: #164e63;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.automation-group ::ng-deep .p-datatable-tbody > tr > td {
+  border-color: #edf2f3;
+}
+
+.automation-audit-console {
+  position: static;
+  max-height: 50vh;
+  overflow: hidden;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  background: #0f172a;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.28);
+  color: #e2e8f0;
+}
+
+.automation-audit-host {
+  position: static;
+  max-height: 50vh;
+  overflow: auto;
+  padding: 0.75rem;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  background: #0b1220;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.28);
+  color: #cbd5e1;
+}
+
+.automation-audit-host h3 {
+  margin: 0 0 0.65rem;
+  color: #f8fafc;
+  font-size: 0.95rem;
+}
+
+.automation-audit-host__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.5rem;
+  margin: -0.75rem -0.75rem 0.75rem;
+  padding: 0.55rem 0.75rem;
+  background: #172033;
+}
+
+.automation-audit-host__header .p-button {
+  color: #cbd5e1;
+}
+
+.automation-audit-host ::ng-deep .p-datatable {
+  border: 0;
+  font-size: 0.8rem;
+}
+
+.automation-audit-host ::ng-deep .p-datatable-thead > tr > th {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+.automation-audit-host ::ng-deep .p-datatable-tbody > tr > td {
+  border-color: #263449;
+  background: #111827;
+  color: #cbd5e1;
+}
+
+.automation-audit-host > label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.15rem 0 1rem;
+  padding: 0.35rem 0.5rem 0.35rem 0.25rem;
+  border-radius: 6px;
+}
+
+.automation-audit-console__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.25rem;
+  padding: 0.65rem 0.9rem;
+  background: #172033;
+}
+
+.automation-audit-console__header h3 {
+  margin: 0.15rem 0 0;
+  color: #f8fafc;
+  font-size: 0.95rem;
+}
+
+.automation-audit-console__header .p-button {
+  color: #cbd5e1;
+}
+
+.automation-audit-console__body {
+  max-height: calc(50vh - 3.25rem);
+  overflow: auto;
+  padding: 0.75rem;
+  background: #0b1220;
+}
+
+.automation-audit-console__body ::ng-deep .p-datatable {
+  border: 0;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.automation-audit-console__body ::ng-deep .p-datatable-thead > tr > th {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+.automation-audit-console__body ::ng-deep .p-datatable-tbody > tr > td {
+  border-color: #263449;
+  background: #111827;
+  color: #cbd5e1;
+}
+
+.automation-audit-console__body label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.15rem 0 1rem;
+  padding: 0.35rem 0.5rem 0.35rem 0.25rem;
+  border-radius: 6px;
+  color: #cbd5e1;
+}
+
+.automation-audit-console__body ::ng-deep .p-paginator,
+.automation-audit-host ::ng-deep .p-paginator {
+  min-height: 3rem;
+  border: 0;
+  background: #111827;
+  color: #cbd5e1;
+}
+
+.automation-audit-console__body ::ng-deep .p-paginator .p-paginator-page,
+.automation-audit-console__body ::ng-deep .p-paginator .p-paginator-first,
+.automation-audit-console__body ::ng-deep .p-paginator .p-paginator-prev,
+.automation-audit-console__body ::ng-deep .p-paginator .p-paginator-next,
+.automation-audit-console__body ::ng-deep .p-paginator .p-paginator-last,
+.automation-audit-host ::ng-deep .p-paginator .p-paginator-page,
+.automation-audit-host ::ng-deep .p-paginator .p-paginator-first,
+.automation-audit-host ::ng-deep .p-paginator .p-paginator-prev,
+.automation-audit-host ::ng-deep .p-paginator .p-paginator-next,
+.automation-audit-host ::ng-deep .p-paginator .p-paginator-last {
+  color: #cbd5e1;
+}
+
+.automation-audit-console__body ::ng-deep .p-paginator .p-paginator-page.p-highlight,
+.automation-audit-host ::ng-deep .p-paginator .p-paginator-page.p-highlight {
+  background: #064e3b;
+  color: #a7f3d0;
+}
+
+.automation-audit-console__body ::ng-deep .p-paginator button:not(.p-disabled):hover,
+.automation-audit-host ::ng-deep .p-paginator button:not(.p-disabled):hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.automation-help__section {
+  margin: 0;
+  color: #0f172a;
+}
+
+.automation-help__section {
+  margin-top: 1.25rem;
+}
+
+.automation-help p,
+.automation-help li,
+.automation-help ul {
+  color: #334155;
+}
+
+.automation-help__list,
+.automation-help__section + p {
+  margin-top: 0.75rem;
+}
+
+.automation-help__decision-table {
+  width: 100%;
+  margin-top: 0.75rem;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.automation-help__decision-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.automation-help__decision-table th,
+.automation-help__decision-table td {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d9e0ea;
+  vertical-align: top;
+  text-align: left;
+}
+
+.automation-help__decision-table th {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+@media (max-width: 40rem) {
+  .automation-help__decision-table {
+    min-width: 40rem;
+  }
+
+  .automation-help__decision-table th,
+  .automation-help__decision-table td {
+    padding: 0.5rem;
+  }
+}
+
+.automation-help__note {
+  margin-top: 0.75rem;
+  color: #475569;
+}
+
+.automation-help__list {
+  margin-bottom: 0;
+  padding-left: 1.25rem;
+}
+
+.automation-exemption-card {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.automation-exemption-card__note {
+  margin: 0.25rem 0 0;
+  color: #475569;
+}
+
+.automation-exemption-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.automation-exemption-form__block {
+  padding: 1rem 1.1rem;
+  border: 1px solid #d9e0ea;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.automation-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.automation-field__label {
+  color: #0f172a;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.automation-field ::ng-deep .p-inputtext {
+  width: 100%;
+}
+
+.automation-exemption-form__block ::ng-deep .p-datepicker {
+  width: 100%;
+}
+
+.automation-exemption-form__actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 42rem) {
+  .automation-exemption-form {
+    gap: 0.85rem;
+  }
+
+  .automation-exemption-form__actions button {
+    width: 100%;
+  }
+}
+
+.advert-preview {
+  margin-top: 0.5rem;
+  max-width: 28rem;
+  padding: 0.5rem;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #334155;
+  white-space: pre-wrap;
+}
+
+.advert-config {
+  display: grid;
+  gap: 1rem;
+  min-width: 24rem;
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #d9e0ea;
+  border-radius: 10px;
+  background: #f8fafc;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.advert-config textarea {
+  width: 100%;
+  min-height: 5rem;
+}
+
+.advert-config h4 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.advert-config__header,
+.advert-config__toggles {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.advert-config__header {
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #d9e0ea;
+}
+
+.advert-config__field-label {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.advert-config__blocks {
+  display: grid;
+  gap: 1rem;
+}
+
+.advert-config__block {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #d9e0ea;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.advert-config__block-note {
+  margin: 0;
+  color: #475569;
+}
+
+.advert-config__block ::ng-deep .p-inputnumber,
+.advert-config__block ::ng-deep .p-inputnumber-input {
+  width: 100%;
+}
+
+.advert-config__block ::ng-deep .p-select {
+  min-width: 14rem;
+}
+
+.advert-config__toggles label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.advert-config__tick-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.advert-config__tick {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.advert-config__tick--plain {
+  color: #0f172a;
+}
+
+.advert-config__cutoff {
+  display: grid;
+  gap: 0.45rem;
+  color: #0f172a;
+}
+
+.advert-config__tick--disabled {
+  color: #64748b;
+}
+
+.advert-config__toggles--header {
+  justify-content: flex-end;
+}
+
+.advert-config__actions {
+  justify-content: flex-end;
+  padding-top: 0.25rem;
+  border-top: 1px solid #d9e0ea;
+}
+
+@media (max-width: 42rem) {
+  .advert-config {
+    min-width: 0;
+    padding: 1rem;
+  }
+
+  .advert-config__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .advert-config__block ::ng-deep .p-select {
+    width: 100%;
+  }
+
+  .advert-config__toggles--header {
+    justify-content: flex-start;
+  }
+}
+
+.advert-message-tabs {
+  margin-top: 0.75rem;
+}
+
+.advert-message-tabs ::ng-deep .p-tabpanels {
+  padding: 1.25rem 0.25rem 0;
+}
+
+.advert-message-tabs ::ng-deep .p-tabpanel {
+  padding: 0;
+}
+
+.automation-form-grid--telegram {
+  margin-top: 1rem;
+  gap: 0.75rem;
+}
+
+.general-settings-accordion {
+  margin-bottom: 1rem;
+}
+
+.general-settings__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+}
+
+.general-settings__header .pi {
+  color: var(--app-primary);
+}
+
+.general-settings__summary {
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.general-settings__section + .general-settings__section {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.general-settings__section h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.general-settings__hint {
+  margin: 0;
+  color: var(--app-text-muted);
+}
+
+.telegram-missing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.automation-form-grid__actions {
+  display: flex;
+  align-items: end;
+}
+
+.automation-help-accordion {
+  margin-top: 1rem;
+}
+
+.automation-cleaning-exceptions-accordion {
+  margin-top: 1rem;
+}
+
+.automation-store-accordion {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.automation-store-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  width: 100%;
+  padding-right: 0.75rem;
+}
+
+.automation-store-header__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.automation-store-header__summary {
+  color: var(--app-text-muted);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.automation-store {
+  display: grid;
+  gap: 1rem;
+}
+
+/* Another account's automation, shown read-only to people who may see all automation decisions. */
+.automation-store-panel--readonly {
+  opacity: 0.62;
+  filter: grayscale(0.7);
+}
+
+.automation-store-panel--readonly:hover,
+.automation-store-panel--readonly:focus-within {
+  opacity: 0.8;
+}
+
+.automation-store-header__readonly {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px dashed var(--app-border);
+  border-radius: 999px;
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.automation-only-mine {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0.75rem;
+  cursor: pointer;
+}
+
+/* Store settings bar: owner plus on/off switches, above the rule panels. */
+.automation-store__general {
+  display: grid;
+  grid-template-columns: minmax(10rem, auto) repeat(auto-fit, minmax(14rem, 1fr));
+  align-items: stretch;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  padding: 0.6rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.automation-store__owner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: center;
+  column-gap: 0.55rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--app-text);
+}
+
+.automation-store__owner .pi {
+  grid-row: span 2;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  font-size: 0.85rem;
+}
+
+.automation-store__owner-label {
+  color: var(--app-text-muted);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.automation-store__owner strong {
+  overflow-wrap: anywhere;
+}
+
+.automation-store__setting {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.automation-store__setting.is-on {
+  border-color: #b9dbbf;
+  background: var(--app-primary-soft);
+}
+
+.automation-store__setting.is-disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.automation-store__setting p-toggleswitch {
+  flex: 0 0 auto;
+}
+
+.automation-store__setting-text {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.automation-store__setting-text strong {
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.automation-store__setting-text small {
+  color: var(--app-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 600px) {
+  .automation-store__general {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .automation-store__owner {
+    padding: 0.35rem 0.4rem;
+  }
+}
+
+.automation-store__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.automation-store__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.automation-rule-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  width: 100%;
+  padding-right: 0.75rem;
+  font-weight: 600;
+}
+
+.automation-rule-header__detail {
+  margin-left: 0.375rem;
+  color: var(--app-text-muted);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+/* Alerts and the late-cancellation settings sit inside a rule panel, which already
+   draws the frame, so their own card chrome is dropped there. */
+.automation-rule-accordion .advert-config {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.advert-late-cancellation {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+}
+
+.advert-late-cancellation textarea {
+  width: 100%;
+  min-height: 5rem;
+}
+
+.automation-rule__hint {
+  margin: 0 0 0.75rem;
+  color: var(--app-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.automation-rule__hint--warn {
+  color: var(--app-warning);
+}
+
+.gap-rule__stores {
+  margin-top: 0.875rem;
+}
+
+.gap-rule__days {
+  max-width: 24rem;
+}
+
+.gap-rule__note {
+  margin: 0.75rem 0 0;
+}
+
+.gap-rule__conflict {
+  color: var(--app-danger);
+}
+
+.gap-preview {
+  display: grid;
+  gap: 0.625rem;
+  margin-top: 0.875rem;
+  padding: 0.875rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.gap-preview__title {
+  font-size: 0.875rem;
+}
+
+.gap-preview__scroll {
+  overflow-x: auto;
+}
+
+.gap-preview__days {
+  display: grid;
+  grid-template-columns: repeat(11, minmax(3.5rem, 1fr));
+  gap: 0.25rem;
+}
+
+.gap-preview__day {
+  display: grid;
+  gap: 0.125rem;
+  padding: 0.375rem 0.125rem;
+  border-radius: 0.375rem;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.gap-preview__day--blocked {
+  background: #fde2e2;
+  color: #991b1b;
+}
+
+.gap-preview__day--pickup {
+  background: var(--app-primary-strong);
+  color: #fff;
+}
+
+.gap-preview .gap-rule__note {
+  margin: 0;
+}
+
+.gap-preview__message summary {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.gap-preview__message p {
+  margin: 0;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.375rem;
+  background: #fff;
+  font-size: 0.875rem;
+}
+
+.automation-rule__fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1.5rem;
+}
+
+.linked-store {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.875rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.linked-store--incoming {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  background: var(--app-primary-soft);
+}
+
+.linked-store__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.linked-store__store {
+  flex: 1 1 100%;
+  min-width: 0;
+
+  p-select,
+  p-multiselect {
+    width: 100%;
+  }
+
+  // Selected stores wrap onto several lines instead of being cut off behind the next field.
+  ::ng-deep .p-multiselect-label {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    white-space: normal;
+  }
+}
+
+.linked-store__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.linked-store__message {
+  width: 100%;
+  resize: vertical;
+}
+
+.linked-store__exemptions {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.linked-store__exemption-list {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.linked-store__exemption {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0.25rem 0.25rem 0.625rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface, #fff);
+
+  button {
+    margin-left: auto;
+    flex: 0 0 auto;
+  }
+}
+
+.linked-store__exemption-id {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.linked-store__exemption-reason {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.linked-store__exemption-id-field {
+  flex: 0 1 10rem;
+  min-width: 8rem;
+}
+
+.linked-store__exemption-reason-field {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.advert-messages {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.advert-messages__header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.advert-messages__note {
+  color: #475569;
+}
+
+.advert-preview-accordion {
+  margin-top: 0.75rem;
+}
+
+.advert-message-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.advert-message-row {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.advert-message-row textarea {
+  width: 100%;
+  min-height: 6rem;
+}
+
+/* Keep this dense administration screen within the same visual system as the
+   rest of the app.  These overrides intentionally come last so older, more
+   specific sections do not introduce a second palette or floating panels. */
+.automation-page--audit-expanded {
+  padding-bottom: 0;
+}
+
+.automation-tabs {
+  margin-top: 1.25rem;
+}
+
+.automation-tabs ::ng-deep .p-tablist,
+.advert-message-tabs ::ng-deep .p-tablist {
+  gap: 0.25rem;
+  padding: 0.35rem 0.5rem 0;
+  border-bottom-color: var(--app-border);
+  background: var(--app-surface-muted);
+}
+
+.automation-tabs ::ng-deep .p-tab,
+.advert-message-tabs ::ng-deep .p-tab {
+  border-radius: var(--app-radius-sm) var(--app-radius-sm) 0 0;
+  color: var(--app-text-muted);
+  font-weight: 650;
+}
+
+.automation-tabs ::ng-deep .p-tab-active,
+.advert-message-tabs ::ng-deep .p-tab-active {
+  color: var(--app-primary-strong);
+}
+
+.automation-tabpanel {
+  gap: 1.25rem;
+  padding: 1.25rem 0;
+}
+
+.automation-group {
+  gap: 1rem;
+  padding: 1.1rem;
+  border-color: var(--app-border);
+  border-radius: var(--app-radius);
+  background: #fff;
+  box-shadow: none;
+}
+
+.automation-group__label,
+.automation-audit-console__eyebrow {
+  color: var(--app-primary-strong);
+}
+
+.automation-group__label::after {
+  background: var(--app-border);
+}
+
+.automation-toolbar {
+  padding: 0.8rem 0.9rem;
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.automation-toolbar__add {
+  min-width: min(100%, 18rem);
+}
+
+.automation-mode-banner {
+  border-radius: var(--app-radius-sm);
+}
+
+.automation-mode-banner--dry-run {
+  border-color: #edd9ad;
+  background: #fff9eb;
+  color: #815114;
+}
+
+.automation-mode-banner--active {
+  border-color: #b9dbbf;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+}
+
+.automation-mode-banner--disabled {
+  border-color: var(--app-border);
+  background: var(--app-surface-muted);
+  color: var(--app-text-muted);
+}
+
+.automation-help,
+.automation-exemption-card,
+.advert-config {
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+  color: var(--app-text);
+}
+
+.automation-help,
+.automation-exemption-card,
+.advert-config {
+  box-shadow: none;
+}
+
+.automation-help p,
+.automation-help li,
+.automation-help ul,
+.automation-help__note,
+.automation-exemption-card__note,
+.advert-config__block-note,
+.advert-messages__note {
+  color: var(--app-text-muted);
+}
+
+.automation-help__section,
+.advert-config h4,
+.advert-config__field-label,
+.automation-field__label {
+  color: var(--app-text);
+}
+
+.automation-help__decision-table th,
+.automation-help__decision-table td {
+  border-color: var(--app-border);
+}
+
+.automation-help__decision-table th {
+  background: var(--app-surface-strong);
+  color: var(--app-text);
+}
+
+.automation-group ::ng-deep .p-datatable {
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-sm);
+}
+
+.automation-group ::ng-deep .p-datatable-thead > tr > th,
+.automation-table ::ng-deep .p-datatable-thead > tr > th.p-datatable-column-sorted {
+  background: var(--app-surface-strong);
+  color: var(--app-text-muted);
+}
+
+.automation-group ::ng-deep .p-datatable-tbody > tr > td {
+  border-color: #eaf0eb;
+  color: var(--app-text);
+}
+
+.automation-exemption-form__block,
+.advert-config__block {
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: #fff;
+}
+
+.advert-config {
+  min-width: 0;
+}
+
+.advert-config__header,
+.advert-config__actions {
+  border-color: var(--app-border);
+}
+
+.advert-preview {
+  border-color: var(--app-border-strong);
+  border-radius: var(--app-radius-sm);
+  background: #fff;
+  color: var(--app-text-muted);
+}
+
+.automation-audit-console,
+.automation-audit-host {
+  position: static;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  max-height: none;
+  margin-top: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: #fff;
+  box-shadow: none;
+  color: var(--app-text);
+}
+
+.automation-audit-host__header,
+.automation-audit-console__header {
+  min-height: 3rem;
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface-muted);
+}
+
+.automation-audit-host h3,
+.automation-audit-console__header h3 {
+  color: var(--app-text);
+}
+
+.automation-audit-host__header .p-button,
+.automation-audit-console__header .p-button {
+  color: var(--app-primary-strong);
+}
+
+.automation-audit-console__body {
+  max-height: 32rem;
+  padding: 0.9rem;
+  overflow: auto;
+  background: #fff;
+}
+
+.automation-audit-host > label,
+.automation-audit-console__body label {
+  color: var(--app-text);
+}
+
+.automation-audit-host ::ng-deep .p-datatable,
+.automation-audit-console__body ::ng-deep .p-datatable {
+  border: 1px solid var(--app-border);
+  background: #fff;
+  color: var(--app-text);
+}
+
+.automation-audit-host ::ng-deep .p-datatable-thead > tr > th,
+.automation-audit-console__body ::ng-deep .p-datatable-thead > tr > th {
+  background: var(--app-surface-strong);
+  color: var(--app-text-muted);
+}
+
+.automation-audit-host ::ng-deep .p-datatable-tbody > tr > td,
+.automation-audit-console__body ::ng-deep .p-datatable-tbody > tr > td {
+  border-color: #eaf0eb;
+  background: #fff;
+  color: var(--app-text);
+}
+
+.automation-audit-console__body ::ng-deep .p-paginator,
+.automation-audit-host ::ng-deep .p-paginator {
+  border-top-color: var(--app-border);
+  background: #fff;
+  color: var(--app-text);
+}
+
+.automation-audit-console__body ::ng-deep .p-paginator .p-paginator-page,
+.automation-audit-console__body ::ng-deep .p-paginator .p-paginator-first,
+.automation-audit-console__body ::ng-deep .p-paginator .p-paginator-prev,
+.automation-audit-console__body ::ng-deep .p-paginator .p-paginator-next,
+.automation-audit-console__body ::ng-deep .p-paginator .p-paginator-last,
+.automation-audit-host ::ng-deep .p-paginator .p-paginator-page,
+.automation-audit-host ::ng-deep .p-paginator .p-paginator-first,
+.automation-audit-host ::ng-deep .p-paginator .p-paginator-prev,
+.automation-audit-host ::ng-deep .p-paginator .p-paginator-next,
+.automation-audit-host ::ng-deep .p-paginator .p-paginator-last {
+  color: var(--app-text-muted);
+}
+
+@media (max-width: 768px) {
+  .automation-page ::ng-deep > .p-card > .p-card-body {
+    padding-inline: 0.875rem;
+  }
+
+  .automation-tabpanel {
+    padding-top: 1rem;
+  }
+
+  .automation-group,
+  .advert-config {
+    padding: 0.9rem;
+  }
+
+  .automation-toolbar,
+  .automation-toolbar__add,
+  .advert-config__header,
+  .advert-config__toggles--header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .automation-toolbar__add {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+    flex-basis: auto;
+  }
+
+  .automation-toolbar__actions > *,
+  .advert-config__actions > * {
+    width: 100%;
+  }
+
+  .automation-toolbar__add > p-select {
+    width: 100%;
+  }
+
+  .automation-toolbar__add > button {
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .automation-audit-console__body {
+    max-height: 26rem;
+    padding: 0.75rem;
+  }
+
+  .advert-messages__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .advert-messages__header .p-button,
+  .advert-message-row .p-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .automation-tabs {
+    margin-top: 0.75rem;
+  }
+
+  .automation-tabpanel {
+    gap: 0.875rem;
+    padding-top: 0.75rem;
+  }
+
+  .automation-group,
+  .advert-config,
+  .automation-help,
+  .automation-exemption-card {
+    padding: 0.75rem;
+  }
+
+  .automation-toolbar__add {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .automation-toolbar__add > button,
+  .automation-form-grid__actions > button,
+  .automation-exemption-form__actions > button {
+    width: 100%;
+  }
+
+  .advert-message-tabs ::ng-deep .p-tabpanels {
+    padding-top: 0.875rem;
+  }
+
+  .automation-audit-host__header,
+  .automation-audit-console__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .automation-audit-host__header .p-button,
+  .automation-audit-console__header .p-button {
+    width: 100%;
+  }
+
+  .automation-help__list {
+    padding-left: 1.1rem;
+  }
+
+  .automation-exemption-form__block,
+  .advert-config__block {
+    padding: 0.75rem;
+  }
+
+  .advert-config__tick,
+  .advert-config__toggles label,
+  .automation-audit-host > label,
+  .automation-audit-console__body label {
+    min-height: 2.75rem;
+  }
+}
+
+.store-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.store-info__block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.store-info__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.store-info__row input,
+.store-info__select {
+  flex: 1 1 16rem;
+  min-width: 0;
+  max-width: 40rem;
+}
+
+.store-info__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.store-info__error {
+  color: var(--p-red-600, #b91c1c);
+  white-space: pre-line;
+}
+
+.automation-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
+  gap: 0.75rem;
+}
+
+.automation-metrics__tile {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-muted);
+}
+
+.automation-metrics__label {
+  color: var(--app-text-muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.automation-metrics__value {
+  color: var(--app-text);
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+
+.automation-metrics__note {
+  color: var(--app-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+.metrics-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.metrics-toolbar__period {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--app-text);
+  font-weight: 650;
+}
+
+.metrics-toolbar__period ::ng-deep .p-select {
+  min-width: 11rem;
+}
+
+.metric-subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--app-text);
+  font-size: 0.95rem;
+}
+
+.metric-bars {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metric-bars__row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr) 2.5rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.metric-bars__label {
+  color: var(--app-text);
+  font-size: 0.88rem;
+}
+
+.metric-bars__track {
+  height: 0.75rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--app-surface-strong);
+}
+
+.metric-bars__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--app-primary);
+}
+
+.metric-bars__value {
+  color: var(--app-text);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: right;
+}
+
+.metric-chart {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.metric-chart__caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--app-text);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.metric-chart__peak {
+  color: var(--app-text-muted);
+  font-weight: 500;
+}
+
+.metric-chart__plot {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 7.5rem;
+  padding-bottom: 1px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.metric-chart__slot {
+  display: flex;
+  flex: 1 1 0;
+  align-items: flex-end;
+  min-width: 0;
+  height: 100%;
+  cursor: default;
+}
+
+.metric-chart__slot:hover .metric-chart__bar {
+  background: var(--app-primary-strong);
+}
+
+.metric-chart__bar {
+  display: block;
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--app-primary);
+}
+
+.metric-chart__bar--empty {
+  height: 2px !important;
+  border-radius: 1px;
+  background: var(--app-border);
+}
+
+.metric-chart__axis {
+  display: flex;
+  justify-content: space-between;
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 42rem) {
+  .metric-bars__row {
+    grid-template-columns: minmax(0, 1fr) 2.5rem;
+    row-gap: 0.25rem;
+  }
+
+  .metric-bars__track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .metrics-toolbar__period {
+    width: 100%;
+  }
+
+  .metrics-toolbar__period ::ng-deep .p-select {
+    flex: 1;
+  }
+}
+
+/* ---- UX fixes ---- */
+.automation-page,
+.automation-page .automation-group,
+.automation-page .automation-tabpanel,
+.automation-page .automation-store,
+.automation-page .form-grid > *,
+.automation-page .automation-toolbar > * {
+  min-width: 0;
+}
+
+.automation-metrics__label {
+  font-size: 0.78rem;
+  letter-spacing: 0;
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
+
+.metrics-more {
+  margin-top: 0.5rem;
+}
+
+.metrics-more > summary {
+  padding: 0.6rem 0;
+  color: var(--app-primary-strong);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.store-info__select {
+  min-height: 0;
+}
+
+@media (max-width: 640px) {
+  .automation-help__decision-table,
+  .automation-help__decision-table tbody,
+  .automation-help__decision-table tr,
+  .automation-help__decision-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .automation-help__decision-table thead {
+    display: none;
+  }
+
+  .automation-help__decision-table tr {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--app-border);
+  }
+
+  .automation-help__decision-table td {
+    padding: 0.1rem 0;
+    border: 0;
+  }
+
+  .automation-help__decision-table td:first-child {
+    font-weight: 650;
+  }
+
+  .automation-toolbar,
+  .automation-toolbar__add {
+    flex-wrap: wrap;
+  }
+
+  .automation-toolbar__add .p-select {
+    flex: 1 1 100%;
+  }
+}
+
+.stats-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.75rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stats-row {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: #fff;
+}
+
+.stats-row__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+  padding: 0.6rem 0.8rem;
+  list-style: none;
+  cursor: pointer;
+}
+
+.stats-row__summary::-webkit-details-marker {
+  display: none;
+}
+
+.stats-row__name {
+  display: grid;
+  flex: 1 1 10rem;
+  min-width: 0;
+  font-weight: 650;
+}
+
+.stats-row__name small {
+  color: var(--app-text-muted);
+  font-weight: 500;
+}
+
+.stats-row__count {
+  color: var(--app-text-muted);
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.stats-row__chevron {
+  color: var(--app-text-muted);
+  transition: transform 150ms ease;
+}
+
+.stats-row[open] .stats-row__chevron {
+  transform: rotate(180deg);
+}
+
+.stats-row__pickups {
+  margin: 0;
+  padding: 0 0.8rem 0.6rem;
+  list-style: none;
+}
+
+.stats-row__pickups > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.6rem;
+  padding: 0.45rem 0;
+  border-top: 1px solid var(--app-border);
+  font-size: 0.9rem;
+}
+
+.stats-row__when {
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-row__store {
+  color: var(--app-text-muted);
+}
+
+.stats-row__errors {
+  flex: 1 1 100%;
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #8a4b00;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 640px) {
+  .store-info__row .store-info__select,
+  .store-info__select {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
+  }
+}
+
+/* One Save per store stays in reach while scrolling through the rules; Delete is a quiet text button. */
+.automation-store__actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding: 0.6rem 0 calc(0.4rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--app-border);
+  background: var(--app-surface-muted, #fff);
+}
+
+.automation-setup-steps > summary {
+  margin-bottom: 0.4rem;
+  color: var(--app-primary-strong);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+/* General settings: one tidy column of fields with even spacing. */
+.general-settings-accordion ::ng-deep .p-accordioncontent-content {
+  padding-top: 1.25rem;
+}
+
+.general-settings__section .automation-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: start;
+  gap: 1rem;
+  max-width: 34rem;
+  margin-top: 1rem;
+}
+
+.general-settings__section .automation-form-grid label {
+  justify-self: stretch;
+}
+
+.general-settings__section .automation-form-grid > .p-button,
+.general-settings__section .automation-form-grid__actions {
+  margin-top: 0.25rem;
+}
+
+.general-settings__section .automation-form-grid + small {
+  display: block;
+  margin-top: 0.6rem;
+  color: var(--app-text-muted);
+}
+
+.automation-setup-steps {
+  margin-bottom: 0.25rem;
+}
+
+@media (max-width: 600px) {
+  .general-settings__section .automation-form-grid {
+    justify-items: stretch;
+    max-width: none;
+  }
+}
+
+/* Open store: its name stays pinned below the app bar until the store's settings end. */
+p-card:has(.automation-store-accordion),
+.automation-store-accordion .p-accordionpanel {
+  overflow: clip;
+}
+
+.automation-store-accordion .p-accordionpanel-active > .p-accordionheader {
+  position: sticky;
+  top: var(--app-sticky-top, 0px);
+  z-index: 3;
+  transition: box-shadow 0.15s ease;
+}
+
+.automation-store-accordion .p-accordionpanel-active > .p-accordionheader.is-stuck {
+  border-radius: 0;
+  box-shadow: 0 6px 12px -6px rgb(23 49 38 / 0.22);
+}
+
+/* In the column layout of a block, the row's flex-basis (16rem) became the select's height; keep it one line tall. */
+.store-info__block > .store-info__select {
+  flex: 0 0 auto;
+}
+
+/* Checkbox and its (wrapping) label side by side, the box aligned with the first line. */
+.automation-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+
+.automation-checkbox-row p-checkbox {
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
+}

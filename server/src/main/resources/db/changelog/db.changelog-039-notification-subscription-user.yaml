@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: 039-notification-subscription-user
+      author: claude
+      changes:
+        - addColumn:
+            tableName: notification_subscriptions
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_notification_subscriptions_user
+                    references: users(id)
+        - dropNotNullConstraint:
+            tableName: notification_subscriptions
+            columnName: email
+            columnDataType: VARCHAR(255)
+        # Link legacy anonymous subscriptions to the user with the same email, if there is one.
+        - sql:
+            sql: >-
+              UPDATE notification_subscriptions SET user_id =
+              (SELECT u.id FROM users u WHERE LOWER(u.email) = LOWER(notification_subscriptions.email) ORDER BY u.id LIMIT 1)
+              WHERE user_id IS NULL
+        # Subscriptions that cannot be linked (anonymous, or user already verified) are switched off.
+        - sql:
+            sql: >-
+              UPDATE notification_subscriptions SET active = FALSE
+              WHERE user_id IS NULL
+              OR user_id IN (SELECT id FROM users WHERE verified = TRUE)

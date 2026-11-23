@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 016-add-teacher-ical-feed
+      author: codex
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: ical_feed_token
+                  type: VARCHAR(64)
+        - addUniqueConstraint:
+            tableName: users
+            columnNames: ical_feed_token
+            constraintName: uk_users_ical_feed_token

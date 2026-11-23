@@ -1,0 +1,2977 @@
+<section
+  class="page-shell page-stack automation-page"
+  [class.automation-page--audit-expanded]="auditConsoleExpanded()"
+>
+  <p-card class="page-card--flat">
+    <ng-template pTemplate="title"><i class="pi pi-cog title-icon" aria-hidden="true"></i>{{ i18n.t('adminAutomation.title') }}</ng-template>
+    <!-- General settings: their own tab once Foodsharing is connected, shown directly before that. -->
+    <ng-template #generalSettingsContent>
+      <div id="general-settings" class="general-settings">
+      <section class="general-settings__section">
+        <h3>{{ i18n.t('automation.generalSettingsFoodsharing') }}</h3>
+        @if (!foodsharingStatus()?.connected) {
+          <p class="general-settings__hint">{{ i18n.t('automation.connectFirstHere') }}</p>
+          <div class="form-grid automation-form-grid">
+            <label
+              >{{ i18n.t('common.email')
+              }}<input
+                pInputText
+                type="email"
+                [ngModel]="foodsharingEmail()"
+                (ngModelChange)="foodsharingEmail.set($event)"
+            /></label>
+            <label
+              >{{ i18n.t('common.password')
+              }}<input pInputText type="password" [(ngModel)]="foodsharingPassword"
+            /></label>
+            <button
+              pButton
+              type="button"
+              class="automation-connect"
+              [label]="i18n.t('adminAutomation.connect')"
+              (click)="connectFoodsharing()"
+            ></button>
+          </div>
+        } @else {
+          <div class="automation-toolbar">
+            <span>{{ i18n.t('adminAutomation.connectedAs') }} {{ foodsharingStatus()?.email }}</span>
+            <span class="automation-toolbar__actions">
+              @if (!changingFoodsharingPassword()) {
+                <button
+                  pButton
+                  type="button"
+                  severity="secondary"
+                  icon="pi pi-key"
+                  [label]="i18n.t('foodsharingAccount.changePassword')"
+                  (click)="changingFoodsharingPassword.set(true)"
+                ></button>
+              }
+              <button
+                pButton
+                type="button"
+                severity="danger"
+                [outlined]="true"
+                [label]="i18n.t('adminAutomation.disconnect')"
+                (click)="disconnectFoodsharing()"
+              ></button>
+            </span>
+          </div>
+          @if (changingFoodsharingPassword()) {
+            <div class="form-grid automation-form-grid">
+              <label
+                >{{ i18n.t('foodsharingAccount.newPassword')
+                }}<input
+                  pInputText
+                  type="password"
+                  autocomplete="new-password"
+                  [(ngModel)]="foodsharingPassword"
+              /></label>
+              <button
+                pButton
+                type="button"
+                icon="pi pi-save"
+                [label]="i18n.t('foodsharingAccount.savePassword')"
+                [disabled]="!foodsharingPassword"
+                (click)="changeFoodsharingPassword()"
+              ></button>
+              <button
+                pButton
+                type="button"
+                severity="secondary"
+                [text]="true"
+                [label]="i18n.t('common.cancel')"
+                (click)="cancelFoodsharingPasswordChange()"
+              ></button>
+            </div>
+            <small>{{ i18n.t('foodsharingAccount.changePasswordHint') }}</small>
+          }
+        }
+      </section>
+      @if (foodsharingStatus()?.connected) {
+        <section class="general-settings__section">
+          <h3>{{ i18n.t('automation.telegramSetupTitle') }}</h3>
+          <details class="automation-setup-steps" [open]="!telegramBotTokenConfigured()">
+            <summary>{{ i18n.t('admin.setupSteps') }}</summary>
+            <ol class="automation-help__list">
+              <li>{{ i18n.t('automation.telegramSetupInstruction1') }}</li>
+              <li>{{ i18n.t('automation.telegramSetupInstruction2') }}</li>
+              <li>{{ i18n.t('automation.telegramSetupInstruction3') }}</li>
+            </ol>
+          </details>
+          @if (telegramBotTokenConfigured()) {
+            <div class="automation-form-grid automation-form-grid--telegram">
+              <div class="automation-form-grid__status">
+                <strong>{{ i18n.t('automation.telegramBotTokenConfigured') }}</strong>
+              </div>
+              <div class="automation-form-grid__actions">
+                <button
+                  pButton
+                  type="button"
+                  severity="secondary"
+                  [label]="i18n.t('automation.removeTelegramBotToken')"
+                  (click)="removeTelegramBotToken()"
+                ></button>
+              </div>
+            </div>
+          } @else {
+            <div class="automation-form-grid automation-form-grid--telegram">
+              <label
+                >{{ i18n.t('automation.telegramBotToken')
+                }}<input
+                  pInputText
+                  type="password"
+                  [ngModel]="telegramBotToken"
+                  (ngModelChange)="telegramBotToken = $event"
+              /></label>
+              <div class="automation-form-grid__actions">
+                <button
+                  pButton
+                  type="button"
+                  [label]="i18n.t('common.save')"
+                  (click)="saveTelegramBotToken()"
+                ></button>
+              </div>
+            </div>
+          }
+        </section>
+      }
+      </div>
+    </ng-template>
+
+    @if (statusLoading()) {
+      <app-loading-indicator />
+    } @else if (!foodsharingStatus()?.connected) {
+      <ng-container *ngTemplateOutlet="generalSettingsContent"></ng-container>
+    } @else {
+      <div class="automation-mode-banner" [ngClass]="statusBannerClass()">
+        {{ statusBannerText() }}
+      </div>
+
+      <p-tabs
+        [value]="activeAutomationTab()"
+        (valueChange)="onAutomationTabChange($event)"
+        class="automation-tabs"
+      >
+        <p-tablist>
+          @if (sessionService.hasPermission(UserPermission.CanUseAutomations)) {
+            <p-tab value="slots">{{ i18n.t('automation.slotApproval') }}</p-tab>
+          }
+          @if (sessionService.hasPermission(UserPermission.CanUseAutomations)) {
+            <p-tab value="applications">{{ i18n.t('automation.storeApplications') }}</p-tab>
+          }
+          @if (sessionService.hasPermission(UserPermission.CanUseAutomations)) {
+            <p-tab value="advertisements">{{ i18n.t('automation.slotAdvertisement') }}</p-tab>
+          }
+          @if (sessionService.hasPermission(UserPermission.CanUseAutomations)) {
+            <p-tab value="storeInfo">{{ i18n.t('automation.storeInfo') }}</p-tab>
+          }
+          @if (sessionService.hasPermission(UserPermission.CanSeeUserPickupCountGrouping)) {
+            <p-tab value="statistics">{{ i18n.t('adminAutomation.tabUserStatistics') }}</p-tab>
+          }
+          @if (canSeeMetrics()) {
+            <p-tab value="metrics">{{ i18n.t('adminAutomation.tabMetrics') }}</p-tab>
+          }
+          <p-tab value="settings">{{ i18n.t('automation.settingsTab') }}</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          @if (sessionService.hasPermission(UserPermission.CanUseAutomations)) {
+            <p-tabpanel value="applications">
+              @if (activeAutomationTab() === 'applications') {
+                <div class="automation-tabpanel">
+                  @if (tabLoading()) {
+                    <app-loading-indicator [compact]="true" />
+                  }
+                  <section class="automation-group">
+                    <div class="automation-group__label">
+                      {{ i18n.t('automation.group.instructions') }}
+                    </div>
+                    <p-accordion [multiple]="false" class="automation-help-accordion">
+                      <p-accordion-panel [value]="'applications-help'">
+                        <p-accordion-header>
+                          <strong>{{ i18n.t('automation.applicationsInstructionsTitle') }}</strong>
+                        </p-accordion-header>
+                        <p-accordion-content>
+                          <div class="automation-help">
+                            <ol class="automation-help__list">
+                              <li>{{ i18n.t('automation.applicationsInstruction1') }}</li>
+                              <li>{{ i18n.t('automation.applicationsInstruction2') }}</li>
+                              <li>{{ i18n.t('automation.applicationsInstruction3') }}</li>
+                              <li>{{ i18n.t('automation.applicationsInstruction4') }}</li>
+                            </ol>
+                            <h4 class="automation-help__section">
+                              {{ i18n.t('automation.requestDecisionTableTitle') }}
+                            </h4>
+                            <div class="automation-help__decision-table-wrapper">
+                              <table class="automation-help__decision-table">
+                                <thead>
+                                  <tr>
+                                    <th>{{ i18n.t('automation.requestDecisionCondition') }}</th>
+                                    <th>{{ i18n.t('automation.requestDecisionAction') }}</th>
+                                    <th>{{ i18n.t('automation.requestDecisionAudit') }}</th>
+                                    <th>
+                                      {{ i18n.t('automation.requestDecisionCustomerMessage') }}
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td>{{ i18n.t('automation.requestDecisionMissingData') }}</td>
+                                    <td>{{ i18n.t('automation.requestDecisionSkip') }}</td>
+                                    <td>{{ codeLabel('SKIPPED') }}</td>
+                                    <td>{{ i18n.t('automation.requestDecisionNoMessage') }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>{{ i18n.t('adminAutomation.distanceRuleHint') }}</td>
+                                    <td>{{ i18n.t('automation.requestDecisionDecline') }}</td>
+                                    <td>{{ i18n.t('automation.codeHelp.decline') }}</td>
+                                    <td>{{ i18n.t('automation.requestDecisionTooFarMessage') }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>{{ i18n.t('automation.requestDecisionOtherwise') }}</td>
+                                    <td>{{ i18n.t('automation.requestDecisionApprove') }}</td>
+                                    <td>{{ i18n.t('automation.codeHelp.approve') }}</td>
+                                    <td>{{ i18n.t('automation.requestDecisionNoMessage') }}</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                            <p class="automation-help__note">
+                              {{ i18n.t('automation.requestDecisionDryRunNote') }}
+                            </p>
+                          </div>
+                        </p-accordion-content>
+                      </p-accordion-panel>
+                    </p-accordion>
+                  </section>
+                  <section class="automation-group">
+                    <div class="automation-group__label">
+                      {{ i18n.t('automation.group.configuration') }}
+                    </div>
+                    <div class="automation-toolbar">
+                      <div class="automation-toolbar__add">
+                        <p-select
+                          [options]="availableRequestStoreOptions()"
+                          optionLabel="label"
+                          optionValue="value"
+                          [ngModel]="selectedRequestStoreId()"
+                          (ngModelChange)="selectedRequestStoreId.set(normalizeStoreId($event))"
+                          [placeholder]="i18n.t('adminAutomation.addStorePlaceholder')"
+                          appendTo="body"
+                        ></p-select
+                        ><button
+                          pButton
+                          type="button"
+                          icon="pi pi-plus"
+                          [label]="i18n.t('adminAutomation.addStore')"
+                          [disabled]="selectedRequestStoreId() == null"
+                          (click)="addRequestAutomation()"
+                        ></button>
+                      </div>
+                      <button
+                        pButton
+                        type="button"
+                        severity="secondary"
+                        [outlined]="true"
+                        icon="pi pi-play"
+                        [label]="i18n.t('adminAutomation.runDryRun')"
+                        (click)="runRequestAutomationDryRun()"
+                      ></button>
+                    </div>
+                    @if (requestRunResult(); as result) {
+                      <div class="automation-run-result">
+                        <strong>{{ i18n.t('adminAutomation.dryRunSummary') }}</strong
+                        >:
+                        @if (result.evaluated === 0 && result.declined > 0) {
+                          {{ result.declined }}
+                          {{ i18n.t('adminAutomation.storesHadNoOpenApplications') }}.
+                        } @else {
+                          {{ result.evaluated }} {{ i18n.t('automation.evaluated') }},
+                          {{ result.confirmed }} {{ i18n.t('automation.wouldAct') }},
+                          {{ result.declined }} {{ i18n.t('automation.skipped') }}.
+                        }
+                      </div>
+                    }
+                    @if (sessionService.hasPermission(UserPermission.CanSeeAllAutomationDecisions)) {
+                      <label class="automation-only-mine">
+                        <p-checkbox
+                          [binary]="true"
+                          [ngModel]="onlyMyAutomations()"
+                          (ngModelChange)="onlyMyAutomations.set($event)"
+                        ></p-checkbox>
+                        {{ i18n.t('adminAutomation.onlyMyAutomations') }}
+                      </label>
+                    }
+                    @if (requestAutomationStores().length === 0) {
+                      <p class="empty-state">{{ i18n.t('adminAutomation.noRequestStores') }}</p>
+                    }
+                    <p-accordion [multiple]="true" class="automation-store-accordion">
+                      @for (requestStore of requestAutomationStores(); track requestStore.storeId) {
+                        <!-- The request fields are not part of the generated store model, as in the former table row. -->
+                        @let store = $any(requestStore);
+                        <p-accordion-panel
+                          [value]="'request-store-' + store.storeId"
+                          [class.automation-store-panel--readonly]="!requestEditable(store)"
+                        >
+                          <p-accordion-header>
+                            <span class="automation-store-header">
+                              <strong class="automation-store-header__name">{{ store.storeName }}</strong>
+                              <span class="automation-store-header__tags">
+                                <ng-container
+                                  *ngTemplateOutlet="
+                                    storeState;
+                                    context: {
+                                      enabled: store.requestEnabled,
+                                      dryRun: store.requestDryRunEnabled
+                                    }
+                                  "
+                                ></ng-container>
+                                <span class="automation-store-header__summary">{{
+                                  requestDistanceLabel(store)
+                                }}</span>
+                                @if (!requestEditable(store)) {
+                                  <span class="automation-store-header__readonly">
+                                    <i class="pi pi-lock" aria-hidden="true"></i>
+                                    {{ i18n.t('adminAutomation.readOnlyOwner').replace('{owner}', requestOwnerLabel(store)) }}
+                                  </span>
+                                }
+                              </span>
+                            </span>
+                          </p-accordion-header>
+                          <p-accordion-content>
+                            <div class="automation-store">
+                              <div class="automation-store__general">
+                                <span class="automation-store__owner">
+                                  <i class="pi pi-user" aria-hidden="true"></i>
+                                  <span class="automation-store__owner-label">{{ i18n.t('adminAutomation.owner') }}</span>
+                                  <strong>{{ requestOwnerLabel(store) }}</strong>
+                                </span>
+                                <label class="automation-store__setting" [class.is-on]="store.requestEnabled" [class.is-disabled]="!requestEditable(store)">
+                                  <p-toggleswitch [(ngModel)]="store.requestEnabled" [disabled]="!requestEditable(store)"></p-toggleswitch>
+                                  <span class="automation-store__setting-text">
+                                    <strong>{{ i18n.t('adminAutomation.enabled') }}</strong>
+                                    <small>{{ i18n.t('adminAutomation.enabledHint') }}</small>
+                                  </span>
+                                </label>
+                                <label class="automation-store__setting" [class.is-on]="store.requestDryRunEnabled" [class.is-disabled]="!requestEditable(store)">
+                                  <p-toggleswitch [(ngModel)]="store.requestDryRunEnabled" [disabled]="!requestEditable(store)"></p-toggleswitch>
+                                  <span class="automation-store__setting-text">
+                                    <strong>{{ i18n.t('adminAutomation.storeDryRun') }}</strong>
+                                    <small>{{ i18n.t('adminAutomation.storeDryRunHint') }}</small>
+                                  </span>
+                                </label>
+                              </div>
+                              <p-accordion [multiple]="true" class="automation-rule-accordion">
+                                <p-accordion-panel [value]="'distance'">
+                                  <p-accordion-header>
+                                    <span class="automation-rule-header">
+                                      <span>{{ i18n.t('adminAutomation.distanceRule') }}</span>
+                                      <ng-container
+                                        *ngTemplateOutlet="
+                                          ruleState;
+                                          context: { $implicit: store.requestDistanceRuleEnabled }
+                                        "
+                                      ></ng-container>
+                                    </span>
+                                  </p-accordion-header>
+                                  <p-accordion-content>
+                                    <p class="automation-rule__hint">
+                                      {{ i18n.t('adminAutomation.distanceRuleHint') }}
+                                    </p>
+                                    <div class="automation-rule__fields">
+                                      <label class="automation-store__toggle">
+                                        <p-checkbox
+                                          [binary]="true"
+                                          [(ngModel)]="store.requestDistanceRuleEnabled"
+                                          [disabled]="!requestEditable(store)"
+                                        ></p-checkbox>
+                                        {{ i18n.t('adminAutomation.ruleActive') }}
+                                      </label>
+                                      <label class="automation-field">
+                                        <span class="automation-field__label">{{
+                                          i18n.t('adminAutomation.maximumDistanceKm')
+                                        }}</span>
+                                        <p-inputNumber
+                                          [(ngModel)]="store.requestMaximumDistanceKm"
+                                          [min]="0"
+                                          [minFractionDigits]="0"
+                                          [maxFractionDigits]="2"
+                                          [disabled]="!requestEditable(store) || !store.requestDistanceRuleEnabled"
+                                        ></p-inputNumber>
+                                      </label>
+                                    </div>
+                                  </p-accordion-content>
+                                </p-accordion-panel>
+                              </p-accordion>
+                              @if (requestEditable(store)) {
+                              <div class="automation-store__actions">
+                                <button
+                                  pButton
+                                  type="button"
+                                  size="small"
+                                  icon="pi pi-save"
+                                  [label]="i18n.t('common.save')"
+                                  [disabled]="!requestEditable(store)"
+                                  (click)="saveRequestAutomation(store)"
+                                ></button
+                                ><button
+                                  pButton
+                                  type="button"
+                                  size="small"
+                                  severity="danger"
+                                  [text]="true"
+                                  icon="pi pi-trash"
+                                  [label]="i18n.t('common.delete')"
+                                  [disabled]="!requestEditable(store)"
+                                  (click)="deleteRequestAutomation(store)"
+                                ></button>
+                              </div>
+                              }
+                            </div>
+                          </p-accordion-content>
+                        </p-accordion-panel>
+                      }
+                    </p-accordion>
+                  </section>
+                  <ng-container
+                    *ngTemplateOutlet="requestAudit; context: { entries: requestAutomationAudit() }"
+                  ></ng-container>
+                </div>
+              }
+            </p-tabpanel>
+          }
+          @if (sessionService.hasPermission(UserPermission.CanUseAutomations)) {
+            <p-tabpanel value="slots">
+              @if (activeAutomationTab() === 'slots') {
+                <div class="automation-tabpanel">
+                  @if (tabLoading()) {
+                    <app-loading-indicator [compact]="true" />
+                  }
+                  <section class="automation-group">
+                    <div class="automation-group__label">
+                      {{ i18n.t('automation.group.instructions') }}
+                    </div>
+                    <p-accordion [multiple]="false" class="automation-help-accordion">
+                      <p-accordion-panel [value]="'slots-help'">
+                        <p-accordion-header>
+                          <strong>{{ i18n.t('automation.slotsInstructionsTitle') }}</strong>
+                        </p-accordion-header>
+                        <p-accordion-content>
+                          <div class="automation-help">
+                            <ol class="automation-help__list">
+                              <li>{{ i18n.t('automation.slotsInstruction1') }}</li>
+                              <li>{{ i18n.t('automation.slotsInstruction2') }}</li>
+                              <li>{{ i18n.t('automation.slotsInstruction3') }}</li>
+                              <li>{{ i18n.t('automation.slotsInstruction4') }}</li>
+                            </ol>
+                            <h4 class="automation-help__section">
+                              {{ i18n.t('automation.slotsDecisionTableTitle') }}
+                            </h4>
+                            <div class="automation-help__decision-table-wrapper">
+                              <table class="automation-help__decision-table">
+                                <thead>
+                                  <tr>
+                                    <th>{{ i18n.t('automation.requestDecisionCondition') }}</th>
+                                    <th>{{ i18n.t('automation.requestDecisionAction') }}</th>
+                                    <th>{{ i18n.t('automation.requestDecisionAudit') }}</th>
+                                    <th>
+                                      {{ i18n.t('automation.requestDecisionCustomerMessage') }}
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td>{{ i18n.t('automation.slotsDecisionRecentPickup') }}</td>
+                                    <td>{{ i18n.t('automation.slotsDecisionAllow') }}</td>
+                                    <td>{{ i18n.t('automation.codeHelp.confirm') }}</td>
+                                    <td>
+                                      {{ i18n.t('automation.slotsDecisionRecentPickupMessage') }}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td>{{ i18n.t('automation.slotsDecisionGapRule') }}</td>
+                                    <td>{{ i18n.t('automation.slotsDecisionDecline') }}</td>
+                                    <td>{{ i18n.t('automation.codeHelp.decline') }}</td>
+                                    <td>{{ i18n.t('automation.slotsDecisionGapRuleMessage') }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>{{ i18n.t('automation.slotsDecisionExperienceRule') }}</td>
+                                    <td>{{ i18n.t('automation.slotsDecisionDecline') }}</td>
+                                    <td>{{ i18n.t('automation.codeHelp.decline') }}</td>
+                                    <td>
+                                      {{ i18n.t('automation.slotsDecisionExperienceRuleMessage') }}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td>
+                                      {{ i18n.t('automation.slotsDecisionCleaningRuleOverride') }}
+                                    </td>
+                                    <td>{{ i18n.t('automation.slotsDecisionAllow') }}</td>
+                                    <td>{{ i18n.t('automation.codeHelp.confirm') }}</td>
+                                    <td>
+                                      {{
+                                        i18n.t(
+                                          'automation.slotsDecisionCleaningRuleOverrideMessage'
+                                        )
+                                      }}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td>
+                                      {{ i18n.t('automation.slotsDecisionCleaningRuleDecline') }}
+                                    </td>
+                                    <td>{{ i18n.t('automation.slotsDecisionDecline') }}</td>
+                                    <td>{{ i18n.t('automation.codeHelp.decline') }}</td>
+                                    <td>
+                                      {{
+                                        i18n.t('automation.slotsDecisionCleaningRuleDeclineMessage')
+                                      }}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td>{{ i18n.t('automation.slotsDecisionOtherwise') }}</td>
+                                    <td>{{ i18n.t('automation.slotsDecisionAllow') }}</td>
+                                    <td>{{ i18n.t('automation.codeHelp.confirm') }}</td>
+                                    <td>
+                                      {{ i18n.t('automation.slotsDecisionOtherwiseMessage') }}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                            <p class="automation-help__note">
+                              {{ i18n.t('automation.slotsDecisionDryRunNote') }}
+                            </p>
+                          </div>
+                        </p-accordion-content>
+                      </p-accordion-panel>
+                    </p-accordion>
+                  </section>
+                  <section class="automation-group">
+                    <div class="automation-group__label">
+                      {{ i18n.t('automation.group.configuration') }}
+                    </div>
+                    @if (cleaningStoreConfigured() === false) {
+                      <p class="empty-state">
+                        {{ i18n.t('adminAutomation.cleaningStoreMissing') }}
+                      </p>
+                    }
+                    <div class="automation-toolbar">
+                      <div class="automation-toolbar__add">
+                        <p-select
+                          [options]="availableStoreOptions()"
+                          optionLabel="label"
+                          optionValue="value"
+                          [ngModel]="selectedStoreId()"
+                          (ngModelChange)="selectedStoreId.set(normalizeStoreId($event))"
+                          [placeholder]="i18n.t('adminAutomation.addStorePlaceholder')"
+                          appendTo="body"
+                        ></p-select
+                        ><button
+                          pButton
+                          type="button"
+                          icon="pi pi-plus"
+                          [label]="i18n.t('adminAutomation.addStore')"
+                          [disabled]="selectedStoreId() == null"
+                          (click)="addFoodsharingStore()"
+                        ></button>
+                      </div>
+                      <button
+                        pButton
+                        type="button"
+                        severity="secondary"
+                        [outlined]="true"
+                        icon="pi pi-play"
+                        [label]="i18n.t('adminAutomation.runDryRun')"
+                        (click)="runFoodsharingDryRun()"
+                      ></button>
+                    </div>
+                    @if (slotRunResult(); as result) {
+                      <div class="automation-run-result">
+                        <strong>{{ i18n.t('adminAutomation.dryRunSummary') }}</strong
+                        >: {{ result.evaluated }} {{ i18n.t('automation.evaluated') }},
+                        {{ result.confirmed }} {{ i18n.t('adminAutomation.dryRunWouldConfirm') }},
+                        {{ result.declined }} {{ i18n.t('adminAutomation.dryRunWouldDecline') }},
+                        {{ result.failed }} {{ i18n.t('adminAutomation.dryRunFailed') }}.
+                      </div>
+                    }
+                    @if (sessionService.hasPermission(UserPermission.CanSeeAllAutomationDecisions)) {
+                      <label class="automation-only-mine">
+                        <p-checkbox
+                          [binary]="true"
+                          [ngModel]="onlyMyAutomations()"
+                          (ngModelChange)="onlyMyAutomations.set($event)"
+                        ></p-checkbox>
+                        {{ i18n.t('adminAutomation.onlyMyAutomations') }}
+                      </label>
+                    }
+                    @if (slotApprovalStores().length === 0) {
+                      <p class="empty-state">{{ i18n.t('adminAutomation.noSlotStores') }}</p>
+                    }
+                    <p-accordion [multiple]="true" class="automation-store-accordion">
+                      @for (store of slotApprovalStores(); track store.storeId) {
+                        <p-accordion-panel
+                          [value]="'slot-store-' + store.storeId"
+                          [class.automation-store-panel--readonly]="!store.editable"
+                        >
+                          <p-accordion-header>
+                            <span class="automation-store-header">
+                              <strong class="automation-store-header__name">{{ store.storeName }}</strong>
+                              <span class="automation-store-header__tags">
+                                <ng-container
+                                  *ngTemplateOutlet="
+                                    storeState;
+                                    context: { enabled: store.enabled, dryRun: store.dryRunEnabled }
+                                  "
+                                ></ng-container>
+                                <span class="automation-store-header__summary">{{
+                                  activeSlotRuleLabel(store)
+                                }}</span>
+                                @if (!store.editable) {
+                                  <span class="automation-store-header__readonly">
+                                    <i class="pi pi-lock" aria-hidden="true"></i>
+                                    {{ i18n.t('adminAutomation.readOnlyOwner').replace('{owner}', storeOwnerLabel(store)) }}
+                                  </span>
+                                }
+                              </span>
+                            </span>
+                          </p-accordion-header>
+                          <p-accordion-content>
+                            <div class="automation-store">
+                              <div class="automation-store__general">
+                                <span class="automation-store__owner">
+                                  <i class="pi pi-user" aria-hidden="true"></i>
+                                  <span class="automation-store__owner-label">{{ i18n.t('adminAutomation.owner') }}</span>
+                                  <strong>{{ storeOwnerLabel(store) }}</strong>
+                                </span>
+                                <label class="automation-store__setting" [class.is-on]="store.enabled" [class.is-disabled]="!store.editable">
+                                  <p-toggleswitch [(ngModel)]="store.enabled" [disabled]="!store.editable"></p-toggleswitch>
+                                  <span class="automation-store__setting-text">
+                                    <strong>{{ i18n.t('adminAutomation.enabled') }}</strong>
+                                    <small>{{ i18n.t('adminAutomation.enabledHint') }}</small>
+                                  </span>
+                                </label>
+                                <label class="automation-store__setting" [class.is-on]="store.dryRunEnabled" [class.is-disabled]="!store.editable">
+                                  <p-toggleswitch [(ngModel)]="store.dryRunEnabled" [disabled]="!store.editable"></p-toggleswitch>
+                                  <span class="automation-store__setting-text">
+                                    <strong>{{ i18n.t('adminAutomation.storeDryRun') }}</strong>
+                                    <small>{{ i18n.t('adminAutomation.storeDryRunHint') }}</small>
+                                  </span>
+                                </label>
+                              </div>
+                              <p-accordion [multiple]="true" class="automation-rule-accordion">
+                                <p-accordion-panel [value]="'gap'">
+                                  <p-accordion-header>
+                                    <span class="automation-rule-header">
+                                      <span>{{ i18n.t('adminAutomation.gapRule') }}</span>
+                                      <ng-container
+                                        *ngTemplateOutlet="
+                                          ruleState;
+                                          context: { $implicit: store.gapRuleEnabled || !!store.gapStores?.length }
+                                        "
+                                      ></ng-container>
+                                    </span>
+                                  </p-accordion-header>
+                                  <p-accordion-content>
+                                    <p class="automation-rule__hint">
+                                      {{ i18n.t('adminAutomation.rulesGapSameStore') }}
+                                      {{ i18n.t('adminAutomation.rulesGapCalendarDays') }}
+                                    </p>
+                                    <div class="automation-rule__fields">
+                                      <label class="automation-store__toggle">
+                                        <p-checkbox
+                                          [binary]="true"
+                                          [(ngModel)]="store.gapRuleEnabled"
+                                          [disabled]="!store.editable"
+                                        ></p-checkbox>
+                                        {{ i18n.t('adminAutomation.ruleActive') }}
+                                      </label>
+                                      <label class="automation-field">
+                                        <span class="automation-field__label">{{
+                                          i18n.t('adminAutomation.minimumGapDays')
+                                        }}</span>
+                                        <p-inputNumber
+                                          [(ngModel)]="store.minimumGapDays"
+                                          [min]="0"
+                                          [disabled]="!store.editable || !store.gapRuleEnabled"
+                                        ></p-inputNumber>
+                                      </label>
+                                    </div>
+                                    <div class="automation-field gap-rule__stores">
+                                      <span class="automation-field__label">{{
+                                        i18n.t('adminAutomation.gapStores')
+                                      }}</span>
+                                      <p-multiSelect
+                                        [options]="gapStoreOptions(store)"
+                                        [showToggleAll]="false"
+                                        [maxSelectedLabels]="maximumGapStores"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        [ngModel]="gapStoreIds(store)"
+                                        (ngModelChange)="setGapStoreIds(store, $event)"
+                                        [selectionLimit]="maximumGapStores"
+                                        display="chip"
+                                        [filter]="true"
+                                        filterBy="label"
+                                        [placeholder]="i18n.t('adminAutomation.gapStoresPlaceholder')"
+                                        [disabled]="!store.editable"
+                                        appendTo="body"
+                                      >
+                                        <ng-template #item let-option>
+                                          <span class="linked-store__option">
+                                            <i class="pi pi-shop" aria-hidden="true"></i>
+                                            <span>{{ option.label }}</span>
+                                            @if (option.hasAutomation) {
+                                              <p-tag
+                                                severity="success"
+                                                [value]="i18n.t('adminAutomation.linkedStoreHasAutomation')"
+                                              ></p-tag>
+                                            }
+                                          </span>
+                                        </ng-template>
+                                      </p-multiSelect>
+                                    </div>
+                                    @if (store.gapStores?.length) {
+                                      <label class="automation-field gap-rule__stores gap-rule__days">
+                                        <span class="automation-field__label">{{
+                                          i18n.t('adminAutomation.gapStoresMinimumDays')
+                                        }}</span>
+                                        <p-inputNumber
+                                          [(ngModel)]="store.gapStoresMinimumDays"
+                                          [min]="1"
+                                          [disabled]="!store.editable"
+                                        ></p-inputNumber>
+                                      </label>
+                                      <p class="automation-rule__hint gap-rule__note">
+                                        {{ i18n.t('adminAutomation.gapStoresSharedHint').replace('{count}', gapGroupSize(store)) }}
+                                      </p>
+                                    }
+                                    @if (gapStoresWithoutAutomation(store); as missing) {
+                                      <p class="automation-rule__hint automation-rule__hint--warn gap-rule__note">
+                                        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+                                        {{ i18n.t('adminAutomation.gapStoresNoAutomation').replace('{stores}', missing) }}
+                                      </p>
+                                    }
+                                    @if (gapLinkConflict(store); as conflict) {
+                                      <p class="automation-rule__hint gap-rule__note gap-rule__conflict" role="alert">
+                                        <i class="pi pi-times-circle" aria-hidden="true"></i>
+                                        {{ i18n.t('adminAutomation.gapStoresLinkConflict').replace('{stores}', conflict) }}
+                                      </p>
+                                    }
+                                    @for (preview of gapPreviews(store); track preview.title) {
+                                      <div class="gap-preview">
+                                        <strong class="gap-preview__title">{{ preview.title }}</strong>
+                                        <div class="gap-preview__scroll">
+                                          <div class="gap-preview__days">
+                                            @for (day of preview.days; track day.offset) {
+                                              <div class="gap-preview__day" [class.gap-preview__day--pickup]="day.offset === 0" [class.gap-preview__day--blocked]="day.blocked">
+                                                <span>{{ day.label }}</span>
+                                                <strong>{{ day.state }}</strong>
+                                              </div>
+                                            }
+                                          </div>
+                                        </div>
+                                        <p class="automation-rule__hint gap-rule__note">{{ preview.note }}</p>
+                                        <details class="app-collapsible gap-preview__message">
+                                          <summary>{{ i18n.t('adminAutomation.gapPreviewMessageTitle') }}</summary>
+                                          <p>{{ preview.message }}</p>
+                                        </details>
+                                      </div>
+                                    }
+                                  </p-accordion-content>
+                                </p-accordion-panel>
+                                <p-accordion-panel [value]="'cleaning'">
+                                  <p-accordion-header>
+                                    <span class="automation-rule-header">
+                                      <span>{{ i18n.t('adminAutomation.cleaningRule') }}</span>
+                                      <ng-container
+                                        *ngTemplateOutlet="
+                                          ruleState;
+                                          context: { $implicit: store.cleaningRuleEnabled }
+                                        "
+                                      ></ng-container>
+                                    </span>
+                                  </p-accordion-header>
+                                  <p-accordion-content>
+                                    <p class="automation-rule__hint">
+                                      {{ i18n.t('adminAutomation.rulesCleaningHistory') }}
+                                      {{ i18n.t('adminAutomation.rulesCleaningFuture') }}
+                                    </p>
+                                    @if (cleaningStoreConfigured() === false) {
+                                      <p class="automation-rule__hint">
+                                        {{ i18n.t('adminAutomation.cleaningStoreMissing') }}
+                                      </p>
+                                    }
+                                    @if (userInfoSourceConfigured() === false) {
+                                      <p class="automation-rule__hint">
+                                        {{ i18n.t('adminAutomation.userInfoSourceMissing') }}
+                                      </p>
+                                    }
+                                    <label class="automation-store__toggle">
+                                      <p-checkbox
+                                        [binary]="true"
+                                        [(ngModel)]="store.cleaningRuleEnabled"
+                                        [disabled]="
+                                          !store.editable ||
+                                          cleaningStoreConfigured() === false ||
+                                          (userInfoSourceConfigured() === false && !store.cleaningRuleEnabled)
+                                        "
+                                      ></p-checkbox>
+                                      {{ i18n.t('adminAutomation.ruleActive') }}
+                                    </label>
+                                  </p-accordion-content>
+                                </p-accordion-panel>
+                                <p-accordion-panel [value]="'experience'">
+                                  <p-accordion-header>
+                                    <span class="automation-rule-header">
+                                      <span>{{ i18n.t('adminAutomation.experienceRule') }}</span>
+                                      <ng-container
+                                        *ngTemplateOutlet="
+                                          ruleState;
+                                          context: { $implicit: store.experienceRuleEnabled }
+                                        "
+                                      ></ng-container>
+                                    </span>
+                                  </p-accordion-header>
+                                  <p-accordion-content>
+                                    <p class="automation-rule__hint">
+                                      {{ i18n.t('adminAutomation.rulesExperienceOwnHistory') }}
+                                      {{ i18n.t('adminAutomation.rulesExperienceCoPickup') }}
+                                    </p>
+                                    <label class="automation-store__toggle">
+                                      <p-checkbox
+                                        [binary]="true"
+                                        [(ngModel)]="store.experienceRuleEnabled"
+                                        [disabled]="!store.editable"
+                                      ></p-checkbox>
+                                      {{ i18n.t('adminAutomation.ruleActive') }}
+                                    </label>
+                                  </p-accordion-content>
+                                </p-accordion-panel>
+                                <p-accordion-panel [value]="'holiday'">
+                                  <p-accordion-header>
+                                    <span class="automation-rule-header">
+                                      <span>{{ i18n.t('adminAutomation.publicHolidayRule') }}</span>
+                                      <ng-container
+                                        *ngTemplateOutlet="
+                                          ruleState;
+                                          context: { $implicit: store.publicHolidayRuleEnabled }
+                                        "
+                                      ></ng-container>
+                                    </span>
+                                  </p-accordion-header>
+                                  <p-accordion-content>
+                                    <p class="automation-rule__hint">
+                                      {{ i18n.t('adminAutomation.publicHolidayRuleHint') }}
+                                    </p>
+                                    <label class="automation-store__toggle">
+                                      <p-checkbox
+                                        [binary]="true"
+                                        [(ngModel)]="store.publicHolidayRuleEnabled"
+                                        [disabled]="!store.editable"
+                                      ></p-checkbox>
+                                      {{ i18n.t('adminAutomation.ruleActive') }}
+                                    </label>
+                                  </p-accordion-content>
+                                </p-accordion-panel>
+                                <p-accordion-panel [value]="'linked'">
+                                  <p-accordion-header>
+                                    <span class="automation-rule-header">
+                                      <span>{{ i18n.t('adminAutomation.linkedStoreRule') }}</span>
+                                      <ng-container
+                                        *ngTemplateOutlet="
+                                          ruleState;
+                                          context: { $implicit: linkedStoreCount(store) > 0 }
+                                        "
+                                      ></ng-container>
+                                    </span>
+                                  </p-accordion-header>
+                                  <p-accordion-content>
+                                    <p class="automation-rule__hint">
+                                      {{ i18n.t('adminAutomation.linkedStoreHint') }}
+                                    </p>
+                                    @for (incoming of store.incomingLinkedStores; track incoming.sourceStoreId) {
+                                      <div class="linked-store linked-store--incoming">
+                                        <i
+                                          [class]="
+                                            incoming.bidirectional
+                                              ? 'pi pi-arrow-right-arrow-left'
+                                              : 'pi pi-arrow-right'
+                                          "
+                                          aria-hidden="true"
+                                        ></i>
+                                        <span
+                                          >{{
+                                            incoming.bidirectional
+                                              ? i18n.t('adminAutomation.linkedStoreIncoming')
+                                              : i18n.t('adminAutomation.linkedStoreIncomingOneWay')
+                                          }}
+                                          <strong>{{ incoming.sourceStoreName }}</strong> ({{
+                                            linkedStoreWindowLabel(incoming.windowMode, incoming.windowDaysBefore, incoming.windowDaysAfter)
+                                          }}, {{ incoming.graceMinutes }}
+                                          {{ i18n.t('adminAutomation.linkedStoreMinutes') }})
+                                          @if (!incoming.bidirectional) {
+                                            <br />{{ i18n.t('adminAutomation.linkedStoreIncomingOneWayHint') }}
+                                          }
+                                        </span>
+                                      </div>
+                                    }
+                                    @for (link of store.linkedStores ?? []; track $index) {
+                                      <div class="linked-store">
+                                        <div class="linked-store__row">
+                                          <div class="automation-field linked-store__store">
+                                            <span class="automation-field__label">{{
+                                              i18n.t('adminAutomation.linkedStore')
+                                            }}</span>
+                                            <p-multiSelect
+                                              [options]="linkedStoreOptions(store, link)"
+                                              [showToggleAll]="false"
+                                              [maxSelectedLabels]="5"
+                                              optionLabel="label"
+                                              optionValue="value"
+                                              [ngModel]="linkedStoreIds(link)"
+                                              (ngModelChange)="setLinkedStoreIds(link, $event)"
+                                              [selectionLimit]="maximumStoresPerLink"
+                                              display="chip"
+                                              [filter]="true"
+                                              filterBy="label"
+                                              [placeholder]="i18n.t('adminAutomation.linkedStorePlaceholder')"
+                                              [disabled]="!store.editable"
+                                              appendTo="body"
+                                            >
+                                              <ng-template #item let-option>
+                                                <span class="linked-store__option">
+                                                  <i class="pi pi-shop" aria-hidden="true"></i>
+                                                  <span>{{ option.label }}</span>
+                                                  @if (option.hasAutomation) {
+                                                    <p-tag
+                                                      severity="secondary"
+                                                      [value]="i18n.t('adminAutomation.linkedStoreHasAutomation')"
+                                                    ></p-tag>
+                                                  }
+                                                </span>
+                                              </ng-template>
+                                            </p-multiSelect>
+                                          </div>
+                                          <label class="automation-field">
+                                            <span class="automation-field__label">{{
+                                              i18n.t('adminAutomation.linkedStoreDirection')
+                                            }}</span>
+                                            <p-select
+                                              [options]="linkedStoreDirectionOptions()"
+                                              optionLabel="label"
+                                              optionValue="value"
+                                              [(ngModel)]="link.bidirectional"
+                                              [disabled]="!store.editable"
+                                              appendTo="body"
+                                            ></p-select>
+                                          </label>
+                                          <label class="automation-field">
+                                            <span class="automation-field__label">{{
+                                              i18n.t('adminAutomation.linkedStoreWindow')
+                                            }}</span>
+                                            <p-select
+                                              [options]="linkedStoreWindowOptions()"
+                                              optionLabel="label"
+                                              optionValue="value"
+                                              [(ngModel)]="link.windowMode"
+                                              [disabled]="!store.editable"
+                                              appendTo="body"
+                                            ></p-select>
+                                          </label>
+                                          @if (link.windowMode === 'LAST_DAYS') {
+                                            <label class="automation-field">
+                                              <span class="automation-field__label">{{
+                                                i18n.t('adminAutomation.linkedStoreDaysBefore')
+                                              }}</span>
+                                              <p-inputNumber
+                                                [(ngModel)]="link.windowDaysBefore"
+                                                [min]="0"
+                                                [max]="120"
+                                                [disabled]="!store.editable"
+                                              ></p-inputNumber>
+                                            </label>
+                                            <label class="automation-field">
+                                              <span class="automation-field__label">{{
+                                                i18n.t('adminAutomation.linkedStoreDaysAfter')
+                                              }}</span>
+                                              <p-inputNumber
+                                                [(ngModel)]="link.windowDaysAfter"
+                                                [min]="0"
+                                                [max]="120"
+                                                [disabled]="!store.editable"
+                                              ></p-inputNumber>
+                                            </label>
+                                          }
+                                          <label class="automation-field">
+                                            <span class="automation-field__label">{{
+                                              i18n.t('adminAutomation.linkedStoreGraceMinutes')
+                                            }}</span>
+                                            <p-inputNumber
+                                              [(ngModel)]="link.graceMinutes"
+                                              [min]="20"
+                                              [disabled]="!store.editable"
+                                            ></p-inputNumber>
+                                          </label>
+                                          <button
+                                            pButton
+                                            type="button"
+                                            size="small"
+                                            severity="danger"
+                                            [outlined]="true"
+                                            icon="pi pi-trash"
+                                            [label]="i18n.t('adminAutomation.linkedStoreRemove')"
+                                            [disabled]="!store.editable"
+                                            (click)="removeLinkedStore(store, $index)"
+                                          ></button>
+                                        </div>
+                                        @if (storesWithoutAutomation(link); as missing) {
+                                          <p class="automation-rule__hint automation-rule__hint--warn">
+                                            <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+                                            {{ i18n.t('adminAutomation.linkedStoreNoAutomation').replace('{stores}', missing) }}
+                                            @if (link.bidirectional) {
+                                              {{ i18n.t('adminAutomation.linkedStoreBidirectionalNeedsAutomation') }}
+                                            }
+                                          </p>
+                                        }
+                                        <label class="automation-field">
+                                          <span class="automation-field__label">{{
+                                            i18n.t('adminAutomation.linkedStoreMessage')
+                                          }}</span>
+                                          <textarea
+                                            pInputText
+                                            rows="8"
+                                            class="linked-store__message"
+                                            [(ngModel)]="link.message"
+                                            [disabled]="!store.editable"
+                                          ></textarea>
+                                          <span class="automation-rule__hint">{{
+                                            i18n.t('adminAutomation.linkedStoreMessageVariables')
+                                          }}</span>
+                                        </label>
+                                        <button
+                                          pButton
+                                          type="button"
+                                          size="small"
+                                          [text]="true"
+                                          icon="pi pi-refresh"
+                                          [label]="i18n.t('adminAutomation.linkedStoreResetMessage')"
+                                          [disabled]="!store.editable"
+                                          (click)="link.message = linkedStoreDefaultMessage()"
+                                        ></button>
+                                        <div class="linked-store__exemptions">
+                                          <span class="automation-field__label">{{
+                                            i18n.t('adminAutomation.linkedStoreExemptions')
+                                          }}</span>
+                                          <span class="automation-rule__hint">{{
+                                            i18n.t('adminAutomation.linkedStoreExemptionsHint')
+                                          }}</span>
+                                          @if (link.exemptions?.length) {
+                                            <ul class="linked-store__exemption-list">
+                                              @for (exemption of link.exemptions ?? []; track exemption.foodsharingId) {
+                                                <li class="linked-store__exemption">
+                                                  <span class="linked-store__exemption-id">{{ exemption.foodsharingId }}</span>
+                                                  <span class="linked-store__exemption-reason">{{ exemption.reason }}</span>
+                                                  @if (store.editable) {
+                                                    <button
+                                                      pButton
+                                                      type="button"
+                                                      size="small"
+                                                      severity="danger"
+                                                      [text]="true"
+                                                      icon="pi pi-times"
+                                                      [attr.aria-label]="i18n.t('common.delete')"
+                                                      (click)="removeLinkedStoreExemption(link, exemption.foodsharingId)"
+                                                    ></button>
+                                                  }
+                                                </li>
+                                              }
+                                            </ul>
+                                          } @else {
+                                            <span class="automation-rule__hint">{{
+                                              i18n.t('adminAutomation.linkedStoreExemptionsEmpty')
+                                            }}</span>
+                                          }
+                                          @if (store.editable) {
+                                            <div class="linked-store__row">
+                                              <label class="automation-field linked-store__exemption-id-field">
+                                                <span class="automation-field__label">{{
+                                                  i18n.t('common.foodsharingId')
+                                                }}</span>
+                                                <input
+                                                  #exemptionId
+                                                  pInputText
+                                                  inputmode="numeric"
+                                                  [placeholder]="i18n.t('common.foodsharingId')"
+                                                />
+                                              </label>
+                                              <label class="automation-field linked-store__exemption-reason-field">
+                                                <span class="automation-field__label">{{
+                                                  i18n.t('adminAutomation.exemptionReason')
+                                                }}</span>
+                                                <input
+                                                  #exemptionReason
+                                                  pInputText
+                                                  maxlength="1000"
+                                                  [placeholder]="i18n.t('adminAutomation.linkedStoreExemptionReasonPlaceholder')"
+                                                  (keydown.enter)="addLinkedStoreExemption(link, exemptionId, exemptionReason)"
+                                                />
+                                              </label>
+                                              <button
+                                                pButton
+                                                type="button"
+                                                size="small"
+                                                [outlined]="true"
+                                                icon="pi pi-plus"
+                                                [label]="i18n.t('adminAutomation.linkedStoreExemptionAdd')"
+                                                (click)="addLinkedStoreExemption(link, exemptionId, exemptionReason)"
+                                              ></button>
+                                            </div>
+                                          }
+                                        </div>
+                                      </div>
+                                    }
+                                    @if (store.editable) {
+                                      <button
+                                        pButton
+                                        type="button"
+                                        size="small"
+                                        icon="pi pi-plus"
+                                        [label]="i18n.t('adminAutomation.linkedStoreAdd')"
+                                        [disabled]="linkedStoreCount(store) >= maximumLinkedStores"
+                                        (click)="addLinkedStore(store)"
+                                      ></button>
+                                      @if (linkedStoreCount(store) >= maximumLinkedStores) {
+                                        <p class="automation-rule__hint">
+                                          {{ i18n.t('adminAutomation.linkedStoreLimit') }}
+                                        </p>
+                                      }
+                                    }
+                                  </p-accordion-content>
+                                </p-accordion-panel>
+                              </p-accordion>
+                              @if (store.editable) {
+                              <div class="automation-store__actions">
+                                <button
+                                  pButton
+                                  type="button"
+                                  size="small"
+                                  icon="pi pi-save"
+                                  [label]="i18n.t('common.save')"
+                                  [disabled]="!store.editable || !!gapLinkConflict(store)"
+                                  (click)="saveFoodsharingStore(store)"
+                                ></button
+                                ><button
+                                  pButton
+                                  type="button"
+                                  size="small"
+                                  severity="danger"
+                                  [text]="true"
+                                  icon="pi pi-trash"
+                                  [label]="i18n.t('common.delete')"
+                                  [disabled]="!store.editable"
+                                  (click)="deleteFoodsharingStore(store)"
+                                ></button>
+                              </div>
+                              }
+                            </div>
+                          </p-accordion-content>
+                        </p-accordion-panel>
+                      }
+                    </p-accordion>
+                    <p-accordion
+                      [multiple]="false"
+                      class="automation-cleaning-exceptions-accordion"
+                    >
+                      <p-accordion-panel [value]="'cleaning-exceptions'">
+                        <p-accordion-header>
+                          <strong>{{
+                            i18n.t('adminAutomation.cleaningRuleExceptionsAndDates')
+                          }}</strong>
+                        </p-accordion-header>
+                        <p-accordion-content>
+                          <section class="automation-exemption-card">
+                            <div>
+                              <h3 class="automation-section-title">
+                                {{ i18n.t('adminAutomation.excludedDates') }}
+                              </h3>
+                              <p class="automation-exemption-card__note">
+                                {{ i18n.t('adminAutomation.excludedDatesHint') }}
+                              </p>
+                            </div>
+                            <div class="automation-exemption-form">
+                              <div class="automation-exemption-form__block">
+                                <p-select
+                                  [options]="editableSlotApprovalStores()"
+                                  optionLabel="storeName"
+                                  optionValue="storeId"
+                                  [ngModel]="excludedDateStoreId()"
+                                  (ngModelChange)="
+                                    excludedDateStoreId.set(normalizeStoreId($event))
+                                  "
+                                  [placeholder]="i18n.t('adminAutomation.addStorePlaceholder')"
+                                  appendTo="body"
+                                ></p-select>
+                              </div>
+                              <div class="automation-exemption-form__block">
+                                <p-datepicker
+                                  [ngModel]="excludedDate()"
+                                  (ngModelChange)="excludedDate.set($event)"
+                                  dateFormat="dd.mm.yy"
+                                  [minDate]="minimumExcludedDate"
+                                  [showIcon]="true"
+                                ></p-datepicker>
+                              </div>
+                              <div class="automation-exemption-form__actions">
+                                <button
+                                  pButton
+                                  type="button"
+                                  [label]="i18n.t('common.save')"
+                                  [disabled]="excludedDateStoreId() == null || !excludedDate()"
+                                  (click)="saveExcludedDate()"
+                                ></button>
+                              </div>
+                            </div>
+                          </section>
+                          <p-table class="automation-responsive-table" [value]="excludedDates()">
+                            <ng-template pTemplate="header"
+                              ><tr>
+                                <th>{{ i18n.t('adminAutomation.store') }}</th>
+                                <th>{{ i18n.t('common.date') }}</th>
+                                <th>{{ i18n.t('adminAutomation.event') }}</th>
+                                <th>{{ i18n.t('common.actions') }}</th>
+                              </tr></ng-template
+                            >
+                            <ng-template pTemplate="body" let-excludedDate>
+                              <tr>
+                                <td [attr.data-label]="i18n.t('adminAutomation.store')">
+                                  {{ excludedDate.storeName }}
+                                </td>
+                                <td [attr.data-label]="i18n.t('common.date')">
+                                  {{
+                                    excludedDate.excludedDate | date: 'dd.MM.yyyy' : 'Europe/Zurich'
+                                  }}
+                                </td>
+                                <td [attr.data-label]="i18n.t('adminAutomation.event')">
+                                  {{
+                                    excludedDate.eventName || i18n.t('adminAutomation.manualEvent')
+                                  }}
+                                </td>
+                                <td
+                                  class="automation-responsive-table__actions"
+                                  [attr.data-label]="i18n.t('common.actions')"
+                                >
+                                  @if (excludedDate.manual && isEditableStore(excludedDate.storeId)) {
+                                    <button
+                                      pButton
+                                      type="button"
+                                      size="small"
+                                      severity="danger"
+                                      [label]="i18n.t('common.delete')"
+                                      (click)="deleteExcludedDate(excludedDate)"
+                                    ></button>
+                                  }
+                                </td>
+                              </tr>
+                            </ng-template>
+                          </p-table>
+                          <section class="automation-exemption-card">
+                            <div>
+                              <h3 class="automation-section-title">
+                                {{ i18n.t('adminAutomation.cleaningRuleExemptions') }}
+                              </h3>
+                              <p class="automation-exemption-card__note">
+                                {{ i18n.t('adminAutomation.rulesCleaningExemption') }}
+                              </p>
+                            </div>
+                            <div class="automation-exemption-form">
+                              <div class="automation-exemption-form__block">
+                                <label class="automation-field">
+                                  <span class="automation-field__label">{{
+                                    i18n.t('common.foodsharingId')
+                                  }}</span>
+                                  <input
+                                    pInputText
+                                    [ngModel]="cleaningExemptionFoodsharingId()"
+                                    (ngModelChange)="cleaningExemptionFoodsharingId.set($event)"
+                                    [placeholder]="i18n.t('common.foodsharingId')"
+                                  />
+                                </label>
+                              </div>
+                              <div class="automation-exemption-form__block">
+                                <label class="automation-field">
+                                  <span class="automation-field__label">{{
+                                    i18n.t('adminAutomation.exemptionReason')
+                                  }}</span>
+                                  <input
+                                    pInputText
+                                    [ngModel]="cleaningExemptionReason()"
+                                    (ngModelChange)="cleaningExemptionReason.set($event)"
+                                    [placeholder]="
+                                      i18n.t('adminAutomation.exemptionReasonPlaceholder')
+                                    "
+                                  />
+                                </label>
+                              </div>
+                              <div class="automation-exemption-form__actions">
+                                <button
+                                  pButton
+                                  type="button"
+                                  [label]="i18n.t('common.save')"
+                                  (click)="saveCleaningRuleExemption()"
+                                ></button>
+                              </div>
+                            </div>
+                          </section>
+                          <p-table
+                            class="automation-responsive-table"
+                            [value]="cleaningRuleExemptions()"
+                          >
+                            <ng-template pTemplate="header"
+                              ><tr>
+                                <th>{{ i18n.t('common.foodsharingId') }}</th>
+                                <th>{{ i18n.t('adminAutomation.exemptionReason') }}</th>
+                                <th>{{ i18n.t('common.actions') }}</th>
+                              </tr></ng-template
+                            >
+                            <ng-template pTemplate="body" let-exemption>
+                              <tr>
+                                <td [attr.data-label]="i18n.t('common.foodsharingId')">
+                                  {{ exemption.foodsharingId }}
+                                </td>
+                                <td [attr.data-label]="i18n.t('adminAutomation.exemptionReason')">
+                                  {{ exemption.reason }}
+                                </td>
+                                <td
+                                  class="automation-responsive-table__actions"
+                                  [attr.data-label]="i18n.t('common.actions')"
+                                >
+                                  <button
+                                    pButton
+                                    type="button"
+                                    size="small"
+                                    severity="danger"
+                                    [label]="i18n.t('common.delete')"
+                                    (click)="deleteCleaningRuleExemption(exemption)"
+                                  ></button>
+                                </td>
+                              </tr>
+                            </ng-template>
+                          </p-table>
+                        </p-accordion-content>
+                      </p-accordion-panel>
+                    </p-accordion>
+                  </section>
+                  <div class="automation-audit-host">
+                    <header class="automation-audit-host__header">
+                      <span class="automation-audit-console__eyebrow">{{
+                        i18n.t('automation.group.audit')
+                      }}</span
+                      ><button
+                        pButton
+                        type="button"
+                        text="true"
+                        [icon]="auditConsoleExpanded() ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+                        [label]="
+                          auditConsoleExpanded()
+                            ? i18n.t('automation.audit.collapse')
+                            : i18n.t('automation.audit.expand')
+                        "
+                        (click)="auditConsoleExpanded.set(!auditConsoleExpanded())"
+                      ></button>
+                    </header>
+                    @if (auditConsoleExpanded()) {
+                      <ng-container *ngTemplateOutlet="slotAudit"></ng-container>
+                    }
+                  </div>
+                </div>
+              }
+            </p-tabpanel>
+          }
+          @if (sessionService.hasPermission(UserPermission.CanUseAutomations)) {
+            <p-tabpanel value="advertisements">
+              @if (activeAutomationTab() === 'advertisements') {
+                <div class="automation-tabpanel">
+                  @if (tabLoading()) {
+                    <app-loading-indicator [compact]="true" />
+                  }
+                  <section class="automation-group">
+                    <div class="automation-group__label">
+                      {{ i18n.t('automation.group.instructions') }}
+                    </div>
+                    <p-accordion [multiple]="false" class="automation-help-accordion">
+                      <p-accordion-panel [value]="'advertisements-help'">
+                        <p-accordion-header>
+                          <strong>{{ i18n.t('automation.advertisementsInstructionsTitle') }}</strong>
+                        </p-accordion-header>
+                        <p-accordion-content>
+                          <div class="automation-help">
+                            <ol class="automation-help__list">
+                              <li>{{ i18n.t('automation.advertisementsInstruction1') }}</li>
+                              <li>{{ i18n.t('automation.advertisementsInstruction2') }}</li>
+                              <li>{{ i18n.t('automation.advertisementsInstruction3') }}</li>
+                              <li>{{ i18n.t('automation.advertisementsInstruction4') }}</li>
+                              <li>{{ i18n.t('automation.advertisementsInstruction5') }}</li>
+                              <li>{{ i18n.t('automation.telegramSetupInstruction4') }}</li>
+                            </ol>
+                            <p>{{ i18n.t('automation.advertisementVariables') }}</p>
+                          </div>
+                        </p-accordion-content>
+                      </p-accordion-panel>
+                    </p-accordion>
+                  </section>
+                  <section class="automation-group">
+                    <div class="automation-group__label">
+                      {{ i18n.t('automation.group.configuration') }}
+                    </div>
+                    @if (!telegramBotTokenConfigured()) {
+                      <div class="automation-mode-banner automation-mode-banner--dry-run telegram-missing">
+                        <span>{{ i18n.t('automation.telegramMissing') }}</span>
+                        <button pButton type="button" size="small" severity="secondary" icon="pi pi-cog" [label]="i18n.t('automation.openGeneralSettings')" (click)="openGeneralSettings()"></button>
+                      </div>
+                    }
+                    <div class="automation-toolbar">
+                      <div class="automation-toolbar__add">
+                        <p-select
+                          [options]="availableAdvertisementStoreOptions()"
+                          optionLabel="label"
+                          optionValue="value"
+                          [ngModel]="selectedAdvertisementStoreId()"
+                          (ngModelChange)="selectedAdvertisementStoreId.set(normalizeStoreId($event))"
+                          [placeholder]="i18n.t('adminAutomation.addStorePlaceholder')"
+                          appendTo="body"
+                        ></p-select>
+                        <button
+                          pButton
+                          type="button"
+                          icon="pi pi-plus"
+                          [label]="i18n.t('adminAutomation.addStore')"
+                          [disabled]="selectedAdvertisementStoreId() == null"
+                          (click)="addAdvertisementAutomation()"
+                        ></button>
+                      </div>
+                      <div class="automation-toolbar__actions">
+                        <button
+                          pButton
+                          type="button"
+                          severity="secondary"
+                          [outlined]="true"
+                          icon="pi pi-play"
+                          [label]="i18n.t('adminAutomation.runDryRun')"
+                          (click)="runAdvertisementAutomationDryRun()"
+                        ></button>
+                        @if (telegramBotTokenConfigured()) {
+                          <button
+                            pButton
+                            type="button"
+                            severity="secondary"
+                            [label]="i18n.t('automation.refreshTelegramChats')"
+                            (click)="refreshTelegramChats()"
+                          ></button>
+                        }
+                      </div>
+                    </div>
+                    @if (advertisementRunResult(); as result) {
+                      <div class="automation-run-result">
+                        <strong>{{ i18n.t('adminAutomation.dryRunSummary') }}</strong
+                        >: {{ result.evaluated }} {{ i18n.t('automation.evaluated') }},
+                        {{ result.confirmed }} {{ i18n.t('automation.wouldAct') }},
+                        {{ result.declined }} {{ i18n.t('automation.skipped') }}.
+                      </div>
+                    }
+                    @if (sessionService.hasPermission(UserPermission.CanSeeAllAutomationDecisions)) {
+                      <label class="automation-only-mine">
+                        <p-checkbox
+                          [binary]="true"
+                          [ngModel]="onlyMyAutomations()"
+                          (ngModelChange)="onlyMyAutomations.set($event)"
+                        ></p-checkbox>
+                        {{ i18n.t('adminAutomation.onlyMyAutomations') }}
+                      </label>
+                    }
+                    @if (advertisementAutomationStores().length === 0) {
+                      <p class="empty-state">{{ i18n.t('automation.noAdvertisementStores') }}</p>
+                    }
+                    <p-accordion [multiple]="true" class="automation-store-accordion">
+                      @for (store of advertisementAutomationStores(); track store.storeId) {
+                        <p-accordion-panel
+                          [value]="'advertisement-store-' + store.storeId"
+                          [class.automation-store-panel--readonly]="!advertisementEditable(store)"
+                        >
+                          <p-accordion-header>
+                            <span class="automation-store-header">
+                              <strong class="automation-store-header__name">{{ store.storeName }}</strong>
+                              <span class="automation-store-header__tags">
+                                <ng-container
+                                  *ngTemplateOutlet="
+                                    storeState;
+                                    context: {
+                                      enabled: advertisementStoreEnabled(store),
+                                      dryRun: advertisementStoreDryRun(store)
+                                    }
+                                  "
+                                ></ng-container>
+                                <span class="automation-store-header__summary">{{
+                                  advertisementSummaryLabel(store)
+                                }}</span>
+                                @if (!advertisementEditable(store)) {
+                                  <span class="automation-store-header__readonly">
+                                    <i class="pi pi-lock" aria-hidden="true"></i>
+                                    {{ i18n.t('adminAutomation.readOnlyOwner').replace('{owner}', advertisementOwnerLabel(store)) }}
+                                  </span>
+                                }
+                              </span>
+                            </span>
+                          </p-accordion-header>
+                          <p-accordion-content>
+                            <div class="automation-store">
+                              <div class="automation-store__general">
+                                <span class="automation-store__owner">
+                                  <i class="pi pi-user" aria-hidden="true"></i>
+                                  <span class="automation-store__owner-label">{{ i18n.t('adminAutomation.owner') }}</span>
+                                  <strong>{{ advertisementOwnerLabel(store) }}</strong>
+                                </span>
+                              </div>
+                              @if (advertisementNumbers(store).length === 0) {
+                                <p class="empty-state">{{ i18n.t('automation.noAdvertisements') }}</p>
+                              }
+                              <p-accordion [multiple]="true" class="automation-rule-accordion">
+                                @for (advertNumber of advertisementNumbers(store); track advertNumber) {
+                                <p-accordion-panel [value]="'alert-' + advertNumber">
+                                  <p-accordion-header>
+                                    <span class="automation-rule-header">
+                                      <span
+                                        >{{ i18n.t('automation.alert') }} {{ advertNumber }}
+                                        <span class="automation-rule-header__detail">{{
+                                          advertisementHoursLabel(store, advertNumber)
+                                        }}</span></span
+                                      >
+                                      <span class="automation-store-header__tags">
+                                        @if (
+                                          $any(store)['advertEnabled' + advertNumber] &&
+                                          $any(store)['advertDryRunEnabled' + advertNumber]
+                                        ) {
+                                          <p-tag
+                                            severity="warn"
+                                            [value]="i18n.t('adminAutomation.storeDryRun')"
+                                          ></p-tag>
+                                        }
+                                        <ng-container
+                                          *ngTemplateOutlet="
+                                            ruleState;
+                                            context: {
+                                              $implicit: $any(store)['advertEnabled' + advertNumber]
+                                            }
+                                          "
+                                        ></ng-container>
+                                      </span>
+                                    </span>
+                                  </p-accordion-header>
+                                  <p-accordion-content>
+                                    <div class="advert-config">
+                                      <div class="automation-store__general">
+                                        <label class="automation-store__toggle">
+                                          <p-checkbox
+                                            [binary]="true"
+                                            [disabled]="!advertisementEditable(store)"
+                                            [(ngModel)]="$any(store)['advertEnabled' + advertNumber]"
+                                          ></p-checkbox>
+                                          {{ i18n.t('adminAutomation.enabled') }}
+                                        </label>
+                                        <label class="automation-store__toggle">
+                                          <p-checkbox
+                                            [binary]="true"
+                                            [disabled]="!advertisementEditable(store)"
+                                            [(ngModel)]="$any(store)['advertDryRunEnabled' + advertNumber]"
+                                          ></p-checkbox>
+                                          {{ i18n.t('adminAutomation.storeDryRun') }}
+                                        </label>
+                                      </div>
+                                      <div class="advert-config__blocks">
+                                        <div class="advert-config__block">
+                                          <span class="advert-config__field-label">{{
+                                            i18n.t('automation.hoursBefore')
+                                          }}</span>
+                                          <p-inputNumber
+                                            [(ngModel)]="$any(store)['advertHoursBefore' + advertNumber]"
+                                            [min]="1"
+                                            [max]="168"
+                                            [disabled]="!advertisementEditable(store)"
+                                          ></p-inputNumber>
+                                        </div>
+
+                                        <div class="advert-config__block">
+                                          <span class="advert-config__field-label">{{
+                                            i18n.t('automation.sendMessageTo')
+                                          }}</span>
+                                          <ul class="advert-config__tick-list">
+                                            <li>
+                                              <label class="advert-config__tick">
+                                                <p-checkbox
+                                                  [binary]="true"
+                                                  [disabled]="!advertisementEditable(store)"
+                                                  [(ngModel)]="
+                                                    $any(store)['advertSendToStoreChat' + advertNumber]
+                                                  "
+                                                ></p-checkbox>
+                                                <span>{{ i18n.t('automation.storeChat') }}</span>
+                                              </label>
+                                            </li>
+                                            <li>
+                                              @if (telegramBotTokenConfigured()) {
+                                                <label class="advert-config__tick">
+                                                  <p-checkbox
+                                                    [binary]="true"
+                                                    [disabled]="!advertisementEditable(store)"
+                                                    [(ngModel)]="
+                                                      $any(store)['advertSendToTelegram' + advertNumber]
+                                                    "
+                                                  ></p-checkbox>
+                                                  <span>{{ i18n.t('automation.telegram') }}</span>
+                                                </label>
+                                              } @else {
+                                                <label
+                                                  class="advert-config__tick advert-config__tick--disabled"
+                                                >
+                                                  <p-checkbox
+                                                    [binary]="true"
+                                                    [disabled]="true"
+                                                    [ngModel]="false"
+                                                  ></p-checkbox>
+                                                  <span>{{ i18n.t('automation.telegram') }}</span>
+                                                </label>
+                                              }
+                                            </li>
+                                          </ul>
+                                          @if (telegramBotTokenConfigured()) {
+                                            <p-select
+                                              [options]="telegramChatOptions()"
+                                              [(ngModel)]="$any(store)['advertTelegramChatId' + advertNumber]"
+                                              [disabled]="!advertisementEditable(store)"
+                                              [editable]="true"
+                                              [placeholder]="i18n.t('automation.telegramChat')"
+                                              appendTo="body"
+                                            ></p-select>
+                                          } @else {
+                                            <p-select
+                                              [options]="telegramChatOptions()"
+                                              [disabled]="true"
+                                              [placeholder]="i18n.t('automation.telegramChatDisabled')"
+                                              appendTo="body"
+                                            ></p-select>
+                                          }
+                                        </div>
+                                      </div>
+
+                                      <p-tabs
+                                        class="advert-message-tabs"
+                                        [value]="advertisementMessageTab(store, advertNumber)"
+                                        (valueChange)="setAdvertisementMessageTab(store, advertNumber, $event)"
+                                      >
+                                        <p-tablist>
+                                          <p-tab value="store">{{
+                                            i18n.t('automation.storeChatMessages')
+                                          }}</p-tab>
+                                          @if (telegramBotTokenConfigured()) {
+                                            <p-tab value="telegram">{{
+                                              i18n.t('automation.telegramMessages')
+                                            }}</p-tab>
+                                          }
+                                          <p-tab value="preview">{{ i18n.t('automation.preview') }}</p-tab>
+                                        </p-tablist>
+                                        <p-tabpanels>
+                                          <p-tabpanel value="store">
+                                            <div class="advert-messages">
+                                              <div class="advert-messages__header">
+                                                <strong>{{ i18n.t('automation.storeChatMessages') }}</strong>
+                                                <button
+                                                  pButton
+                                                  type="button"
+                                                  size="small"
+                                                  icon="pi pi-plus"
+                                                  [label]="i18n.t('automation.addStoreChatMessage')"
+                                                  (click)="
+                                                    addAdvertisementMessage(store, advertNumber, 'store')
+                                                  "
+                                                  [disabled]="!advertisementEditable(store)"
+                                                ></button>
+                                              </div>
+                                              <div class="advert-messages__note">
+                                                {{ i18n.t('automation.messagesRandomizedNote') }}
+                                              </div>
+                                              <div class="advert-message-list">
+                                                @for (
+                                                  message of advertisementMessages(
+                                                    store,
+                                                    advertNumber,
+                                                    'store'
+                                                  );
+                                                  track $index
+                                                ) {
+                                                  <div class="advert-message-row">
+                                                    <textarea
+                                                      pInputText
+                                                      rows="4"
+                                                      [readonly]="!advertisementEditable(store)"
+                                                      [ngModel]="message"
+                                                      (ngModelChange)="
+                                                        updateAdvertisementMessage(
+                                                          store,
+                                                          advertNumber,
+                                                          'store',
+                                                          $index,
+                                                          $event
+                                                        )
+                                                      "
+                                                      [placeholder]="
+                                                        i18n.t('automation.messageTemplatePlaceholder')
+                                                      "
+                                                    ></textarea>
+                                                    <button
+                                                      pButton
+                                                      type="button"
+                                                      size="small"
+                                                      severity="secondary"
+                                                      [label]="i18n.t('common.delete')"
+                                                      (click)="
+                                                        removeAdvertisementMessage(
+                                                          store,
+                                                          advertNumber,
+                                                          'store',
+                                                          $index
+                                                        )
+                                                      "
+                                                      [disabled]="
+                                                        !advertisementEditable(store) ||
+                                                        advertisementMessages(store, advertNumber, 'store')
+                                                          .length === 1
+                                                      "
+                                                    ></button>
+                                                  </div>
+                                                }
+                                              </div>
+                                            </div>
+                                          </p-tabpanel>
+                                          @if (telegramBotTokenConfigured()) {
+                                            <p-tabpanel value="telegram">
+                                              <div class="advert-messages">
+                                                <div class="advert-messages__header">
+                                                  <strong>{{ i18n.t('automation.telegramMessages') }}</strong>
+                                                  <button
+                                                    pButton
+                                                    type="button"
+                                                    size="small"
+                                                    icon="pi pi-plus"
+                                                    [label]="i18n.t('automation.addTelegramMessage')"
+                                                    (click)="
+                                                      addAdvertisementMessage(store, advertNumber, 'telegram')
+                                                    "
+                                                    [disabled]="!advertisementEditable(store)"
+                                                  ></button>
+                                                </div>
+                                                <div class="advert-messages__note">
+                                                  {{ i18n.t('automation.messagesRandomizedNote') }}
+                                                </div>
+                                                <div class="advert-message-list">
+                                                  @for (
+                                                    message of advertisementMessages(
+                                                      store,
+                                                      advertNumber,
+                                                      'telegram'
+                                                    );
+                                                    track $index
+                                                  ) {
+                                                    <div class="advert-message-row">
+                                                      <textarea
+                                                        pInputText
+                                                        rows="4"
+                                                        [readonly]="!advertisementEditable(store)"
+                                                        [ngModel]="message"
+                                                        (ngModelChange)="
+                                                          updateAdvertisementMessage(
+                                                            store,
+                                                            advertNumber,
+                                                            'telegram',
+                                                            $index,
+                                                            $event
+                                                          )
+                                                        "
+                                                        [placeholder]="
+                                                          i18n.t('automation.messageTemplatePlaceholder')
+                                                        "
+                                                      ></textarea>
+                                                      <button
+                                                        pButton
+                                                        type="button"
+                                                        size="small"
+                                                        severity="secondary"
+                                                        [label]="i18n.t('common.delete')"
+                                                        (click)="
+                                                          removeAdvertisementMessage(
+                                                            store,
+                                                            advertNumber,
+                                                            'telegram',
+                                                            $index
+                                                          )
+                                                        "
+                                                        [disabled]="
+                                                          !advertisementEditable(store) ||
+                                                          advertisementMessages(store, advertNumber, 'telegram')
+                                                            .length === 1
+                                                        "
+                                                      ></button>
+                                                    </div>
+                                                  }
+                                                </div>
+                                              </div>
+                                            </p-tabpanel>
+                                          }
+                                          <p-tabpanel value="preview">
+                                            <p-accordion [multiple]="true" class="advert-preview-accordion">
+                                              <p-accordion-panel [value]="'store-preview'">
+                                                <p-accordion-header>
+                                                  <strong
+                                                    >{{ i18n.t('automation.preview') }}
+                                                    {{ i18n.t('automation.storeChat') }}</strong
+                                                  >
+                                                </p-accordion-header>
+                                                <p-accordion-content>
+                                                  <div class="advert-preview">
+                                                    {{
+                                                      previewOpenSlotAdvertisement(store, advertNumber, 'store')
+                                                    }}
+                                                  </div>
+                                                </p-accordion-content>
+                                              </p-accordion-panel>
+                                              @if (telegramBotTokenConfigured()) {
+                                                <p-accordion-panel [value]="'telegram-preview'">
+                                                  <p-accordion-header>
+                                                    <strong
+                                                      >{{ i18n.t('automation.preview') }}
+                                                      {{ i18n.t('automation.telegram') }}</strong
+                                                    >
+                                                  </p-accordion-header>
+                                                  <p-accordion-content>
+                                                    <div class="advert-preview">
+                                                      {{
+                                                        previewOpenSlotAdvertisement(
+                                                          store,
+                                                          advertNumber,
+                                                          'telegram'
+                                                        )
+                                                      }}
+                                                    </div>
+                                                    <button
+                                                      pButton
+                                                      type="button"
+                                                      size="small"
+                                                      [label]="i18n.t('automation.sendTelegramTest')"
+                                                      [disabled]="
+                                                        !advertisementEditable(store) ||
+                                                        !$any(store)['advertTelegramChatId' + advertNumber]
+                                                      "
+                                                      (click)="sendTelegramTestMessage(store, advertNumber)"
+                                                    ></button>
+                                                  </p-accordion-content>
+                                                </p-accordion-panel>
+                                              }
+                                            </p-accordion>
+                                          </p-tabpanel>
+                                        </p-tabpanels>
+                                      </p-tabs>
+                                      @if (advertisementEditable(store)) {
+                                      <div class="actions-cell advert-config__actions">
+                                        <button
+                                          pButton
+                                          type="button"
+                                          size="small"
+                                          [label]="i18n.t('common.save')"
+                                          (click)="saveOpenSlotAdvertisement(store, advertNumber)"
+                                        ></button>
+                                        <button
+                                          pButton
+                                          type="button"
+                                          size="small"
+                                          severity="danger"
+                                          [label]="i18n.t('common.delete')"
+                                          (click)="deleteAdvertisementAutomation(store, advertNumber)"
+                                        ></button>
+                                      </div>
+                                      }
+                                    </div>
+                                  </p-accordion-content>
+                                </p-accordion-panel>
+                                }
+                                @if (lateCancellationSettingsNumber(store); as settingsNumber) {
+                                  <p-accordion-panel [value]="'late-cancellation'">
+                                    <p-accordion-header>
+                                      <span class="automation-rule-header">
+                                        <span>{{ i18n.t('automation.lateCancellationMessage') }}</span>
+                                        <ng-container
+                                          *ngTemplateOutlet="
+                                            ruleState;
+                                            context: {
+                                              $implicit:
+                                                $any(store)['advertSendLateCancellationMessage' + settingsNumber]
+                                            }
+                                          "
+                                        ></ng-container>
+                                      </span>
+                                    </p-accordion-header>
+                                    <p-accordion-content>
+                                      <div class="advert-late-cancellation">
+                                        <p class="advert-config__block-note">
+                                          {{ i18n.t('automation.lateCancellationStoreNote') }}
+                                        </p>
+                                        <textarea
+                                          pInputText
+                                          rows="4"
+                                          [readonly]="!advertisementEditable(store)"
+                                          [(ngModel)]="
+                                            $any(store)['advertLateCancellationMessage' + settingsNumber]
+                                          "
+                                          [placeholder]="i18n.t('automation.messageTemplatePlaceholder')"
+                                        ></textarea>
+                                        <label class="advert-config__tick advert-config__tick--plain">
+                                          <p-checkbox
+                                            [binary]="true"
+                                            [disabled]="!advertisementEditable(store)"
+                                            [(ngModel)]="
+                                              $any(store)['advertSendLateCancellationMessage' + settingsNumber]
+                                            "
+                                          ></p-checkbox>
+                                          <span>{{ i18n.t('automation.sendLateCancellationMessage') }}</span>
+                                        </label>
+                                        <label class="advert-config__cutoff">
+                                          <span>{{
+                                            i18n.t('automation.lateCancellationMessageMaximumHoursBeforePickup')
+                                          }}</span>
+                                          <p-inputNumber
+                                            [(ngModel)]="
+                                              $any(store)[
+                                                'advertLateCancellationMessageMaximumHoursBeforePickup' +
+                                                  settingsNumber
+                                              ]
+                                            "
+                                            [min]="0"
+                                            [disabled]="
+                                              !advertisementEditable(store) ||
+                                              !$any(store)['advertSendLateCancellationMessage' + settingsNumber]
+                                            "
+                                          ></p-inputNumber>
+                                        </label>
+                                        <label class="advert-config__tick advert-config__tick--plain">
+                                          <p-checkbox
+                                            [binary]="true"
+                                            [disabled]="!advertisementEditable(store)"
+                                            [(ngModel)]="
+                                              $any(store)[
+                                                'advertSendLatestAdvertisementAfterLateCancellation' +
+                                                  settingsNumber
+                                              ]
+                                            "
+                                          ></p-checkbox>
+                                          <span>{{
+                                            i18n.t('automation.sendLatestAdvertisementAfterLateCancellation')
+                                          }}</span>
+                                        </label>
+                                        @if (advertisementEditable(store)) {
+                                          <button
+                                            pButton
+                                            type="button"
+                                            size="small"
+                                            [label]="i18n.t('common.save')"
+                                            (click)="saveOpenSlotAdvertisement(store, settingsNumber)"
+                                          ></button>
+                                        }
+                                      </div>
+                                    </p-accordion-content>
+                                  </p-accordion-panel>
+                                }
+                              </p-accordion>
+                              @if (advertisementEditable(store)) {
+                              <div class="automation-store__actions">
+                                <button
+                                  pButton
+                                  type="button"
+                                  size="small"
+                                  icon="pi pi-plus"
+                                  [label]="i18n.t('automation.createAlert')"
+                                  [disabled]="advertisementNumbers(store).length >= 3"
+                                  (click)="addAdvertisement(store)"
+                                ></button>
+                              </div>
+                              }
+                            </div>
+                          </p-accordion-content>
+                        </p-accordion-panel>
+                      }
+                    </p-accordion>
+                  </section>
+                  <div class="automation-audit-host">
+                    <header class="automation-audit-host__header">
+                      <span class="automation-audit-console__eyebrow">{{
+                        i18n.t('automation.group.audit')
+                      }}</span
+                      ><button
+                        pButton
+                        type="button"
+                        text="true"
+                        [icon]="auditConsoleExpanded() ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+                        [label]="
+                          auditConsoleExpanded()
+                            ? i18n.t('automation.audit.collapse')
+                            : i18n.t('automation.audit.expand')
+                        "
+                        (click)="auditConsoleExpanded.set(!auditConsoleExpanded())"
+                      ></button>
+                    </header>
+                    @if (auditConsoleExpanded()) {
+                      @if (
+                        sessionService.hasPermission(UserPermission.CanSeeAllAutomationDecisions)
+                      ) {
+                        <label
+                          ><p-checkbox
+                            [binary]="true"
+                            [ngModel]="onlyMyDecisions()"
+                            (ngModelChange)="setOnlyMyDecisions($event)"
+                          ></p-checkbox
+                          >{{ i18n.t('adminAutomation.onlyMyDecisions') }}</label
+                        >
+                      }
+                      <ng-container
+                        *ngTemplateOutlet="
+                          advertisementPlans;
+                          context: { entries: plannedAdvertisementNotifications() }
+                        "
+                      ></ng-container
+                      ><ng-container
+                        *ngTemplateOutlet="
+                          advertisementAudit;
+                          context: { entries: sentAdvertisementAudit() }
+                        "
+                      ></ng-container>
+                    }
+                  </div>
+                </div>
+              }
+            </p-tabpanel>
+          }
+          @if (sessionService.hasPermission(UserPermission.CanUseAutomations)) {
+            <p-tabpanel value="storeInfo">
+              @if (activeAutomationTab() === 'storeInfo') {
+                <div class="automation-tabpanel">
+                  @if (tabLoading()) {
+                    <app-loading-indicator [compact]="true" />
+                  }
+                  <p-accordion [multiple]="false" class="automation-help-accordion">
+                    <p-accordion-panel [value]="'store-info-help'">
+                      <p-accordion-header>
+                        <strong>{{ i18n.t('automation.storeInfoInstructionsTitle') }}</strong>
+                      </p-accordion-header>
+                      <p-accordion-content>
+                        <div class="automation-help">
+                          <ol class="automation-help__list">
+                            <li>{{ i18n.t('automation.storeInfoInstruction1') }}</li>
+                            <li>{{ i18n.t('automation.storeInfoInstruction3') }}</li>
+                            <li>{{ i18n.t('automation.storeInfoInstruction4') }}</li>
+                          </ol>
+                        </div>
+                      </p-accordion-content>
+                    </p-accordion-panel>
+                  </p-accordion>
+                  @if (!telegramBotTokenConfigured()) {
+                    <div class="automation-mode-banner automation-mode-banner--dry-run telegram-missing">
+                      <span>{{ i18n.t('automation.telegramMissing') }}</span>
+                      <button pButton type="button" size="small" severity="secondary" icon="pi pi-cog" [label]="i18n.t('automation.openGeneralSettings')" (click)="openGeneralSettings()"></button>
+                    </div>
+                  }
+                  <section class="automation-group store-info">
+                    <div class="automation-group__label">{{ i18n.t('automation.storeInfoSettings') }}</div>
+                    <label class="advert-config__tick advert-config__tick--plain">
+                      <p-checkbox [binary]="true" [(ngModel)]="storeInfoForm.enabled"></p-checkbox>
+                      <span>{{ i18n.t('automation.storeInfoEnabled') }}</span>
+                    </label>
+
+                    <div class="store-info__block">
+                      <label class="advert-config__tick advert-config__tick--plain">
+                        <p-checkbox [binary]="true" [(ngModel)]="storeInfoForm.cutoffEnabled"></p-checkbox>
+                        <span>{{ i18n.t('automation.storeInfoCutoffEnabled') }}</span>
+                      </label>
+                      <label class="advert-config__cutoff">
+                        <span>{{ i18n.t('automation.storeInfoMaximumHoursBeforePickup') }}</span>
+                        <p-inputNumber
+                          [(ngModel)]="storeInfoForm.maximumHoursBeforePickup"
+                          [min]="1"
+                          [disabled]="!storeInfoForm.cutoffEnabled"
+                        ></p-inputNumber>
+                      </label>
+                    </div>
+
+                    <div class="store-info__block">
+                      <strong>{{ i18n.t('automation.storeInfoRecipients') }}</strong>
+                      <div class="store-info__row">
+                        <p-multiselect
+                          [options]="storeInfoChatOptions()"
+                          optionLabel="label"
+                          optionValue="value"
+                          [(ngModel)]="storeInfoForm.telegramChatIds"
+                          [placeholder]="i18n.t('automation.storeInfoRecipientsPlaceholder')"
+                          [disabled]="!telegramBotTokenConfigured()"
+                          display="chip"
+                          appendTo="body"
+                          class="store-info__select"
+                        ></p-multiselect>
+                        <button
+                          pButton
+                          type="button"
+                          severity="secondary"
+                          icon="pi pi-refresh"
+                          [label]="i18n.t('automation.refreshTelegramChats')"
+                          [disabled]="!telegramBotTokenConfigured()"
+                          (click)="refreshTelegramChats()"
+                        ></button>
+                      </div>
+                      <div class="store-info__row">
+                        <input
+                          pInputText
+                          [(ngModel)]="storeInfoManualChatId"
+                          [placeholder]="i18n.t('automation.storeInfoManualChatId')"
+                          [disabled]="!telegramBotTokenConfigured()"
+                        />
+                        <button
+                          pButton
+                          type="button"
+                          severity="secondary"
+                          icon="pi pi-plus"
+                          [label]="i18n.t('automation.storeInfoAddChat')"
+                          [disabled]="!telegramBotTokenConfigured() || !storeInfoManualChatId.trim()"
+                          (click)="addStoreInfoChatId()"
+                        ></button>
+                      </div>
+                      <p class="advert-config__block-note">{{ i18n.t('automation.storeInfoRecipientsHint') }}</p>
+                    </div>
+
+                    <div class="store-info__block">
+                      <strong>{{ i18n.t('automation.storeInfoStores') }}</strong>
+                      <p-multiselect
+                        [options]="storeInfoStoreOptions()"
+                        optionLabel="label"
+                        optionValue="value"
+                        [(ngModel)]="storeInfoForm.storeIds"
+                        [placeholder]="i18n.t('automation.storeInfoStoresPlaceholder')"
+                        display="chip"
+                        appendTo="body"
+                        class="store-info__select"
+                      ></p-multiselect>
+                    </div>
+
+                    <div class="store-info__actions">
+                      <button
+                        pButton
+                        type="button"
+                        [label]="i18n.t('common.save')"
+                        [loading]="storeInfoSaving()"
+                        (click)="saveStoreInfo()"
+                      ></button>
+                      <button
+                        pButton
+                        type="button"
+                        severity="secondary"
+                        icon="pi pi-send"
+                        [label]="i18n.t('automation.storeInfoSendTest')"
+                        [disabled]="!telegramBotTokenConfigured() || storeInfoForm.telegramChatIds.length === 0"
+                        [loading]="storeInfoTesting()"
+                        (click)="sendStoreInfoTestMessage()"
+                      ></button>
+                    </div>
+                    @if (storeInfo()?.activeSince; as activeSince) {
+                      <p class="advert-config__block-note">
+                        {{ i18n.t('automation.storeInfoActiveSince') }} {{ activeSince | zurichDateTime: 'short' }}
+                      </p>
+                    }
+                  </section>
+
+                  <section class="automation-group">
+                    <div class="automation-group__label">{{ i18n.t('automation.storeInfoRecentCancellations') }}</div>
+                    <p-table
+                      class="automation-responsive-table"
+                      [value]="storeInfoCancellations()"
+                      [paginator]="true" [alwaysShowPaginator]="false"
+                      [rows]="10"
+                    >
+                      <ng-template pTemplate="header"
+                        ><tr>
+                          <th>{{ i18n.t('adminAutomation.store') }}</th>
+                          <th>{{ i18n.t('adminAutomation.pickup') }}</th>
+                          <th>{{ i18n.t('adminAutomation.user') }}</th>
+                          <th>{{ i18n.t('automation.storeInfoCancelledAt') }}</th>
+                          <th>{{ i18n.t('automation.storeInfoSlots') }}</th>
+                          <th>{{ i18n.t('common.status') }}</th>
+                          <th>{{ i18n.t('automation.storeInfoNotified') }}</th>
+                        </tr></ng-template
+                      >
+                      <ng-template pTemplate="body" let-entry
+                        ><tr>
+                          <td [attr.data-label]="i18n.t('adminAutomation.store')">{{ entry.storeName || entry.storeId }}</td>
+                          <td [attr.data-label]="i18n.t('adminAutomation.pickup')">
+                            {{ entry.pickupDate | zurichDateTime: 'short' }}
+                          </td>
+                          <td [attr.data-label]="i18n.t('adminAutomation.user')">
+                            {{ entry.foodsharingUserName || entry.foodsharingUserId }}
+                          </td>
+                          <td [attr.data-label]="i18n.t('automation.storeInfoCancelledAt')">
+                            {{ entry.cancelledAt | zurichDateTime: 'short' }}
+                            ({{ entry.hoursBeforePickup }} {{ i18n.t('automation.storeInfoHoursBefore') }})
+                          </td>
+                          <td [attr.data-label]="i18n.t('automation.storeInfoSlots')">
+                            {{ entry.occupiedSlots ?? '-' }} / {{ entry.totalSlots || '-' }}
+                          </td>
+                          <td [attr.data-label]="i18n.t('common.status')">
+                            <p-tag
+                              [value]="storeInfoStatusLabel(entry.status)"
+                              [severity]="storeInfoStatusSeverity(entry.status)"
+                            ></p-tag>
+                          </td>
+                          <td [attr.data-label]="i18n.t('automation.storeInfoNotified')">
+                            @if (entry.immediateNotifiedAt) {
+                              <div>{{ i18n.t('automation.storeInfoNotifiedImmediately') }} {{ entry.immediateNotifiedAt | zurichDateTime: 'short' }}</div>
+                            }
+                            @if (entry.finalNotifiedAt) {
+                              <div>{{ i18n.t('automation.storeInfoNotifiedAfterPickup') }} {{ entry.finalNotifiedAt | zurichDateTime: 'short' }}</div>
+                            }
+                            @if (!entry.immediateNotifiedAt && !entry.finalNotifiedAt) { - }
+                            @if (entry.dryRun) {
+                              <div>({{ i18n.t('adminAutomation.dryRun') }})</div>
+                            }
+                            @if (entry.error) {
+                              <div class="store-info__error">{{ entry.error }}</div>
+                            }
+                          </td>
+                        </tr></ng-template
+                      >
+                      <ng-template pTemplate="emptymessage"
+                        ><tr>
+                          <td colspan="7">{{ i18n.t('automation.storeInfoNoCancellations') }}</td>
+                        </tr></ng-template
+                      >
+                    </p-table>
+                  </section>
+                </div>
+              }
+            </p-tabpanel>
+          }
+          @if (sessionService.hasPermission(UserPermission.CanSeeUserPickupCountGrouping)) {
+            <p-tabpanel value="statistics">
+              @if (activeAutomationTab() === 'statistics') {
+                <div class="automation-tabpanel">
+                  @if (tabLoading()) {
+                    <app-loading-indicator [compact]="true" />
+                  }
+                  <section class="automation-group">
+                    <div class="automation-group__label">
+                      {{ i18n.t('automation.group.statistics') }}
+                    </div>
+                    <button
+                      pButton
+                      type="button"
+                      icon="pi pi-refresh"
+                      [label]="i18n.t('common.forceRefresh')"
+                      [loading]="refreshingFoodsharingFuturePickupUsers()"
+                      loadingIcon="pi pi-spinner pi-spin"
+                      [disabled]="refreshingFoodsharingFuturePickupUsers()"
+                      (click)="refreshFoodsharingFuturePickupUsers()"
+                    ></button>
+                    <label class="automation-checkbox-row"
+                      ><p-checkbox
+                        [binary]="true"
+                        [ngModel]="onlyUsersWithSlotVerificationErrors()"
+                        (ngModelChange)="onlyUsersWithSlotVerificationErrors.set($event)"
+                      ></p-checkbox
+                      >{{ i18n.t('adminAutomation.onlyUsersWithSlotVerificationErrors') }}</label
+                    >
+                    <ul class="stats-list">
+                      @for (user of visibleFoodsharingFuturePickupUsers() | slice: 0 : statsLimit(); track user.foodsharingUserId) {
+                        <li>
+                          <details class="stats-row">
+                            <summary class="stats-row__summary">
+                              <span class="stats-row__name">{{ user.name || user.foodsharingUserId }}<small>ID {{ user.foodsharingUserId }}</small></span>
+                              <span class="stats-row__count">{{ i18n.t('adminAutomation.pickupsCount').replace('{0}', '' + user.futurePickupCount) }}</span>
+                              @if (hasSlotVerificationErrors(user)) {
+                                <p-tag severity="warn" icon="pi pi-exclamation-triangle" [value]="i18n.t('adminAutomation.hasErrors')"></p-tag>
+                              }
+                              <i class="pi pi-chevron-down stats-row__chevron" aria-hidden="true"></i>
+                            </summary>
+                            <ul class="stats-row__pickups">
+                              @for (pickup of user.futurePickups; track pickup.storeId + '-' + pickup.pickupDate) {
+                                <li>
+                                  <span class="stats-row__when">{{ pickup.pickupDate | zurichDateTime }}</span>
+                                  <span class="stats-row__store">{{ pickup.storeName }}</span>
+                                  <p-tag [severity]="pickup.confirmed ? 'success' : 'warn'" [value]="pickup.confirmed ? i18n.t('adminAutomation.confirmed') : i18n.t('adminAutomation.pending')"></p-tag>
+                                  @if (pickup.validationErrors.length) {
+                                    <ul class="stats-row__errors">
+                                      @for (error of pickup.validationErrors; track error) { <li>{{ error }}</li> }
+                                    </ul>
+                                  }
+                                </li>
+                              }
+                            </ul>
+                          </details>
+                        </li>
+                      }
+                    </ul>
+                    @if (visibleFoodsharingFuturePickupUsers().length > statsLimit()) {
+                      <button pButton type="button" severity="secondary" [text]="true" icon="pi pi-angle-down" [label]="i18n.t('common.loadMore')" (click)="statsLimit.set(statsLimit() + 20)"></button>
+                    }
+                  </section>
+                </div>
+              }
+            </p-tabpanel>
+          }
+          @if (canSeeMetrics()) {
+            <p-tabpanel value="metrics">
+              @if (activeAutomationTab() === 'metrics') {
+                <div class="automation-tabpanel">
+                  @if (tabLoading()) {
+                    <app-loading-indicator [compact]="true" />
+                  }
+                  <div class="metrics-toolbar">
+                    <label class="metrics-toolbar__period">
+                      <span>{{ i18n.t('metrics.period') }}</span>
+                      <p-select
+                        [options]="metricsPeriodOptions()"
+                        optionLabel="label"
+                        optionValue="value"
+                        [ngModel]="metricsDays()"
+                        (ngModelChange)="setMetricsDays($event)"
+                        appendTo="body"
+                      ></p-select>
+                    </label>
+                    @if (metrics(); as m) {
+                      <span class="general-settings__hint">
+                        {{ m.fromDay | date: 'dd.MM.yyyy' }} – {{ m.toDay | date: 'dd.MM.yyyy' }}
+                      </span>
+                    }
+                    <button
+                      pButton
+                      type="button"
+                      severity="secondary"
+                      icon="pi pi-refresh"
+                      [label]="i18n.t('common.forceRefresh')"
+                      [loading]="metricsLoading()"
+                      loadingIcon="pi pi-spinner pi-spin"
+                      [disabled]="metricsLoading()"
+                      (click)="refreshMetrics()"
+                    ></button>
+                  </div>
+
+                  @if (metrics(); as m) {
+                  <section class="automation-group">
+                    <div class="automation-group__label">{{ i18n.t('metrics.coverageTitle') }}</div>
+                    <p class="general-settings__hint">
+                      {{ i18n.t('metrics.coverageHint') }}
+                      @if (m.coverage.oldestRefreshAt) {
+                        {{ i18n.t('metrics.dataAsOf') }} {{ m.coverage.oldestRefreshAt | zurichDateTime: 'short' }}.
+                      }
+                    </p>
+                    <div class="automation-metrics">
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.slotsFilled') }}</span>
+                        <strong class="automation-metrics__value">{{ formatPercent(metricSummary().coverageRate) }}</strong>
+                        <span class="automation-metrics__note">{{ m.coverage.occupiedSlots }} / {{ m.coverage.totalSlots }}</span>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.openSlots') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().openSlots }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.pickupsWithOpenSlots') }}</span>
+                        <strong class="automation-metrics__value">{{ m.coverage.pickupsWithOpenSlots }}</strong>
+                        <span class="automation-metrics__note">{{ i18n.t('metrics.ofPickups').replace('{count}', '' + m.coverage.pickups) }}</span>
+                      </div>
+                    </div>
+                    @if (m.coverage.stores.length) {
+                      <p-table class="automation-responsive-table" [value]="m.coverage.stores" [paginator]="m.coverage.stores.length > 10" [rows]="10">
+                        <ng-template pTemplate="header"
+                          ><tr>
+                            <th>{{ i18n.t('adminAutomation.store') }}</th>
+                            <th>{{ i18n.t('metrics.pickups') }}</th>
+                            <th>{{ i18n.t('metrics.openSlots') }}</th>
+                            <th>{{ i18n.t('metrics.slotsFilled') }}</th>
+                          </tr></ng-template
+                        >
+                        <ng-template pTemplate="body" let-store
+                          ><tr>
+                            <td [attr.data-label]="i18n.t('adminAutomation.store')">{{ store.storeName }}</td>
+                            <td [attr.data-label]="i18n.t('metrics.pickups')">{{ store.pickups }}</td>
+                            <td [attr.data-label]="i18n.t('metrics.openSlots')">{{ store.totalSlots - store.occupiedSlots }}</td>
+                            <td [attr.data-label]="i18n.t('metrics.slotsFilled')">
+                              {{ store.occupiedSlots }} / {{ store.totalSlots }}
+                            </td>
+                          </tr></ng-template
+                        >
+                      </p-table>
+                    } @else {
+                      <p class="general-settings__hint">{{ i18n.t('metrics.noCoverage') }}</p>
+                    }
+                  </section>
+                  <details class="metrics-more">
+                    <summary>{{ i18n.t('metrics.more') }}</summary>
+
+                  <section class="automation-group">
+                    <div class="automation-group__label">{{ i18n.t('metrics.notificationsTitle') }}</div>
+                    <div class="automation-metrics">
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.notificationsTotal') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().notificationsTotal }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.advertsSent') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().advertsSent }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.lateCancellationReminders') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().reminders }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.storeInfoMessages') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().storeInfo }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.advertsNotNeeded') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().notNeeded }}</strong>
+                        <span class="automation-metrics__note">{{ i18n.t('metrics.advertsNotNeededHint') }}</span>
+                      </div>
+                    </div>
+                    <figure class="metric-chart">
+                      <figcaption class="metric-chart__caption">
+                        {{ i18n.t('metrics.notificationsPerDay') }}
+                        <span class="metric-chart__peak">{{ i18n.t('metrics.peak') }} {{ notificationPeak() }}</span>
+                      </figcaption>
+                      <div class="metric-chart__plot" role="img" [attr.aria-label]="i18n.t('metrics.notificationsPerDay')">
+                        @for (entry of notificationDays(); track entry.day) {
+                          <div class="metric-chart__slot" [title]="(entry.day | date: 'dd.MM.yyyy') + ': ' + entry.value">
+                            <span class="metric-chart__bar" [class.metric-chart__bar--empty]="!entry.value" [style.height.%]="entry.height"></span>
+                          </div>
+                        }
+                      </div>
+                      @if (notificationDays().length; as count) {
+                        <div class="metric-chart__axis">
+                          <span>{{ notificationDays()[0].day | date: 'dd.MM.' }}</span>
+                          <span>{{ notificationDays()[count - 1].day | date: 'dd.MM.' }}</span>
+                        </div>
+                      }
+                    </figure>
+                  </section>
+
+                  <section class="automation-group">
+                    <div class="automation-group__label">{{ i18n.t('metrics.advertResultsTitle') }}</div>
+                    <p class="general-settings__hint">{{ i18n.t('metrics.advertResultsHint') }}</p>
+                    <div class="automation-metrics">
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.filledAfterAdvert') }}</span>
+                        <strong class="automation-metrics__value">{{ formatPercent(metricSummary().fillRate) }}</strong>
+                        <span class="automation-metrics__note">{{ metricSummary().filled }} / {{ metricSummary().filled + metricSummary().unfilled }}</span>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.notFilled') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().unfilled }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.waiting') }}</span>
+                        <strong class="automation-metrics__value">{{ m.advertsWaiting }}</strong>
+                        <span class="automation-metrics__note">{{ i18n.t('metrics.waitingHint') }}</span>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.averageTimeToFill') }}</span>
+                        <strong class="automation-metrics__value">{{ formatDuration(metricSummary().averageFillMinutes) }}</strong>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section class="automation-group">
+                    <div class="automation-group__label">{{ i18n.t('metrics.lateCancellationsTitle') }}</div>
+                    <div class="automation-metrics">
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.lateCancellations') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().lateCancellations }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.covered') }}</span>
+                        <strong class="automation-metrics__value">{{ formatPercent(metricSummary().coveredRate) }}</strong>
+                        <span class="automation-metrics__note">{{ i18n.t('metrics.coveredHint') }}</span>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.replaced') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().replaced }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.rejoined') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().rejoined }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.notReplaced') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().notReplaced }}</strong>
+                      </div>
+                    </div>
+                    <h4 class="metric-subtitle">{{ i18n.t('metrics.hoursBeforePickup') }}</h4>
+                    @if (lateCancellationHours().length) {
+                      <ul class="metric-bars">
+                        @for (bar of lateCancellationHours(); track bar.label) {
+                          <li class="metric-bars__row">
+                            <span class="metric-bars__label">{{ bar.label }}</span>
+                            <span class="metric-bars__track"
+                              ><span class="metric-bars__fill" [style.width.%]="bar.width"></span
+                            ></span>
+                            <span class="metric-bars__value">{{ bar.value }}</span>
+                          </li>
+                        }
+                      </ul>
+                    } @else {
+                      <p class="general-settings__hint">{{ i18n.t('metrics.noData') }}</p>
+                    }
+                  </section>
+
+                  <section class="automation-group">
+                    <div class="automation-group__label">{{ i18n.t('metrics.automationsTitle') }}</div>
+                    <p class="general-settings__hint">{{ i18n.t('metrics.automationsHint') }}</p>
+                    <h4 class="metric-subtitle">{{ i18n.t('automation.slotApproval') }}</h4>
+                    <div class="automation-metrics">
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.confirmed') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().slotConfirmed }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.declined') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().slotDeclined }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.skipped') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().slotSkipped }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.failed') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().slotFailed }}</strong>
+                      </div>
+                    </div>
+                    <h4 class="metric-subtitle">{{ i18n.t('metrics.declineReasons') }}</h4>
+                    @if (slotDeclineRules().length) {
+                      <ul class="metric-bars">
+                        @for (bar of slotDeclineRules(); track bar.label) {
+                          <li class="metric-bars__row">
+                            <span class="metric-bars__label">{{ bar.label }}</span>
+                            <span class="metric-bars__track"
+                              ><span class="metric-bars__fill" [style.width.%]="bar.width"></span
+                            ></span>
+                            <span class="metric-bars__value">{{ bar.value }}</span>
+                          </li>
+                        }
+                      </ul>
+                    } @else {
+                      <p class="general-settings__hint">{{ i18n.t('metrics.noData') }}</p>
+                    }
+                    <h4 class="metric-subtitle">{{ i18n.t('metrics.skipReasons') }}</h4>
+                    @if (slotSkipRules().length) {
+                      <ul class="metric-bars">
+                        @for (bar of slotSkipRules(); track bar.label) {
+                          <li class="metric-bars__row">
+                            <span class="metric-bars__label">{{ bar.label }}</span>
+                            <span class="metric-bars__track"
+                              ><span class="metric-bars__fill" [style.width.%]="bar.width"></span
+                            ></span>
+                            <span class="metric-bars__value">{{ bar.value }}</span>
+                          </li>
+                        }
+                      </ul>
+                    } @else {
+                      <p class="general-settings__hint">{{ i18n.t('metrics.noData') }}</p>
+                    }
+                    <h4 class="metric-subtitle">{{ i18n.t('automation.storeApplications') }}</h4>
+                    <div class="automation-metrics">
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.approved') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().applicationsApproved }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.declined') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().applicationsDeclined }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.skipped') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().applicationsSkipped }}</strong>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section class="automation-group">
+                    <div class="automation-group__label">{{ i18n.t('metrics.einAbsTitle') }}</div>
+                    <p class="general-settings__hint">{{ i18n.t('metrics.einAbsHint') }}</p>
+                    <div class="automation-metrics">
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.einAbSlots') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().einAbSlots }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.einAbBooked') }}</span>
+                        <strong class="automation-metrics__value">{{ formatPercent(metricSummary().einAbBookedRate) }}</strong>
+                        <span class="automation-metrics__note">{{ metricSummary().einAbBooked }} / {{ metricSummary().einAbSlots }}</span>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.einAbDone') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().einAbDone }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.einAbUnbooked') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().einAbUnbooked }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.einAbCancelled') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().einAbCancelled }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.einAbPendingExpired') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().einAbPendingExpired }}</strong>
+                        <span class="automation-metrics__note">{{ i18n.t('metrics.einAbPendingExpiredHint') }}</span>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.einAbUpcoming') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().einAbUpcomingBooked + ' / ' + metricSummary().einAbUpcomingSlots }}</strong>
+                        <span class="automation-metrics__note">{{ i18n.t('metrics.einAbUpcomingHint') }}</span>
+                      </div>
+                    </div>
+                  </section>
+                  </details>
+                  }
+
+                  <section class="automation-group">
+                    <div class="automation-group__label">
+                      {{ i18n.t('adminAutomation.extraSlotAuditTitle') }}
+                    </div>
+                    <p class="general-settings__hint">
+                      {{ i18n.t('adminAutomation.extraSlotAuditHint') }}
+                    </p>
+                    <div class="automation-metrics">
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.extraSlotsAddedPeriod') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().extraSlotsAdded }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('metrics.extraSlotsFilled') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().extraSlotsFilled }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('adminAutomation.extraSlotUsers') }}</span>
+                        <strong class="automation-metrics__value">{{ metricSummary().extraSlotUsers }}</strong>
+                      </div>
+                      <div class="automation-metrics__tile">
+                        <span class="automation-metrics__label">{{ i18n.t('adminAutomation.extraSlotTotal') }}</span>
+                        <strong class="automation-metrics__value">{{ pickupExtraSlotAudit().length }}</strong>
+                        <span class="automation-metrics__note">{{ i18n.t('metrics.allTime') }}</span>
+                      </div>
+                    </div>
+                    <p-table
+                      class="automation-responsive-table"
+                      [value]="pickupExtraSlotAudit()"
+                      [paginator]="true" [alwaysShowPaginator]="false"
+                      [rows]="10"
+                    >
+                      <ng-template pTemplate="header"
+                        ><tr>
+                          <th>{{ i18n.t('common.createdAt') }}</th>
+                          <th>{{ i18n.t('adminAutomation.store') }}</th>
+                          <th>{{ i18n.t('adminAutomation.pickup') }}</th>
+                          <th>{{ i18n.t('adminAutomation.user') }}</th>
+                          <th>{{ i18n.t('adminAutomation.slots') }}</th>
+                          <th>{{ i18n.t('metrics.filledColumn') }}</th>
+                        </tr></ng-template
+                      >
+                      <ng-template pTemplate="body" let-entry
+                        ><tr>
+                          <td [attr.data-label]="i18n.t('common.createdAt')">
+                            {{ entry.createdAt | zurichDateTime: 'short' }}
+                          </td>
+                          <td [attr.data-label]="i18n.t('adminAutomation.store')">
+                            {{ entry.storeName }}
+                          </td>
+                          <td [attr.data-label]="i18n.t('adminAutomation.pickup')">
+                            {{ entry.pickupDate | date: 'dd.MM.yyyy HH:mm' : 'Europe/Zurich' }}
+                          </td>
+                          <td [attr.data-label]="i18n.t('adminAutomation.user')">
+                            {{ entry.foodsharingUserName || entry.foodsharingUserId }}
+                          </td>
+                          <td [attr.data-label]="i18n.t('adminAutomation.slots')">
+                            {{ entry.previousTotalSlots }} → {{ entry.newTotalSlots }}
+                          </td>
+                          <td [attr.data-label]="i18n.t('metrics.filledColumn')">
+                            @if (entry.filled == null) {
+                              –
+                            } @else {
+                              <p-tag
+                                [severity]="entry.filled ? 'success' : 'warn'"
+                                [value]="entry.filled ? i18n.t('common.yes') : i18n.t('common.no')"
+                              ></p-tag>
+                            }
+                          </td>
+                        </tr></ng-template
+                      >
+                      <ng-template pTemplate="emptymessage"
+                        ><tr>
+                          <td colspan="6">{{ i18n.t('adminAutomation.extraSlotAuditEmpty') }}</td>
+                        </tr></ng-template
+                      >
+                    </p-table>
+                  </section>
+                </div>
+              }
+            </p-tabpanel>
+          }
+          <p-tabpanel value="settings">
+            @if (activeAutomationTab() === 'settings') {
+              <div class="automation-tabpanel">
+                <ng-container *ngTemplateOutlet="generalSettingsContent"></ng-container>
+              </div>
+            }
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
+    }
+  </p-card>
+</section>
+
+<!-- On/off tag shown in the collapsed header of a rule or alert panel. -->
+<ng-template #ruleState let-active>
+  <p-tag
+    [severity]="active ? 'success' : 'secondary'"
+    [value]="active ? i18n.t('adminAutomation.ruleOn') : i18n.t('adminAutomation.ruleOff')"
+  ></p-tag>
+</ng-template>
+
+<!-- Active/inactive and dry-run tags shown in the collapsed header of a store panel. -->
+<ng-template #storeState let-enabled="enabled" let-dryRun="dryRun">
+  <p-tag
+    [severity]="enabled ? 'success' : 'secondary'"
+    [value]="enabled ? i18n.t('adminAutomation.enabled') : i18n.t('adminAutomation.inactive')"
+  ></p-tag>
+  @if (dryRun) {
+    <p-tag severity="warn" [value]="i18n.t('adminAutomation.storeDryRun')"></p-tag>
+  }
+</ng-template>
+
+<ng-template #requestAudit let-entries="entries">
+  <section class="automation-audit-console">
+    <header class="automation-audit-console__header">
+      <div>
+        <span class="automation-audit-console__eyebrow">{{
+          i18n.t('automation.group.audit')
+        }}</span>
+        <h3>{{ i18n.t('adminAutomation.audit') }}</h3>
+      </div>
+      <button
+        pButton
+        type="button"
+        text="true"
+        [icon]="auditConsoleExpanded() ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+        [label]="
+          auditConsoleExpanded()
+            ? i18n.t('automation.audit.collapse')
+            : i18n.t('automation.audit.expand')
+        "
+        (click)="auditConsoleExpanded.set(!auditConsoleExpanded())"
+      ></button>
+    </header>
+    @if (auditConsoleExpanded()) {
+      <div class="automation-audit-console__body">
+        @if (sessionService.hasPermission(UserPermission.CanSeeAllAutomationDecisions)) {
+          <label
+            ><p-checkbox
+              [binary]="true"
+              [ngModel]="onlyMyDecisions()"
+              (ngModelChange)="setOnlyMyDecisions($event)"
+            ></p-checkbox
+            >{{ i18n.t('adminAutomation.onlyMyDecisions') }}</label
+          >
+        }
+        <p-table
+          class="automation-responsive-table"
+          [value]="entries"
+          [paginator]="true" [alwaysShowPaginator]="false"
+          [rows]="10"
+        >
+          <ng-template pTemplate="header"
+            ><tr>
+              <th>{{ i18n.t('adminAutomation.store') }}</th>
+              <th>{{ i18n.t('common.status') }}</th>
+              <th>{{ i18n.t('adminAutomation.dryRun') }}</th>
+              <th>{{ i18n.t('adminAutomation.reasons') }}</th>
+              <th>{{ i18n.t('adminAutomation.message') }}</th>
+              <th>{{ i18n.t('adminAutomation.user') }}</th>
+              <th>{{ i18n.t('common.error') }}</th>
+              <th>{{ i18n.t('common.createdAt') }}</th>
+            </tr></ng-template
+          >
+          <ng-template pTemplate="body" let-entry
+            ><tr>
+              <td [attr.data-label]="i18n.t('adminAutomation.store')">
+                {{ entry.storeName || entry.storeId }}
+              </td>
+              <td [attr.data-label]="i18n.t('common.status')">
+                <p-tag [value]="codeLabel(entry.status)"></p-tag>
+              </td>
+              <td [attr.data-label]="i18n.t('adminAutomation.dryRun')">
+                {{ entry.dryRun ? i18n.t('common.yes') : i18n.t('common.no') }}
+              </td>
+              <td [attr.data-label]="i18n.t('adminAutomation.reasons')">
+                {{ entry.reason || '-' }}
+              </td>
+              <td [attr.data-label]="i18n.t('adminAutomation.message')">
+                {{ entry.message || '-' }}
+              </td>
+              <td [attr.data-label]="i18n.t('adminAutomation.user')">
+                {{ entry.foodsharingUserName || entry.foodsharingUserId || '-' }}
+              </td>
+              <td [attr.data-label]="i18n.t('common.error')">{{ entry.error || '-' }}</td>
+              <td [attr.data-label]="i18n.t('common.createdAt')">
+                {{ entry.createdAt | zurichDateTime: 'short' }}
+              </td>
+            </tr></ng-template
+          >
+        </p-table>
+      </div>
+    }
+  </section>
+</ng-template>
+<ng-template #advertisementPlans let-entries="entries">
+  <h3>{{ i18n.t('adminAutomation.plannedNotifications') }}</h3>
+  <p-table class="automation-responsive-table" [value]="entries" [paginator]="true" [alwaysShowPaginator]="false" [rows]="10">
+    <ng-template pTemplate="header"
+      ><tr>
+        <th>{{ i18n.t('adminAutomation.store') }}</th>
+        <th>{{ i18n.t('adminAutomation.notificationTime') }}</th>
+        <th>{{ i18n.t('adminAutomation.pickup') }}</th>
+        <th>{{ i18n.t('adminAutomation.dryRun') }}</th>
+        <th>{{ i18n.t('adminAutomation.reasons') }}</th>
+      </tr></ng-template
+    >
+    <ng-template pTemplate="body" let-entry
+      ><tr>
+        <td [attr.data-label]="i18n.t('adminAutomation.store')">
+          {{ entry.storeName || entry.storeId }}
+        </td>
+        <td [attr.data-label]="i18n.t('adminAutomation.notificationTime')">
+          {{ entry.notificationDate ? (entry.notificationDate | zurichDateTime: 'short') : '-' }}
+        </td>
+        <td [attr.data-label]="i18n.t('adminAutomation.pickup')">
+          {{ entry.pickupDate ? (entry.pickupDate | zurichDateTime: 'short') : '-' }}
+        </td>
+        <td [attr.data-label]="i18n.t('adminAutomation.dryRun')">
+          {{ entry.dryRun ? i18n.t('common.yes') : i18n.t('common.no') }}
+        </td>
+        <td [attr.data-label]="i18n.t('adminAutomation.reasons')">{{ entry.reason || '-' }}</td>
+      </tr></ng-template
+    >
+  </p-table>
+</ng-template>
+<ng-template #advertisementAudit let-entries="entries">
+  <h3>{{ i18n.t('adminAutomation.sentAdvertisements') }}</h3>
+  <p-table class="automation-responsive-table" [value]="entries" [paginator]="true" [alwaysShowPaginator]="false" [rows]="10">
+    <ng-template pTemplate="header"
+      ><tr>
+        <th>{{ i18n.t('adminAutomation.store') }}</th>
+        <th>{{ i18n.t('common.status') }}</th>
+        <th>{{ i18n.t('adminAutomation.notificationTime') }}</th>
+        <th>{{ i18n.t('adminAutomation.pickup') }}</th>
+        <th>{{ i18n.t('adminAutomation.user') }}</th>
+        <th>{{ i18n.t('adminAutomation.dryRun') }}</th>
+        <th>{{ i18n.t('adminAutomation.reasons') }}</th>
+        <th>{{ i18n.t('adminAutomation.message') }}</th>
+        <th>{{ i18n.t('common.error') }}</th>
+        <th>{{ i18n.t('common.createdAt') }}</th>
+      </tr></ng-template
+    >
+    <ng-template pTemplate="body" let-entry
+      ><tr>
+        <td [attr.data-label]="i18n.t('adminAutomation.store')">
+          {{ entry.storeName || entry.storeId }}
+        </td>
+        <td [attr.data-label]="i18n.t('common.status')"><p-tag [value]="codeLabel(entry.status)"></p-tag></td>
+        <td [attr.data-label]="i18n.t('adminAutomation.notificationTime')">
+          {{ entry.notificationDate ? (entry.notificationDate | zurichDateTime: 'short') : '-' }}
+        </td>
+        <td [attr.data-label]="i18n.t('adminAutomation.pickup')">
+          {{ entry.pickupDate ? (entry.pickupDate | zurichDateTime: 'short') : '-' }}
+        </td>
+        <td [attr.data-label]="i18n.t('adminAutomation.user')">
+          {{ entry.foodsharingUserName || entry.foodsharingUserId || '-' }}
+        </td>
+        <td [attr.data-label]="i18n.t('adminAutomation.dryRun')">
+          {{ entry.dryRun ? i18n.t('common.yes') : i18n.t('common.no') }}
+        </td>
+        <td [attr.data-label]="i18n.t('adminAutomation.reasons')">{{ entry.reason || '-' }}</td>
+        <td [attr.data-label]="i18n.t('adminAutomation.message')">{{ entry.message || '-' }}</td>
+        <td [attr.data-label]="i18n.t('common.error')">{{ entry.error || '-' }}</td>
+        <td [attr.data-label]="i18n.t('common.createdAt')">
+          {{ entry.createdAt | zurichDateTime: 'short' }}
+        </td>
+      </tr></ng-template
+    >
+  </p-table>
+</ng-template>
+<ng-template #slotAudit>
+  <h3>{{ i18n.t('adminAutomation.audit') }}</h3>
+  @if (sessionService.hasPermission(UserPermission.CanSeeAllAutomationDecisions)) {
+    <label
+      ><p-checkbox
+        [binary]="true"
+        [ngModel]="onlyMyDecisions()"
+        (ngModelChange)="setOnlyMyDecisions($event)"
+      ></p-checkbox
+      >{{ i18n.t('adminAutomation.onlyMyDecisions') }}</label
+    >
+  }
+  <label
+    ><p-checkbox
+      [binary]="true"
+      [ngModel]="hideConfirmedDecisions()"
+      (ngModelChange)="setHideConfirmedDecisions($event)"
+    ></p-checkbox
+    >{{ i18n.t('adminAutomation.hideConfirmedDecisions') }}</label
+  >
+  <p-table
+    class="automation-responsive-table"
+    [value]="foodsharingAudit()"
+    [paginator]="true" [alwaysShowPaginator]="false"
+    [rows]="10"
+  >
+    <ng-template pTemplate="header"
+      ><tr>
+        <th>{{ i18n.t('adminAutomation.decision') }}</th>
+        <th>{{ i18n.t('adminAutomation.store') }}</th>
+        <th>{{ i18n.t('adminAutomation.user') }}</th>
+        <th>{{ i18n.t('adminAutomation.pickup') }}</th>
+        <th>{{ i18n.t('adminAutomation.dryRun') }}</th>
+        <th>{{ i18n.t('adminAutomation.reasons') }}</th>
+        <th>{{ i18n.t('common.createdAt') }}</th>
+      </tr></ng-template
+    >
+    <ng-template pTemplate="body" let-entry
+      ><tr>
+        <td [attr.data-label]="i18n.t('adminAutomation.decision')">
+          <p-tag [value]="codeLabel(entry.decision)"></p-tag>
+        </td>
+        <td [attr.data-label]="i18n.t('adminAutomation.store')">{{ entry.storeName }}</td>
+        <td [attr.data-label]="i18n.t('adminAutomation.user')">
+          {{ entry.foodsharingUserName || entry.foodsharingUserId }}
+        </td>
+        <td [attr.data-label]="i18n.t('adminAutomation.pickup')">
+          {{ entry.pickupDate | date: 'dd.MM.yyyy HH:mm' : 'Europe/Zurich' }}
+        </td>
+        <td [attr.data-label]="i18n.t('adminAutomation.dryRun')">
+          {{ entry.dryRun ? i18n.t('common.yes') : i18n.t('common.no') }}
+        </td>
+        <td [attr.data-label]="i18n.t('adminAutomation.reasons')">{{ entry.reasons }}</td>
+        <td [attr.data-label]="i18n.t('common.createdAt')">
+          {{ entry.createdAt | zurichDateTime: 'short' }}
+        </td>
+      </tr></ng-template
+    >
+  </p-table>
+</ng-template>
