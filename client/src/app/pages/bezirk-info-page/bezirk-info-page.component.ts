@@ -7,14 +7,14 @@ import { UserService } from '../../api';
 import { resolveApiError } from '../../core/api-error';
 import { BezirkContextService } from '../../core/bezirk-context.service';
 import { I18nService } from '../../core/i18n.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { MarkdownViewComponent } from '../../core/markdown-view.component';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 /** The Bezirk's info page (Markdown from the Bezirk settings), the same text as the onboarding step. */
 @Component({
   selector: 'app-bezirk-info-page',
   standalone: true,
-  imports: [RouterLink, ButtonModule, CardModule, LoadingIndicatorComponent, MarkdownViewComponent],
+  imports: [SkeletonComponent, SkeletonRegionDirective, RouterLink, ButtonModule, CardModule, MarkdownViewComponent],
   template: `
     <section class="page-shell page-shell--narrow">
       <p-card class="page-card--flat">
@@ -24,7 +24,15 @@ import { MarkdownViewComponent } from '../../core/markdown-view.component';
         @if (error()) {
           <p class="field-error" role="alert">{{ error() }}</p>
         } @else if (markdown() === null) {
-          <app-loading-indicator />
+          <div class="skeleton-stack" appSkeletonRegion>
+          <app-skeleton shape="title" width="45%" height="1.2rem" />
+          <app-skeleton width="96%" />
+          <app-skeleton width="90%" />
+          <app-skeleton width="72%" />
+          <app-skeleton shape="title" width="35%" style="margin-top: 0.6rem" />
+          <app-skeleton width="94%" />
+          <app-skeleton width="60%" />
+        </div>
         } @else if (markdown()) {
           <app-markdown-view [markdown]="markdown()" />
         } @else {

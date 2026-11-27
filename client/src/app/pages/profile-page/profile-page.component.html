@@ -2,7 +2,31 @@
   <h1 class="profile-page__title"><i class="pi pi-user title-icon" aria-hidden="true"></i>{{ i18n.t('profile.title') }}</h1>
 
   @if (loading()) {
-    <app-loading-indicator />
+    <div class="profile-page__skeleton" appSkeletonRegion>
+      <p-card styleClass="profile-section">
+        <h2 class="profile-section__title">{{ i18n.t('profile.account') }}</h2>
+        <div class="skeleton-stack">
+          @for (row of [0, 1, 2]; track row) {
+            <div class="skeleton-row">
+              <app-skeleton width="7rem" />
+              <app-skeleton [width]="['9rem', '5rem', '7rem'][row]" />
+            </div>
+          }
+        </div>
+      </p-card>
+      <p-card styleClass="profile-section">
+        <h2 class="profile-section__title">{{ i18n.t('common.phoneNumber') }}</h2>
+        <div class="skeleton-stack">
+          <app-skeleton width="80%" />
+          <app-skeleton shape="block" height="2.6rem" />
+          <app-skeleton shape="button" width="6.5rem" />
+        </div>
+      </p-card>
+      <p-card styleClass="profile-section">
+        <h2 class="profile-section__title">{{ i18n.t('profile.language') }}</h2>
+        <app-skeleton shape="block" height="2.6rem" />
+      </p-card>
+    </div>
   } @else {
     <p-card styleClass="profile-section">
       <h2 class="profile-section__title">{{ i18n.t('profile.account') }}</h2>

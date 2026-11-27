@@ -36,7 +36,6 @@ import { BezirkContextService } from '../../core/bezirk-context.service';
 import { ErrorNotifierService } from '../../core/error-notifier.service';
 import { confirmAction } from '../../core/confirm-action';
 import { I18nService } from '../../core/i18n.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { MarkdownViewComponent } from '../../core/markdown-view.component';
 import { SessionService } from '../../core/session.service';
 import { appStickyTop, trackStickyHeaders } from '../../core/sticky-headers';
@@ -58,6 +57,7 @@ import { TagModule } from 'primeng/tag';
 import { TextareaModule } from 'primeng/textarea';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { Observable, finalize, map, of } from 'rxjs';
+import { SkeletonComponent, SkeletonRegionDirective, SkeletonTableComponent } from '../../core/skeleton';
 
 type PermissionKey =
   | 'canGiveEinAbs'
@@ -74,10 +74,9 @@ type InfoLanguage = 'de' | 'gws' | 'en';
 @Component({
   selector: 'app-admin-dashboard-page',
   standalone: true,
-  imports: [
+  imports: [SkeletonComponent, SkeletonRegionDirective, SkeletonTableComponent,
     AdminSupportPageComponent,
     AdminInfoNotesComponent,
-    LoadingIndicatorComponent,
     MarkdownViewComponent,
     CommonModule,
     ZurichDateTimePipe,
@@ -145,6 +144,8 @@ export class AdminDashboardPageComponent implements OnInit {
   /** All Bezirke including disabled ones, for creating and disabling Bezirke. */
   protected readonly adminBezirke = signal<AdminBezirkSummary[]>([]);
   protected readonly adminBezirkeLoading = signal(true);
+  /** The Bezirk rules and info: the settings tab shows a skeleton instead of default values until they are here. */
+  protected readonly bezirkSettingsLoading = signal(true);
   protected readonly activeAdminBezirkCount = computed(() => this.adminBezirke().filter((bezirk) => bezirk.active).length);
   protected readonly bezirkToggling = signal<string | null>(null);
   protected readonly bezirkDisableDialogVisible = signal(false);
@@ -1078,7 +1079,7 @@ export class AdminDashboardPageComponent implements OnInit {
   }
 
   private loadBezirkSettings(): void {
-    this.adminApi.getAdminBezirk({ bezirkSlug: this.bezirkContext.currentSlug() }).subscribe({
+    this.adminApi.getAdminBezirk({ bezirkSlug: this.bezirkContext.currentSlug() }).pipe(finalize(() => this.bezirkSettingsLoading.set(false))).subscribe({
       next: (response) => {
         this.bezirkSettings.set(response);
         this.cleaningStoreId.set(response.cleaningStoreId ?? null);

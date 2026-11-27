@@ -2,9 +2,12 @@
 <p-card class="page-card--flat">
   <ng-template pTemplate="title"><i class="pi pi-sign-in title-icon" aria-hidden="true"></i>{{ i18n.t('login.title') }}</ng-template>
   @if (loading()) {
-    <div class="loading-box">
-      <p-progressSpinner strokeWidth="4"></p-progressSpinner>
-      <p>{{ i18n.t('login.verifying') }}</p>
+    <div class="empty-state" appSkeletonRegion>
+      <div class="skeleton-stack" style="justify-items: center; width: 100%">
+        <app-skeleton shape="circle" width="2.5rem" height="2.5rem" />
+        <p style="margin: 0.25rem 0">{{ i18n.t('login.verifying') }}</p>
+        <app-skeleton width="min(16rem, 70%)" />
+      </div>
     </div>
   }
   @if (error()) {

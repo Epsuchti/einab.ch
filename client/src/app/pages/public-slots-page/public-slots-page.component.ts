@@ -28,13 +28,13 @@ import { CardModule } from 'primeng/card';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SelectModule } from 'primeng/select';
 import { PaginatorModule } from 'primeng/paginator';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 interface SlotGroup {
   key: string;
@@ -50,7 +50,7 @@ interface SlotDay {
 @Component({
   selector: 'app-public-slots-page',
   standalone: true,
-  imports: [
+  imports: [SkeletonComponent, SkeletonRegionDirective,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -65,7 +65,6 @@ interface SlotDay {
     SelectModule,
     PaginatorModule,
     TagModule,
-    ProgressSpinnerModule,
     ToastModule
   ],
   templateUrl: './public-slots-page.component.html',

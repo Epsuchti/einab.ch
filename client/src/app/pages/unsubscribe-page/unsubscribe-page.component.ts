@@ -7,12 +7,12 @@ import { NotificationUnsubscribeRequest, PublicService } from '../../api';
 import { resolveApiError } from '../../core/api-error';
 import { I18nService } from '../../core/i18n.service';
 import { CardModule } from 'primeng/card';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 @Component({
   selector: 'app-unsubscribe-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, ButtonModule, CardModule, ProgressSpinnerModule],
+  imports: [SkeletonComponent, SkeletonRegionDirective, CommonModule, RouterLink, ButtonModule, CardModule],
   templateUrl: './unsubscribe-page.component.html'
 })
 export class UnsubscribePageComponent implements OnInit {

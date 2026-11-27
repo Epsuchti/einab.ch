@@ -57,8 +57,26 @@
     }
 
     @if (loading() && !slots().length) {
-      <div class="loading-box">
-        <p-progressSpinner strokeWidth="4"></p-progressSpinner>
+      <div class="slot-days" appSkeletonRegion>
+        @for (day of [0, 1]; track day) {
+          <section class="slot-day">
+            <h3 class="slot-day__title"><app-skeleton [width]="day ? '8rem' : '10rem'" height="0.75rem" /></h3>
+            <ul class="slot-rows">
+              @for (row of day ? [0, 1] : [0, 1, 2]; track row) {
+                <li>
+                  <div class="slot-row">
+                    <span class="slot-row__time"><app-skeleton shape="title" width="2.6rem" /></span>
+                    <span class="slot-row__main">
+                      <app-skeleton shape="title" [width]="['42%', '58%', '35%'][row]" height="1rem" />
+                      <app-skeleton [width]="['70%', '55%', '64%'][row]" height="0.75rem" />
+                    </span>
+                    <span class="slot-row__side"><app-skeleton shape="pill" width="4.25rem" height="0.9rem" /></span>
+                  </div>
+                </li>
+              }
+            </ul>
+          </section>
+        }
       </div>
     } @else if (!slots().length) {
       <div class="slots-empty">

@@ -1,6 +1,9 @@
 @if (httpActivity.busy()) {
   <div class="request-bar" role="progressbar" [attr.aria-label]="i18n.t('common.loading')"></div>
 }
+@if (skeletons.longWait()) {
+  <app-banana-loader />
+}
 <p-toast [life]="isMobile() ? 6000 : 8000" [position]="isMobile() ? 'bottom-center' : 'top-right'" [breakpoints]="{ '640px': { width: 'calc(100vw - 1.5rem)', left: '0.75rem', right: '0.75rem' } }"></p-toast>
 <p-confirmdialog></p-confirmdialog>
 

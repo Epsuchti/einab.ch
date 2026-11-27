@@ -6,8 +6,8 @@ import { finalize } from 'rxjs';
 import { NewcomerNextStep, NewcomerProgressResponse, NewcomerStage, UserService } from '../../api';
 import { BezirkContextService } from '../../core/bezirk-context.service';
 import { I18nService } from '../../core/i18n.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { ButtonModule } from 'primeng/button';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 type StepState = 'done' | 'booked' | 'open';
 
@@ -21,7 +21,7 @@ interface ProgressStep {
 @Component({
   selector: 'app-newcomer-progress-card',
   standalone: true,
-  imports: [LoadingIndicatorComponent, CommonModule, RouterLink, ButtonModule],
+  imports: [SkeletonComponent, SkeletonRegionDirective, CommonModule, RouterLink, ButtonModule],
   templateUrl: './newcomer-progress-card.component.html',
   styleUrl: './newcomer-progress-card.component.scss',
 })

@@ -16,8 +16,8 @@ import { BezirkContextService } from '../../core/bezirk-context.service';
 import { confirmAction } from '../../core/confirm-action';
 import { I18nService } from '../../core/i18n.service';
 import { InfoNotesService } from '../../core/info-notes.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { ZurichDateTimePipe } from '../../core/zurich-date-time.pipe';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 type NoteState = 'active' | 'scheduled' | 'ended';
 
@@ -32,7 +32,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 @Component({
   selector: 'app-admin-info-notes',
   standalone: true,
-  imports: [FormsModule, ButtonModule, DatePickerModule, DialogModule, InputTextModule, SelectModule, TagModule, TextareaModule, LoadingIndicatorComponent, ZurichDateTimePipe],
+  imports: [SkeletonComponent, SkeletonRegionDirective, FormsModule, ButtonModule, DatePickerModule, DialogModule, InputTextModule, SelectModule, TagModule, TextareaModule, ZurichDateTimePipe],
   templateUrl: './admin-info-notes.component.html',
   styleUrl: './admin-info-notes.component.scss'
 })

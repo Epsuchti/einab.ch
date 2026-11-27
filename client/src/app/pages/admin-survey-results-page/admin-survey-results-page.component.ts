@@ -8,7 +8,6 @@ import { SurveyQuestion, SurveyQuestionType, SurveyResultRow, SurveyResultsRespo
 import { resolveApiError } from '../../core/api-error';
 import { BezirkContextService } from '../../core/bezirk-context.service';
 import { I18nService } from '../../core/i18n.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { ZurichDateTimePipe } from '../../core/zurich-date-time.pipe';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -17,6 +16,7 @@ import { TableModule } from 'primeng/table';
 import { TabsModule } from 'primeng/tabs';
 import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 type ResultsTab = 'questions' | 'replies' | 'table';
 
@@ -45,7 +45,7 @@ interface QuestionSummary {
 @Component({
   selector: 'app-admin-survey-results-page',
   standalone: true,
-  imports: [LoadingIndicatorComponent, CommonModule, FormsModule, RouterLink, ZurichDateTimePipe, ButtonModule, CardModule, InputTextModule, TableModule, TabsModule, TagModule],
+  imports: [SkeletonComponent, SkeletonRegionDirective, CommonModule, FormsModule, RouterLink, ZurichDateTimePipe, ButtonModule, CardModule, InputTextModule, TableModule, TabsModule, TagModule],
   templateUrl: './admin-survey-results-page.component.html'
 })
 export class AdminSurveyResultsPageComponent implements OnInit {

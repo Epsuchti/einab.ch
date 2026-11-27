@@ -1316,7 +1316,22 @@
 }
 
 /* Phones: the rarely used (de)activate action is a small round icon button in the row, not a full-width red bar. */
+.admin-bezirke__toggle-skeleton {
+  display: block;
+  width: 8rem;
+  height: 2.5rem;
+}
+
 @media (max-width: 560px) {
+  .admin-bezirke__toggle-skeleton {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .admin-bezirke__toggle-skeleton .skeleton {
+    border-radius: 50%;
+  }
+
   .admin-bezirke__list li {
     grid-template-columns: minmax(0, 1fr) auto auto;
     gap: 0.5rem;

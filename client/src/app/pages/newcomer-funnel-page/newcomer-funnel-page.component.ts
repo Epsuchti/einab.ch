@@ -16,7 +16,6 @@ import {
 import { resolveApiError } from '../../core/api-error';
 import { BezirkContextService } from '../../core/bezirk-context.service';
 import { I18nService } from '../../core/i18n.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { SessionService } from '../../core/session.service';
 import { ZurichDateTimePipe } from '../../core/zurich-date-time.pipe';
 import { ButtonModule } from 'primeng/button';
@@ -26,6 +25,7 @@ import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
 import { NewcomerFunnelStepperComponent, newcomerStepLabel } from './newcomer-funnel-stepper.component';
 import { NewcomerNeedsComponent } from './newcomer-needs.component';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 /**
  * Newcomer funnel of the Bezirk. Admins (CAN_MANAGE_USERS) see the people at each step,
@@ -34,7 +34,7 @@ import { NewcomerNeedsComponent } from './newcomer-needs.component';
 @Component({
   selector: 'app-newcomer-funnel-page',
   standalone: true,
-  imports: [LoadingIndicatorComponent, CommonModule, FormsModule, RouterLink, ZurichDateTimePipe, ButtonModule, CardModule, SelectModule, TagModule, NewcomerFunnelStepperComponent, NewcomerNeedsComponent],
+  imports: [SkeletonComponent, SkeletonRegionDirective, CommonModule, FormsModule, RouterLink, ZurichDateTimePipe, ButtonModule, CardModule, SelectModule, TagModule, NewcomerFunnelStepperComponent, NewcomerNeedsComponent],
   templateUrl: './newcomer-funnel-page.component.html',
   styleUrl: './newcomer-funnel-page.component.scss'
 })

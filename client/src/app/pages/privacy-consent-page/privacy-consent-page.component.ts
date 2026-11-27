@@ -11,16 +11,16 @@ import { resolveApiError } from '../../core/api-error';
 import { AuthFacadeService } from '../../core/auth-facade.service';
 import { BezirkContextService } from '../../core/bezirk-context.service';
 import { MarkdownViewComponent } from '../../core/markdown-view.component';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { I18nService } from '../../core/i18n.service';
 import { isValidPhoneNumber } from '../../core/phone-number';
 import { SessionService } from '../../core/session.service';
 import { safeReturnUrl } from '../../core/return-url';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 @Component({
   selector: 'app-privacy-consent-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ButtonModule, CardModule, CheckboxModule, InputTextModule, MarkdownViewComponent, LoadingIndicatorComponent],
+  imports: [SkeletonComponent, SkeletonRegionDirective, CommonModule, FormsModule, RouterLink, ButtonModule, CardModule, CheckboxModule, InputTextModule, MarkdownViewComponent],
   templateUrl: './privacy-consent-page.component.html',
   styleUrl: './privacy-consent-page.component.scss'
 })

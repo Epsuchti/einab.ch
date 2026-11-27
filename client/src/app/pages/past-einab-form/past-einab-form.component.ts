@@ -14,6 +14,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { MessageService } from 'primeng/api';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 export interface PastEinAbPerson {
   id: string;
@@ -35,7 +36,7 @@ const MIN_SEARCH_LENGTH = 2;
 @Component({
   selector: 'app-past-einab-form',
   standalone: true,
-  imports: [FormsModule, ButtonModule, CheckboxModule, DatePickerModule, InputTextModule, SelectModule, TextareaModule],
+  imports: [SkeletonComponent, SkeletonRegionDirective, FormsModule, ButtonModule, CheckboxModule, DatePickerModule, InputTextModule, SelectModule, TextareaModule],
   templateUrl: './past-einab-form.component.html',
   styleUrl: './past-einab-form.component.scss'
 })

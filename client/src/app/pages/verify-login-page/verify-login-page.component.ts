@@ -10,13 +10,13 @@ import { SessionService } from '../../core/session.service';
 import { BezirkContextService } from '../../core/bezirk-context.service';
 import { isSurveyPageUrl, safeReturnUrl } from '../../core/return-url';
 import { CardModule } from 'primeng/card';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 @Component({
   selector: 'app-verify-login-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, ButtonModule, CardModule, ProgressSpinnerModule],
+  imports: [SkeletonComponent, SkeletonRegionDirective, CommonModule, RouterLink, ButtonModule, CardModule],
   templateUrl: './verify-login-page.component.html'
 })
 export class VerifyLoginPageComponent implements OnInit {

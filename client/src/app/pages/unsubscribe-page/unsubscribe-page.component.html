@@ -2,8 +2,13 @@
   <p-card class="page-card--flat">
     <ng-template pTemplate="title"><i class="pi pi-bell-slash title-icon" aria-hidden="true"></i>{{ title() }}</ng-template>
     @if (loading()) {
-      <div class="loading-box">
-        <p-progressSpinner strokeWidth="4"></p-progressSpinner>
+<div class="empty-state" appSkeletonRegion>
+        <div class="skeleton-stack" style="justify-items: center; width: 100%">
+          <app-skeleton shape="circle" width="2.5rem" height="2.5rem" />
+          <app-skeleton width="min(18rem, 80%)" />
+          <app-skeleton width="min(13rem, 60%)" />
+          <app-skeleton shape="button" width="11rem" style="margin-top: 0.4rem" />
+        </div>
       </div>
     } @else {
       <div class="empty-state">

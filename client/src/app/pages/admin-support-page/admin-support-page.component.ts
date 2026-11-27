@@ -8,9 +8,9 @@ import { MessageService } from 'primeng/api';
 import { SupportClientPlatform, SupportRequestCategory, SupportRequestResponse, SupportRequestStatus, SupportService } from '../../api';
 import { resolveApiError } from '../../core/api-error';
 import { I18nService } from '../../core/i18n.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { SupportBadgeService } from '../../core/support-badge.service';
 import { ZurichDateTimePipe } from '../../core/zurich-date-time.pipe';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 type StatusFilter = 'OPEN' | 'DONE' | 'ALL';
 
@@ -18,7 +18,7 @@ type StatusFilter = 'OPEN' | 'DONE' | 'ALL';
 @Component({
   selector: 'app-admin-support-page',
   standalone: true,
-  imports: [ButtonModule, PaginatorModule, TagModule, LoadingIndicatorComponent, ZurichDateTimePipe],
+  imports: [SkeletonComponent, SkeletonRegionDirective, ButtonModule, PaginatorModule, TagModule, ZurichDateTimePipe],
   templateUrl: './admin-support-page.component.html',
   styleUrl: './admin-support-page.component.scss'
 })

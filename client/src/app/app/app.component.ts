@@ -16,11 +16,13 @@ import { PageErrorComponent } from '../core/page-error.component';
 import { PageErrorService } from '../core/page-error.service';
 import { isValidPhoneNumber } from '../core/phone-number';
 import { isSurveyPageUrl } from '../core/return-url';
+import { BananaLoaderComponent } from '../core/banana-loader/banana-loader.component';
 import { HttpActivityService } from '../core/http-activity.service';
 import { I18nService } from '../core/i18n.service';
 import { InfoNotesService } from '../core/info-notes.service';
 import { PushNotificationService } from '../core/push-notification.service';
 import { SessionService } from '../core/session.service';
+import { SkeletonActivityService } from '../core/skeleton';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
@@ -58,13 +60,15 @@ function isSurveyUrl(url: string): boolean {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive, ButtonModule, ToastModule, ConfirmDialogModule, DialogModule, InputTextModule, PageErrorComponent],
+  imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive, ButtonModule, ToastModule, ConfirmDialogModule, DialogModule, InputTextModule, PageErrorComponent, BananaLoaderComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class App {
   readonly i18n = inject(I18nService);
   readonly httpActivity = inject(HttpActivityService);
+  /** Skeletons on screen; after a long wait the banana loader keeps the user company. */
+  readonly skeletons = inject(SkeletonActivityService);
   /** Offline / server-unreachable banner below the header. */
   readonly connection = inject(ConnectionStatusService);
   /** Set when the page the user opened could not be loaded. */

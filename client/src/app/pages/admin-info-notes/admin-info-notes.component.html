@@ -5,7 +5,26 @@
   </div>
 
   @if (loading()) {
-    <app-loading-indicator />
+    <ul class="admin-info-notes__list" appSkeletonRegion>
+      @for (note of [0, 1]; track note) {
+        <li class="info-note-item">
+          <div class="info-note-item__tags">
+            <app-skeleton shape="tag" width="4rem" />
+            <app-skeleton shape="tag" width="6rem" />
+          </div>
+          <div class="info-note-item__text skeleton-stack">
+            <app-skeleton shape="title" [width]="note ? '30%' : '40%'" height="1rem" />
+            <app-skeleton width="92%" />
+            <app-skeleton [width]="note ? '50%' : '68%'" />
+          </div>
+          <app-skeleton width="16rem" height="0.7rem" />
+          <div class="info-note-item__actions">
+            <app-skeleton shape="button" width="6.5rem" height="2rem" />
+            <app-skeleton shape="button" width="6rem" height="2rem" />
+          </div>
+        </li>
+      }
+    </ul>
   } @else if (!notes().length) {
     <div class="empty-state">
       <i class="pi pi-megaphone" aria-hidden="true"></i>

@@ -117,7 +117,38 @@
         </section>
       }
     } @else if (loading()) {
-      <app-loading-indicator />
+      <div appSkeletonRegion>
+        <div class="funnel-tiles">
+          @for (tile of [0, 1, 2]; track tile) {
+            <div class="funnel-tile">
+              <app-skeleton [width]="['6rem', '5rem', '7rem'][tile]" height="0.8rem" />
+              <app-skeleton shape="title" width="3.5rem" height="1.8rem" />
+              <app-skeleton width="80%" height="0.7rem" />
+            </div>
+          }
+        </div>
+        <h2 class="funnel-section-title">{{ i18n.t('funnel.stepsTitle') }}</h2>
+        <div class="skeleton-row" style="flex-wrap: nowrap">
+          @for (step of [0, 1, 2, 3, 4]; track step) {
+            <app-skeleton shape="block" height="4.25rem" style="flex: 1 1 0" />
+          }
+        </div>
+        <div class="skeleton-panel" style="margin-top: 1rem">
+          <div class="skeleton-row" style="justify-content: space-between">
+            <app-skeleton shape="title" width="10rem" />
+            <app-skeleton shape="title" width="2.5rem" height="1.5rem" />
+          </div>
+          @for (person of [0, 1, 2]; track person) {
+            <div class="skeleton-row" style="padding-top: 0.6rem; border-top: 1px solid var(--app-border)">
+              <div class="skeleton-stack">
+                <app-skeleton [width]="['9rem', '7rem', '8rem'][person]" height="0.95rem" />
+                <app-skeleton width="5.5rem" height="0.7rem" />
+              </div>
+              <app-skeleton width="9rem" height="0.75rem" />
+            </div>
+          }
+        </div>
+      </div>
     }
   </p-card>
 

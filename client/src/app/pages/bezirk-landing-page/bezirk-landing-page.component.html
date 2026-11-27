@@ -7,7 +7,14 @@
   </header>
 
   @if (loading()) {
-    <div class="loading-box"><p-progressSpinner strokeWidth="4"></p-progressSpinner></div>
+    <div class="bezirk-grid" appSkeletonRegion>
+      @for (tile of [0, 1, 2, 3]; track tile) {
+        <div class="bezirk-tile">
+          <app-skeleton shape="circle" width="1.1rem" height="1.1rem" />
+          <app-skeleton [width]="['55%', '40%', '62%', '48%'][tile]" height="1rem" />
+        </div>
+      }
+    </div>
   } @else if (error()) {
     <div class="bezirk-error">
       <strong>{{ i18n.t('bezirk.loadErrorTitle') }}</strong>

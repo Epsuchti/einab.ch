@@ -1,8 +1,22 @@
 <section class="page-shell page-shell--narrow page-stack">
   <p-card class="page-card--flat">
     @if (loading()) {
-      <div class="loading-box">
-        <p-progressSpinner strokeWidth="4"></p-progressSpinner>
+      <div class="stack-form" appSkeletonRegion>
+        <app-skeleton shape="title" width="55%" height="1.5rem" />
+        <app-skeleton width="90%" />
+        <app-skeleton width="65%" />
+        @for (question of [0, 1, 2]; track question) {
+          <div class="survey-question">
+            <app-skeleton shape="title" [width]="['70%', '50%', '62%'][question]" height="1rem" />
+            @for (option of [0, 1, 2]; track option) {
+              <div class="skeleton-row">
+                <app-skeleton shape="circle" width="1.25rem" height="1.25rem" />
+                <app-skeleton [width]="['8rem', '11rem', '6rem'][option]" />
+              </div>
+            }
+          </div>
+        }
+        <app-skeleton shape="button" width="8rem" />
       </div>
     } @else if (errorMessage()) {
       <div class="empty-state">

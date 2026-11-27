@@ -138,8 +138,41 @@
       </div>
     </ng-template>
 
+    <ng-template #automationSkeleton>
+      <div class="automation-skeleton" appSkeletonRegion>
+        @for (group of [0, 1]; track group) {
+          <section class="automation-group">
+            <div class="skeleton-row" style="flex-wrap: nowrap">
+              <app-skeleton width="8rem" height="0.75rem" />
+              <app-skeleton height="1px" style="flex: 1 1 auto" />
+            </div>
+            <app-skeleton shape="block" height="3rem" />
+            @for (row of group ? [0, 1, 2, 3] : [0, 1]; track row) {
+              <div class="skeleton-row" style="padding: 0.4rem 0; border-bottom: 1px solid #eaf0eb">
+                <div class="skeleton-stack">
+                  <app-skeleton [width]="['40%', '55%', '35%', '48%'][row]" height="0.95rem" />
+                  <app-skeleton [width]="['25%', '30%', '20%', '28%'][row]" height="0.7rem" />
+                </div>
+                <app-skeleton shape="pill" width="3rem" height="1.6rem" />
+              </div>
+            }
+          </section>
+        }
+      </div>
+    </ng-template>
+
     @if (statusLoading()) {
-      <app-loading-indicator />
+      <div appSkeletonRegion>
+        <app-skeleton shape="block" height="2.9rem" style="margin: 0.75rem 0 1rem" />
+        <div class="skeleton-row" style="flex-wrap: nowrap; overflow: hidden; gap: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--app-border)">
+          @for (tab of [0, 1, 2, 3, 4]; track tab) {
+            <app-skeleton [width]="['7rem', '8rem', '6.5rem', '7.5rem', '5.5rem'][tab]" height="1rem" />
+          }
+        </div>
+        <div class="automation-tabpanel">
+          <ng-container *ngTemplateOutlet="automationSkeleton"></ng-container>
+        </div>
+      </div>
     } @else if (!foodsharingStatus()?.connected) {
       <ng-container *ngTemplateOutlet="generalSettingsContent"></ng-container>
     } @else {
@@ -177,9 +210,9 @@
           @if (sessionService.hasPermission(UserPermission.CanUseAutomations)) {
             <p-tabpanel value="applications">
               @if (activeAutomationTab() === 'applications') {
-                <div class="automation-tabpanel">
-                  @if (tabLoading()) {
-                    <app-loading-indicator [compact]="true" />
+                <div class="automation-tabpanel" [class.automation-tabpanel--loading]="tabSkeleton()">
+                  @if (tabSkeleton()) {
+                    <ng-container *ngTemplateOutlet="automationSkeleton"></ng-container>
                   }
                   <section class="automation-group">
                     <div class="automation-group__label">
@@ -442,9 +475,9 @@
           @if (sessionService.hasPermission(UserPermission.CanUseAutomations)) {
             <p-tabpanel value="slots">
               @if (activeAutomationTab() === 'slots') {
-                <div class="automation-tabpanel">
-                  @if (tabLoading()) {
-                    <app-loading-indicator [compact]="true" />
+                <div class="automation-tabpanel" [class.automation-tabpanel--loading]="tabSkeleton()">
+                  @if (tabSkeleton()) {
+                    <ng-container *ngTemplateOutlet="automationSkeleton"></ng-container>
                   }
                   <section class="automation-group">
                     <div class="automation-group__label">
@@ -1390,9 +1423,9 @@
           @if (sessionService.hasPermission(UserPermission.CanUseAutomations)) {
             <p-tabpanel value="advertisements">
               @if (activeAutomationTab() === 'advertisements') {
-                <div class="automation-tabpanel">
-                  @if (tabLoading()) {
-                    <app-loading-indicator [compact]="true" />
+                <div class="automation-tabpanel" [class.automation-tabpanel--loading]="tabSkeleton()">
+                  @if (tabSkeleton()) {
+                    <ng-container *ngTemplateOutlet="automationSkeleton"></ng-container>
                   }
                   <section class="automation-group">
                     <div class="automation-group__label">
@@ -2059,9 +2092,9 @@
           @if (sessionService.hasPermission(UserPermission.CanUseAutomations)) {
             <p-tabpanel value="storeInfo">
               @if (activeAutomationTab() === 'storeInfo') {
-                <div class="automation-tabpanel">
-                  @if (tabLoading()) {
-                    <app-loading-indicator [compact]="true" />
+                <div class="automation-tabpanel" [class.automation-tabpanel--loading]="tabSkeleton()">
+                  @if (tabSkeleton()) {
+                    <ng-container *ngTemplateOutlet="automationSkeleton"></ng-container>
                   }
                   <p-accordion [multiple]="false" class="automation-help-accordion">
                     <p-accordion-panel [value]="'store-info-help'">
@@ -2263,9 +2296,9 @@
           @if (sessionService.hasPermission(UserPermission.CanSeeUserPickupCountGrouping)) {
             <p-tabpanel value="statistics">
               @if (activeAutomationTab() === 'statistics') {
-                <div class="automation-tabpanel">
-                  @if (tabLoading()) {
-                    <app-loading-indicator [compact]="true" />
+                <div class="automation-tabpanel" [class.automation-tabpanel--loading]="tabSkeleton()">
+                  @if (tabSkeleton()) {
+                    <ng-container *ngTemplateOutlet="automationSkeleton"></ng-container>
                   }
                   <section class="automation-group">
                     <div class="automation-group__label">
@@ -2330,9 +2363,9 @@
           @if (canSeeMetrics()) {
             <p-tabpanel value="metrics">
               @if (activeAutomationTab() === 'metrics') {
-                <div class="automation-tabpanel">
-                  @if (tabLoading()) {
-                    <app-loading-indicator [compact]="true" />
+                <div class="automation-tabpanel" [class.automation-tabpanel--loading]="tabSkeleton()">
+                  @if (tabSkeleton()) {
+                    <ng-container *ngTemplateOutlet="automationSkeleton"></ng-container>
                   }
                   <div class="metrics-toolbar">
                     <label class="metrics-toolbar__period">

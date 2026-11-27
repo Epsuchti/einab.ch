@@ -10,10 +10,10 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { TextareaModule } from 'primeng/textarea';
 import { MessageService } from 'primeng/api';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 /**
  * Survey for respondents. The page is opened from a link (optionally with ?store=<name>); the user signs in
@@ -23,7 +23,7 @@ import { MessageService } from 'primeng/api';
 @Component({
   selector: 'app-survey-fill-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, CardModule, CheckboxModule, InputTextModule, ProgressSpinnerModule, RadioButtonModule, TextareaModule],
+  imports: [SkeletonComponent, SkeletonRegionDirective, CommonModule, FormsModule, ButtonModule, CardModule, CheckboxModule, InputTextModule, RadioButtonModule, TextareaModule],
   templateUrl: './survey-fill-page.component.html'
 })
 export class SurveyFillPageComponent implements OnInit {

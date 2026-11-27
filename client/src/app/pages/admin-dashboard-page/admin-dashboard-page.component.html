@@ -63,7 +63,14 @@
     </div>
 
     @if (usersLoading()) {
-      <app-loading-indicator />
+      <app-skeleton-table [rows]="6" [avatar]="true" [columns]="[
+        { kind: 'toggle' },
+        { label: i18n.t('common.name') },
+        { label: i18n.t('common.foodsharingId') },
+        { label: i18n.t('admin.progress'), kind: 'tag' },
+        { label: i18n.t('admin.lastLoginAt') },
+        { kind: 'action' }
+      ]" />
     } @else if (usersPage()?.users?.length) {
       <p-table
         class="admin-users-table admin-users-table--desktop"
@@ -505,7 +512,15 @@
   @if (activeTab() === 'einabs') {
     <p-card class="page-card--flat">
     @if (einAbsLoading()) {
-      <app-loading-indicator />
+      <app-skeleton-table [rows]="5" [columns]="[
+        { kind: 'toggle' },
+        { label: i18n.t('slots.date') },
+        { label: i18n.t('slots.category') },
+        { label: i18n.t('common.location') },
+        { label: i18n.t('admin.einAbTeacher') },
+        { label: i18n.t('teacher.bookedColumn') },
+        { kind: 'action' }
+      ]" />
     } @else if (einAbsPage()?.einAbs?.length) {
       <ng-template #adminEinAbSlots let-einAb>
         <div class="einab-slots">
@@ -717,6 +732,17 @@
   @if (activeTab() === 'settings') {
   <h2 class="admin-section-title"><i class="pi pi-sliders-h title-icon" aria-hidden="true"></i>{{ i18n.t('admin.rulesTitle') }}: {{ bezirkSettings()?.name }}</h2>
     <p-card class="page-card--flat" styleClass="admin-settings-card">
+      @if (bezirkSettingsLoading()) {
+        <div class="stack-form" appSkeletonRegion>
+          @for (field of [0, 1, 2, 3, 4]; track field) {
+            <div class="skeleton-stack">
+              <app-skeleton [width]="['11rem', '14rem', '9rem', '12rem', '10rem'][field]" height="0.8rem" />
+              <app-skeleton shape="block" height="2.6rem" />
+            </div>
+          }
+          <app-skeleton shape="button" width="8rem" />
+        </div>
+      } @else {
       <div class="stack-form">
         <label>
           {{ i18n.t('admin.cleaningStoreId') }}
@@ -826,9 +852,18 @@
           <button pButton type="button" icon="pi pi-save" [label]="i18n.t('admin.saveRules')" [loading]="settingsSaving()" (click)="saveBezirkSettings()"></button>
         </div>
       </div>
+      }
     </p-card>
     <h2 class="admin-section-title"><i class="pi pi-map-marker title-icon" aria-hidden="true"></i>{{ i18n.t('admin.bezirkInfo.title') }}</h2>
     <p-card class="page-card--flat" styleClass="admin-settings-card">
+      @if (bezirkSettingsLoading()) {
+        <div class="stack-form" appSkeletonRegion>
+          <app-skeleton width="75%" />
+          <app-skeleton shape="block" width="14rem" height="2.4rem" />
+          <app-skeleton shape="block" height="9rem" />
+          <app-skeleton shape="button" width="8rem" />
+        </div>
+      } @else {
       <div class="stack-form admin-bezirk-info">
         <p class="form-inline-note">{{ i18n.t('admin.bezirkInfo.intro') }}</p>
         <div class="admin-bezirk-info__options">
@@ -904,6 +939,7 @@
           <button pButton type="button" icon="pi pi-save" [label]="i18n.t('admin.bezirkInfo.save')" [loading]="settingsSaving()" (click)="saveBezirkSettings()"></button>
         </div>
       </div>
+      }
     </p-card>
     <h2 class="admin-section-title"><i class="pi pi-link title-icon" aria-hidden="true"></i>{{ i18n.t('admin.accountsTitle') }}</h2>
     <p-card class="page-card--flat" styleClass="admin-settings-card">
@@ -1122,7 +1158,18 @@
       <div class="admin-bezirke">
         <p class="admin-bezirke__hint">{{ i18n.t('admin.bezirke.hint') }}</p>
         @if (adminBezirkeLoading()) {
-          <app-loading-indicator />
+          <ul class="admin-bezirke__list" appSkeletonRegion>
+            @for (row of [0, 1, 2]; track row) {
+              <li>
+                <span class="admin-bezirke__name skeleton-stack">
+                  <app-skeleton shape="title" [width]="['7rem', '9rem', '6rem'][row]" height="1rem" />
+                  <app-skeleton [width]="['5rem', '6.5rem', '4.5rem'][row]" height="0.7rem" />
+                </span>
+                <app-skeleton shape="tag" />
+                <span class="admin-bezirke__toggle-skeleton"><app-skeleton shape="button" width="100%" height="100%" /></span>
+              </li>
+            }
+          </ul>
         } @else {
           <ul class="admin-bezirke__list">
             @for (bezirk of adminBezirke(); track bezirk.id) {
@@ -1230,7 +1277,16 @@
   <div class="stack-form admin-bezirk-impact">
     <p>{{ i18n.t('admin.bezirke.disableConfirmMessage') }}</p>
     @if (bezirkDisableImpactLoading()) {
-      <app-loading-indicator />
+      <div class="skeleton-stack" appSkeletonRegion>
+        <app-skeleton shape="block" height="2.75rem" />
+        <app-skeleton shape="title" width="40%" style="margin-top: 0.5rem" />
+        @for (row of [0, 1, 2]; track row) {
+          <div class="skeleton-panel" style="gap: 0.4rem; padding: 0.65rem 0.85rem">
+            <app-skeleton shape="title" [width]="['35%', '42%', '30%'][row]" height="0.95rem" />
+            <app-skeleton [width]="['65%', '58%', '70%'][row]" height="0.75rem" />
+          </div>
+        }
+      </div>
     } @else if (bezirkDisableImpact(); as impact) {
       @if (impact.upcomingEinAbCount === 0 && impact.assignedUserCount === 0) {
         <p class="admin-bezirk-impact__none">{{ i18n.t('admin.bezirke.impactNone') }}</p>

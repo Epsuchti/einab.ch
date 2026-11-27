@@ -9,14 +9,14 @@ import { I18nService } from '../../core/i18n.service';
 import { ZurichDateTimePipe } from '../../core/zurich-date-time.pipe';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TagModule } from 'primeng/tag';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 @Component({
   selector: 'app-my-pickups-page',
   standalone: true,
-  imports: [CommonModule, ZurichDateTimePipe, ButtonModule, CardModule, ProgressSpinnerModule, TagModule],
+  imports: [SkeletonComponent, SkeletonRegionDirective, CommonModule, ZurichDateTimePipe, ButtonModule, CardModule, TagModule],
   templateUrl: './my-pickups-page.component.html',
   styleUrl: './my-pickups-page.component.scss',
 })

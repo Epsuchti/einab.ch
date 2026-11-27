@@ -18,7 +18,7 @@
         <span class="past-einab__label">{{ i18n.t(mode() === 'admin' ? 'pastEinAb.personAdmin' : 'pastEinAb.personTeacher') }} *</span>
         <small>{{ i18n.t('pastEinAb.searchHint') }}</small>
         <span class="past-einab__search">
-          <i class="pi" [class.pi-search]="!searching()" [class.pi-spinner]="searching()" [class.pi-spin]="searching()" aria-hidden="true"></i>
+          <i class="pi pi-search" aria-hidden="true"></i>
           <input
             pInputText
             type="search"
@@ -34,8 +34,18 @@
           />
         </span>
       </label>
-      @if (usersLoading()) {
-        <p class="past-einab__note">{{ i18n.t('pastEinAb.usersLoading') }}</p>
+      @if (usersLoading() || searching()) {
+        <ul class="past-einab__results" appSkeletonRegion>
+          @for (row of [0, 1, 2]; track row) {
+            <li>
+              <div class="past-einab__result">
+                <app-skeleton shape="circle" width="2rem" height="2rem" />
+                <app-skeleton [width]="['9rem', '7rem', '8rem'][row]" height="0.95rem" />
+                <app-skeleton width="4.5rem" height="0.75rem" />
+              </div>
+            </li>
+          }
+        </ul>
       } @else if (results(); as found) {
         @if (found.length) {
           <ul class="past-einab__results">
