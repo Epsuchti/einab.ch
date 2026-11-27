@@ -75,5 +75,23 @@
     }
   </section>
 } @else if (loading()) {
-  <app-loading-indicator [compact]="true" />
+  <section class="progress-card" appSkeletonRegion>
+    <div class="progress-card__summary">
+      <div class="progress-ring"><app-skeleton shape="circle" width="100%" height="100%" /></div>
+      <div class="progress-card__text skeleton-stack">
+        <app-skeleton width="7rem" height="0.7rem" />
+        <app-skeleton shape="title" width="85%" height="1.3rem" />
+        <app-skeleton width="55%" />
+        <app-skeleton shape="button" width="10rem" />
+      </div>
+    </div>
+    <ol class="progress-steps">
+      @for (step of [0, 1, 2, 3]; track step) {
+        <li class="progress-step">
+          <app-skeleton shape="circle" width="2rem" height="2rem" />
+          <app-skeleton width="70%" height="0.7rem" />
+        </li>
+      }
+    </ol>
+  </section>
 }

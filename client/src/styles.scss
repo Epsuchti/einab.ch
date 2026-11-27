@@ -2013,10 +2013,107 @@ a.foodsharing-id-help-link {
   margin-left: 0;
 }
 
-/* Loading spinners stay in the brand green; PrimeNG's default colour cycle shows red, which reads as an error. */
-.p-progressspinner-circle {
-  stroke: var(--app-primary) !important;
-  animation: p-progressspinner-dash 1.5s ease-in-out infinite !important;
+/* Skeletons: grey shapes in the layout of the content that is loading (see core/skeleton.ts). No spinners. */
+.skeleton {
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
+  height: 0.85rem;
+  border-radius: 0.375rem;
+  background: linear-gradient(100deg, #e5ede6 0%, #e5ede6 38%, #f4f8f4 50%, #e5ede6 62%, #e5ede6 100%);
+  background-size: 320% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+.skeleton--title {
+  height: 1.15rem;
+}
+
+.skeleton--circle {
+  border-radius: 50%;
+}
+
+.skeleton--pill,
+.skeleton--tag {
+  border-radius: 999px;
+}
+
+.skeleton--tag {
+  width: 4.5rem;
+  height: 1.45rem;
+}
+
+.skeleton--block {
+  border-radius: var(--app-radius-sm);
+}
+
+.skeleton--button {
+  width: 7.5rem;
+  height: 2.5rem;
+  border-radius: var(--p-button-border-radius, 0.5rem);
+}
+
+.skeleton-region {
+  /* Fast responses swap the skeleton out before it shows, so it does not flash. */
+  animation: skeleton-fade-in 200ms ease 120ms both;
+}
+
+/* Small layout helpers for page skeletons. */
+.skeleton-stack {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.skeleton-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  min-width: 0;
+}
+
+.skeleton-row > .skeleton-stack {
+  flex: 1 1 0;
+}
+
+.skeleton-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skeleton-panel {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: #fff;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes skeleton-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
 }
 
 /* A form right after an intro or hint paragraph gets air, instead of its first label touching the text. */

@@ -10,7 +10,6 @@ import { resolveApiError } from '../../core/api-error';
 import { BezirkContextService } from '../../core/bezirk-context.service';
 import { confirmAction } from '../../core/confirm-action';
 import { I18nService } from '../../core/i18n.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { ZurichDateTimePipe } from '../../core/zurich-date-time.pipe';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -19,11 +18,12 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { TextareaModule } from 'primeng/textarea';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 @Component({
   selector: 'app-admin-surveys-page',
   standalone: true,
-  imports: [LoadingIndicatorComponent, CommonModule, FormsModule, RouterLink, ZurichDateTimePipe, ButtonModule, CardModule, DialogModule, InputTextModule, TableModule, TextareaModule, MenuModule],
+  imports: [SkeletonComponent, SkeletonRegionDirective, CommonModule, FormsModule, RouterLink, ZurichDateTimePipe, ButtonModule, CardModule, DialogModule, InputTextModule, TableModule, TextareaModule, MenuModule],
   templateUrl: './admin-surveys-page.component.html'
 })
 export class AdminSurveysPageComponent implements OnInit {

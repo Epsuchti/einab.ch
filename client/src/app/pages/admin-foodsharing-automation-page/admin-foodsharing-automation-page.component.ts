@@ -32,7 +32,6 @@ import { BezirkContextService } from '../../core/bezirk-context.service';
 import { ErrorNotifierService } from '../../core/error-notifier.service';
 import { confirmAction } from '../../core/confirm-action';
 import { I18nService } from '../../core/i18n.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { LoadingTracker } from '../../core/loading-tracker';
 import { SessionService } from '../../core/session.service';
 import { trackStickyHeaders } from '../../core/sticky-headers';
@@ -51,12 +50,13 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { TabsModule } from 'primeng/tabs';
 import { ZurichDateTimePipe } from '../../core/zurich-date-time.pipe';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 @Component({
   selector: 'app-admin-foodsharing-automation-page',
   standalone: true,
-  imports: [
-    LoadingIndicatorComponent,
+  imports: [SkeletonComponent, SkeletonRegionDirective,
+
     CommonModule,
     FormsModule,
     AccordionModule,
@@ -83,9 +83,24 @@ export class AdminFoodsharingAutomationPageComponent implements OnInit {
 
   protected readonly foodsharingStatus = signal<FoodsharingConnectionStatus | null>(null);
   protected readonly statusLoading = signal(true);
-  /** Counts the running loads of the active tab, so one spinner shows until all of them are done. */
+  /** Counts the running loads of the active tab, so one skeleton shows until all of them are done. */
   private readonly loadTracker = new LoadingTracker();
   protected readonly tabLoading = this.loadTracker.active;
+  /** Tabs whose data has been on screen once; later reloads keep the content (the request bar shows them). */
+  private readonly shownTabs = signal<ReadonlySet<string>>(new Set());
+  /** A tab's first load shows a skeleton in place of its still empty content. */
+  protected readonly tabSkeleton = computed(() => this.tabLoading() && !this.shownTabs().has(this.activeAutomationTab()));
+  private readonly markTabShown = effect(() => {
+    if (this.tabLoading()) {
+      return;
+    }
+    const tab = this.activeAutomationTab();
+    untracked(() => {
+      if (!this.shownTabs().has(tab)) {
+        this.shownTabs.update((tabs) => new Set(tabs).add(tab));
+      }
+    });
+  });
   protected readonly foodsharingStores = signal<FoodsharingStoreAutomation[]>([]);
   protected readonly availableStores = signal<FoodsharingManagedStore[]>([]);
   protected readonly foodsharingAudit = signal<FoodsharingAutomationAudit[]>([]);
@@ -338,6 +353,7 @@ export class AdminFoodsharingAutomationPageComponent implements OnInit {
 
   private onBezirkChanged(): void {
     this.bezirkChanged.next();
+    this.shownTabs.set(new Set());
     this.foodsharingStores.set([]);
     this.availableStores.set([]);
     this.managedStores.set([]);

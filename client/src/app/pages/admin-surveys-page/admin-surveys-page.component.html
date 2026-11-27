@@ -9,7 +9,21 @@
       </div>
     </ng-template>
     @if (loading()) {
-      <app-loading-indicator />
+      <ul class="survey-list" appSkeletonRegion>
+        @for (row of [0, 1, 2]; track row) {
+          <li class="survey-row">
+            <div class="survey-row__main skeleton-stack">
+              <app-skeleton shape="title" [width]="['14rem', '10rem', '12rem'][row]" height="1rem" />
+              <app-skeleton [width]="['11rem', '13rem', '9rem'][row]" height="0.75rem" />
+            </div>
+            <div class="survey-row__actions">
+              <app-skeleton shape="button" width="6.5rem" height="2rem" />
+              <app-skeleton shape="button" width="5.5rem" height="2rem" />
+              <app-skeleton shape="circle" width="2rem" height="2rem" />
+            </div>
+          </li>
+        }
+      </ul>
     }
     @if (!loading() && surveys().length === 0) {
       <div class="survey-empty">

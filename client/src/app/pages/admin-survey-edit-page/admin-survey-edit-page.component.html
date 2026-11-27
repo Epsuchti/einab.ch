@@ -2,7 +2,29 @@
   <p-card class="page-card--flat">
     <ng-template pTemplate="title"><i class="pi pi-pencil title-icon" aria-hidden="true"></i>{{ i18n.t(surveyId() ? 'surveys.editTitle' : 'surveys.newTitle') }}</ng-template>
     @if (loading()) {
-      <app-loading-indicator />
+      <div class="stack-form" appSkeletonRegion>
+        <div class="skeleton-stack">
+          <app-skeleton width="4rem" height="0.8rem" />
+          <app-skeleton shape="block" height="2.6rem" />
+        </div>
+        <div class="skeleton-stack">
+          <app-skeleton width="7rem" height="0.8rem" />
+          <app-skeleton shape="block" height="5rem" />
+        </div>
+        <app-skeleton shape="title" width="6rem" style="margin-top: 0.5rem" />
+        @for (question of [0, 1, 2]; track question) {
+          <div class="skeleton-panel" style="padding: 0.75rem 0.9rem">
+            <div class="skeleton-row" style="flex-wrap: nowrap">
+              <app-skeleton shape="circle" width="1.75rem" height="1.75rem" />
+              <div class="skeleton-stack">
+                <app-skeleton [width]="['55%', '70%', '45%'][question]" height="0.95rem" />
+                <app-skeleton width="6rem" height="0.7rem" />
+              </div>
+            </div>
+          </div>
+        }
+        <app-skeleton shape="button" width="9rem" />
+      </div>
     } @else {
     <form class="stack-form" (ngSubmit)="save()">
       <label>

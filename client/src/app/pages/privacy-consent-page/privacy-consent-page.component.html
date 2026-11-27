@@ -61,7 +61,15 @@
           @if (bezirkInfo(); as markdown) {
             <app-markdown-view class="privacy-bezirk-info" [markdown]="markdown" />
           } @else if (bezirkInfo() === null) {
-            <app-loading-indicator />
+            <div class="skeleton-stack" appSkeletonRegion>
+            <app-skeleton shape="title" width="45%" height="1.2rem" />
+            <app-skeleton width="96%" />
+            <app-skeleton width="90%" />
+            <app-skeleton width="72%" />
+            <app-skeleton shape="title" width="35%" style="margin-top: 0.6rem" />
+            <app-skeleton width="94%" />
+            <app-skeleton width="60%" />
+          </div>
           }
           <p class="privacy-later"><i class="pi pi-bookmark" aria-hidden="true"></i>{{ i18n.t('bezirkInfo.laterHint') }}</p>
           @if (error()) { <p class="privacy-error" role="alert">{{ error() }}</p> }

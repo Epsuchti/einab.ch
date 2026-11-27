@@ -3,7 +3,39 @@
   <p-card class="page-card--flat">
     <ng-template pTemplate="title"><i class="pi pi-bookmark title-icon" aria-hidden="true"></i>{{ i18n.t('bookings.title') }}</ng-template>
     @if (loading()) {
-      <app-loading-indicator />
+      <div class="booking-cards" appSkeletonRegion>
+        @for (card of [0, 1]; track card) {
+          <article class="booking-card" [class.booking-card--next]="card === 0">
+            <div class="booking-card__main">
+              <div class="booking-date">
+                <app-skeleton width="2rem" height="0.6rem" style="margin: 0.1rem auto" />
+                <app-skeleton width="2.2rem" height="1.6rem" style="margin: 0.25rem auto" />
+                <app-skeleton width="2rem" height="0.6rem" style="margin: 0.1rem auto" />
+              </div>
+              <div class="booking-card__body">
+                <app-skeleton shape="title" [width]="card ? '45%' : '60%'" height="1.25rem" />
+                <app-skeleton [width]="card ? '38%' : '48%'" />
+                @if (card) { <app-skeleton width="55%" /> }
+              </div>
+            </div>
+            @if (card === 0) {
+              <div class="booking-facts">
+                @for (fact of [0, 1, 2, 3]; track fact) {
+                  <div class="skeleton-stack">
+                    <app-skeleton width="45%" height="0.7rem" />
+                    <app-skeleton [width]="['80%', '62%', '70%', '40%'][fact]" />
+                  </div>
+                }
+              </div>
+            }
+            <footer class="booking-card__actions">
+              @if (card) { <app-skeleton shape="button" width="6.5rem" height="2rem" /> }
+              <app-skeleton shape="button" width="6rem" height="2rem" />
+              <app-skeleton shape="button" width="5.5rem" height="2rem" style="margin-left: auto" />
+            </footer>
+          </article>
+        }
+      </div>
     } @else {
       @if (!upcoming().length) {
         <div class="empty-state">

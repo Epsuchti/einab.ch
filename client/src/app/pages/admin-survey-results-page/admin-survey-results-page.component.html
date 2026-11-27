@@ -203,7 +203,40 @@
         }
       }
     } @else if (loading()) {
-      <app-loading-indicator />
+      <div appSkeletonRegion>
+        <div class="survey-stats">
+          @for (stat of [0, 1, 2]; track stat) {
+            <div class="survey-stat">
+              <app-skeleton shape="title" width="3rem" height="1.6rem" />
+              <app-skeleton width="5.5rem" height="0.75rem" />
+            </div>
+          }
+        </div>
+        <div class="skeleton-row" style="padding-bottom: 0.75rem; border-bottom: 1px solid var(--app-border)">
+          <app-skeleton width="6.5rem" height="1.1rem" />
+          <app-skeleton width="6rem" height="1.1rem" />
+          <app-skeleton width="5rem" height="1.1rem" />
+        </div>
+        <div class="survey-summary-list">
+          @for (card of [0, 1]; track card) {
+            <article class="survey-summary-card">
+              <header class="survey-summary-header">
+                <app-skeleton shape="circle" width="2rem" height="2rem" />
+                <div class="skeleton-stack" style="flex: 1 1 auto">
+                  <app-skeleton shape="title" [width]="card ? '45%' : '60%'" />
+                  <app-skeleton width="12rem" height="0.75rem" />
+                </div>
+              </header>
+              @for (bar of [0, 1, 2]; track bar) {
+                <div class="skeleton-stack">
+                  <app-skeleton [width]="['30%', '22%', '36%'][bar]" height="0.75rem" />
+                  <app-skeleton shape="pill" [width]="['82%', '46%', '24%'][bar]" height="0.65rem" />
+                </div>
+              }
+            </article>
+          }
+        </div>
+      </div>
     }
   </p-card>
 </section>

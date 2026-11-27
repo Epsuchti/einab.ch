@@ -27,6 +27,22 @@
   </p-card>
 } @else if (loading()) {
   <p-card class="funnel-widget">
-    <app-loading-indicator [compact]="true" />
+    <ng-template pTemplate="title">
+      <div class="funnel-widget__header">
+        <div class="funnel-widget__title">
+          <i class="pi pi-users" aria-hidden="true"></i>
+          <span>{{ i18n.t('funnel.widgetTitle') }}</span>
+        </div>
+      </div>
+    </ng-template>
+    <div class="skeleton-stack" appSkeletonRegion>
+      <app-skeleton width="70%" />
+      <div class="skeleton-row" style="flex-wrap: nowrap; margin-top: 0.4rem">
+        @for (step of [0, 1, 2, 3, 4]; track step) {
+          <app-skeleton shape="block" height="3rem" style="flex: 1 1 0" />
+        }
+      </div>
+      <app-skeleton shape="block" height="2.75rem" style="margin-top: 0.4rem" />
+    </div>
   </p-card>
 }

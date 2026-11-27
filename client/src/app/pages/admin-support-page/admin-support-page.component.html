@@ -21,7 +21,33 @@
   </div>
 
   @if (loading()) {
-    <app-loading-indicator />
+    <ul class="admin-support__list" appSkeletonRegion>
+      @for (item of [0, 1]; track item) {
+        <li class="support-item">
+          <div class="support-item__head">
+            <app-skeleton shape="tag" width="5.5rem" />
+            <app-skeleton width="6.5rem" height="0.7rem" />
+          </div>
+          <div class="support-item__who skeleton-stack">
+            <app-skeleton shape="title" [width]="item ? '9rem' : '11rem'" height="1rem" />
+            <app-skeleton width="8rem" height="0.7rem" />
+          </div>
+          <div class="skeleton-stack">
+            <app-skeleton width="95%" />
+            <app-skeleton [width]="item ? '60%' : '80%'" />
+          </div>
+          <div class="skeleton-row">
+            <app-skeleton width="7rem" height="0.7rem" />
+            <app-skeleton width="6rem" height="0.7rem" />
+          </div>
+          <div class="support-item__actions">
+            <app-skeleton shape="button" width="7rem" height="2rem" />
+            <span class="support-item__spacer"></span>
+            <app-skeleton shape="button" width="8rem" height="2rem" />
+          </div>
+        </li>
+      }
+    </ul>
   } @else if (!requests().length) {
     <div class="empty-state">
       <i class="pi pi-inbox" aria-hidden="true"></i>

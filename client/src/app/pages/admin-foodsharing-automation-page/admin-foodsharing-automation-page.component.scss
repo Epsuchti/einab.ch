@@ -37,6 +37,16 @@
   padding: 1.25rem 0 8rem;
 }
 
+/* First load of a tab: only the skeleton shows, not the still empty forms and tables below it. */
+.automation-tabpanel--loading > :not(.automation-skeleton) {
+  display: none;
+}
+
+.automation-skeleton {
+  display: grid;
+  gap: 1rem;
+}
+
 .automation-group {
   display: grid;
   gap: 1rem;

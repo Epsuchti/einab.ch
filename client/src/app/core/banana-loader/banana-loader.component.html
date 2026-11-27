@@ -1,0 +1,30 @@
+<div class="banana-loader" aria-hidden="true">
+  <div class="banana-loader__stage">
+    <svg class="banana-loader__svg" viewBox="0 -4 120 140" overflow="visible">
+      <g class="banana">
+        <!-- The fruit, eaten from the top: each bite is a circle in the colour of the card. -->
+        <g class="banana__fruit">
+          <path d="M60 18 C70 18 74 30 74 45 L74 92 C74 98 46 98 46 92 L46 45 C46 30 50 18 60 18 Z" fill="#fff4cf" stroke="#ead9a2" stroke-width="1.5" />
+          <path d="M55 30 C53 45 53 70 55 88" fill="none" stroke="#f1e3b4" stroke-width="2" stroke-linecap="round" />
+          @for (bite of bites; track $index) {
+            <circle [class]="'banana__bite banana__bite--' + $index" [attr.cx]="bite.x" [attr.cy]="bite.y" r="12" fill="#fff" />
+          }
+        </g>
+        <g class="banana__peel">
+          <g class="banana__flap banana__flap--left">
+            <path d="M60 12 C50 14 43 28 43 46 L43 86 L60 86 Z" fill="#f7cf35" stroke="#d6a419" stroke-width="1.5" stroke-linejoin="round" />
+            <path d="M51 26 C48 40 48 62 49 82" fill="none" stroke="#e8b923" stroke-width="2" stroke-linecap="round" />
+          </g>
+          <g class="banana__flap banana__flap--right">
+            <path d="M60 12 C70 14 77 28 77 46 L77 86 L60 86 Z" fill="#f9d846" stroke="#d6a419" stroke-width="1.5" stroke-linejoin="round" />
+            <path d="M69 26 C72 40 72 62 71 82" fill="none" stroke="#eabf2a" stroke-width="2" stroke-linecap="round" />
+            <rect x="56" y="6" width="8" height="8" rx="2" fill="#6f5118" />
+          </g>
+          <path d="M42 84 C42 77 78 77 78 84 L75 112 C74 123 46 123 45 112 Z" fill="#f7cf35" stroke="#d6a419" stroke-width="1.5" stroke-linejoin="round" />
+          <path d="M54 117 L66 117 L65 128 C65 131 55 131 55 128 Z" fill="#6f5118" />
+        </g>
+      </g>
+    </svg>
+  </div>
+  <p class="banana-loader__caption">{{ i18n.t('common.loadingLong') }}</p>
+</div>

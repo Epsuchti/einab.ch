@@ -11,9 +11,29 @@
     </details>
 
     @if (loading()) {
-      <div class="pickups-loading" role="status" aria-live="polite">
-        <p-progressspinner strokeWidth="4" [style]="{ width: '2.5rem', height: '2.5rem' }" ariaLabel="Loading"></p-progressspinner>
-        <span>{{ i18n.t('pickups.loading') }}</span>
+      <div class="pickup-stores" appSkeletonRegion>
+        <p class="pickups-loading">{{ i18n.t('pickups.loading') }}</p>
+        @for (store of [0, 1]; track store) {
+          <section class="pickup-store">
+            <header class="pickup-store__header">
+              <app-skeleton shape="title" [width]="store ? '8rem' : '11rem'" height="1.2rem" />
+              <app-skeleton width="9rem" height="0.7rem" />
+            </header>
+            <ul class="pickup-list">
+              @for (row of store ? [0, 1] : [0, 1, 2]; track row) {
+                <li class="pickup-row">
+                  <div class="pickup-row__main skeleton-stack" style="flex: 1 1 auto">
+                    <app-skeleton shape="title" [width]="['12rem', '10rem', '11rem'][row]" height="1rem" />
+                    <app-skeleton [width]="['60%', '45%', '52%'][row]" height="0.75rem" />
+                  </div>
+                  <div class="pickup-row__status">
+                    <app-skeleton shape="tag" [width]="row === 1 ? '6.5rem' : '5.5rem'" />
+                  </div>
+                </li>
+              }
+            </ul>
+          </section>
+        }
       </div>
     }
 

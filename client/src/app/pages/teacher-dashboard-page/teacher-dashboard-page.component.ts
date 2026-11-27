@@ -28,7 +28,6 @@ import { revealInvalidControls } from '../../core/reveal-invalid-controls';
 import { BezirkContextService } from '../../core/bezirk-context.service';
 import { confirmAction } from '../../core/confirm-action';
 import { I18nService } from '../../core/i18n.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { LoadingTracker } from '../../core/loading-tracker';
 import { ZurichDateTimePipe } from '../../core/zurich-date-time.pipe';
 import { ButtonModule } from 'primeng/button';
@@ -48,16 +47,16 @@ import { Menu, MenuModule } from 'primeng/menu';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { NewcomerFunnelWidgetComponent } from '../newcomer-funnel-page/newcomer-funnel-widget.component';
 import { PastEinAbFormComponent } from '../past-einab-form/past-einab-form.component';
+import { SkeletonComponent, SkeletonRegionDirective, SkeletonTableComponent } from '../../core/skeleton';
 
 @Component({
   selector: 'app-teacher-dashboard-page',
   standalone: true,
-  imports: [
+  imports: [SkeletonComponent, SkeletonRegionDirective, SkeletonTableComponent,
     RouterLink,
     CommonModule,
     NgTemplateOutlet,
     MenuModule,
-    LoadingIndicatorComponent,
     FormsModule,
     ReactiveFormsModule,
     ZurichDateTimePipe,

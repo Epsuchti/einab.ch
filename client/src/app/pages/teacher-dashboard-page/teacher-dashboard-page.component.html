@@ -84,7 +84,11 @@
     <div #planningToolsDetails class="quick-create" [class.quick-create--highlight]="planningToolsHighlight()" role="group" [attr.aria-label]="i18n.t('teacher.quickCreateEinabTool')">
       <div class="quick-create__label"><i class="pi pi-bolt" aria-hidden="true"></i>{{ i18n.t('teacher.quickCreateTitle') }}</div>
       @if (icalLoading()) {
-        <app-loading-indicator [compact]="true" />
+        <div class="quick-create__chips" appSkeletonRegion>
+          @for (chip of [0, 1, 2]; track chip) {
+            <app-skeleton shape="pill" [width]="['13rem', '11rem', '12rem'][chip]" height="2.5rem" />
+          }
+        </div>
       } @else if (!teacher()?.icalLink) {
         <div class="quick-create__chips">
           <button type="button" class="quick-chip quick-chip--ghost" (click)="openCalendarSettings()"><i class="pi pi-link" aria-hidden="true"></i>{{ i18n.t('teacher.quickCreateConnect') }}</button>
@@ -125,7 +129,14 @@
     <p class="empty-state">{{ i18n.t('teacher.unassignedHint') }}</p>
   }
   @if (einAbsLoading() || teacherLoading()) {
-    <app-loading-indicator />
+    <app-skeleton-table [rows]="4" [columns]="[
+      { kind: 'toggle' },
+      { label: i18n.t('slots.date') },
+      { label: i18n.t('slots.category') },
+      { label: i18n.t('common.location') },
+      { label: i18n.t('teacher.bookedColumn') },
+      { kind: 'action' }
+    ]" />
   } @else if (!einAbs().length && teacher()?.bezirk) {
     <div class="empty-state">
       <i class="pi pi-calendar" aria-hidden="true"></i>

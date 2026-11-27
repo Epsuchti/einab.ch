@@ -7,12 +7,12 @@ import { resolveApiError } from '../../core/api-error';
 import { BezirkContextService } from '../../core/bezirk-context.service';
 import { I18nService } from '../../core/i18n.service';
 import { ButtonModule } from 'primeng/button';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 @Component({
   selector: 'app-bezirk-landing-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, ButtonModule, ProgressSpinnerModule],
+  imports: [SkeletonComponent, SkeletonRegionDirective, CommonModule, RouterLink, ButtonModule],
   templateUrl: './bezirk-landing-page.component.html',
   styleUrl: './bezirk-landing-page.component.scss'
 })

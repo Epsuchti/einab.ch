@@ -7,7 +7,6 @@ import { SurveyPerson, SurveyQuestion, SurveyQuestionType, SurveySaveRequest, Su
 import { resolveApiError } from '../../core/api-error';
 import { BezirkContextService } from '../../core/bezirk-context.service';
 import { I18nService } from '../../core/i18n.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -16,6 +15,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { MessageService } from 'primeng/api';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 interface EditableQuestion {
   id?: string;
@@ -29,7 +29,7 @@ interface EditableQuestion {
 @Component({
   selector: 'app-admin-survey-edit-page',
   standalone: true,
-  imports: [LoadingIndicatorComponent, CommonModule, FormsModule, RouterLink, ButtonModule, CardModule, CheckboxModule, InputTextModule, MultiSelectModule, SelectModule, TextareaModule],
+  imports: [SkeletonComponent, SkeletonRegionDirective, CommonModule, FormsModule, RouterLink, ButtonModule, CardModule, CheckboxModule, InputTextModule, MultiSelectModule, SelectModule, TextareaModule],
   templateUrl: './admin-survey-edit-page.component.html'
 })
 export class AdminSurveyEditPageComponent implements OnInit {

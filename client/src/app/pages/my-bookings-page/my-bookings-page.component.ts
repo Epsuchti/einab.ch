@@ -9,7 +9,6 @@ import { BezirkContextService } from '../../core/bezirk-context.service';
 import { downloadBookingIcs } from '../../core/booking-ics';
 import { confirmAction } from '../../core/confirm-action';
 import { I18nService } from '../../core/i18n.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { ZurichDateTimePipe } from '../../core/zurich-date-time.pipe';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -17,12 +16,13 @@ import { PaginatorModule } from 'primeng/paginator';
 import { TagModule } from 'primeng/tag';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { NewcomerProgressCardComponent } from './newcomer-progress-card.component';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 @Component({
   selector: 'app-my-bookings-page',
   standalone: true,
-  imports: [
-    LoadingIndicatorComponent,
+  imports: [SkeletonComponent, SkeletonRegionDirective,
+
     CommonModule,
     RouterLink,
     ZurichDateTimePipe,

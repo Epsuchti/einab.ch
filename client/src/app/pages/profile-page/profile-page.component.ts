@@ -14,14 +14,14 @@ import { BezirkContextService } from '../../core/bezirk-context.service';
 import { resolveApiError } from '../../core/api-error';
 import { phoneNumberValidator } from '../../core/phone-number';
 import { I18nService } from '../../core/i18n.service';
-import { LoadingIndicatorComponent } from '../../core/loading-indicator.component';
 import { PushNotificationService } from '../../core/push-notification.service';
 import { SessionService } from '../../core/session.service';
+import { SkeletonComponent, SkeletonRegionDirective } from '../../core/skeleton';
 
 @Component({
   selector: 'app-profile-page',
   standalone: true,
-  imports: [LoadingIndicatorComponent, CommonModule, RouterLink, ReactiveFormsModule, ButtonModule, CardModule, InputTextModule],
+  imports: [SkeletonComponent, SkeletonRegionDirective, CommonModule, RouterLink, ReactiveFormsModule, ButtonModule, CardModule, InputTextModule],
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.scss'
 })
